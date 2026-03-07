@@ -1,0 +1,29 @@
+{
+  "name": "tiny-towns-reatom",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@reatom/core": "^1000.15.1",
+    "@reatom/jsx": "^1000.1.0"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0",
+    "typescript": "~5.9.3",
+    "ultracite": "7.2.5",
+    "vite": "^8.0.0-beta.13"
+  },
+  "overrides": {
+    "vite": "^8.0.0-beta.13"
+  }
+}
