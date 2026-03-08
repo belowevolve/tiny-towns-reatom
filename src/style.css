@@ -657,11 +657,6 @@ button {
   border-color: var(--color-border-hover);
 }
 
-.btn-action--disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
 /* ========== Responsive ========== */
 
 @media (max-width: 900px) {

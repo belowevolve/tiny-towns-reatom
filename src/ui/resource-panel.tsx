@@ -1,3 +1,5 @@
+import { computed } from "@reatom/core";
+
 import type { PlayerState } from "../model/player";
 import type { Resource } from "../model/types";
 import { RESOURCES, RESOURCE_ICONS, RESOURCE_NAMES } from "../model/types";
@@ -9,10 +11,13 @@ const ResourceItem = ({
   resource: Resource;
   player: PlayerState;
 }) => {
+  const isSelected = computed(
+    () => player.selectedResource() === resource,
+    `resourceItem.${resource}.selected`
+  );
+
   const handleClick = () => {
-    player.selectedResource.set(
-      player.selectedResource() === resource ? null : resource
-    );
+    player.selectedResource.set(isSelected() ? null : resource);
   };
 
   const handleDragStart = (e: DragEvent) => {
@@ -21,11 +26,12 @@ const ResourceItem = ({
 
   return (
     <div
-      class={() =>
-        player.selectedResource() === resource
-          ? "resource-item resource-item--selected"
-          : "resource-item"
-      }
+      class={[
+        "resource-item",
+        {
+          "resource-item--selected": isSelected,
+        },
+      ]}
       draggable={true}
       on:click={handleClick}
       on:dragstart={handleDragStart}

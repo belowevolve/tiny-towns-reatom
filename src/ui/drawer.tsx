@@ -47,15 +47,21 @@ export const Drawer = ({
   return (
     <>
       <div
-        class={() =>
-          open()
-            ? "drawer-backdrop drawer-backdrop--visible"
-            : "drawer-backdrop"
-        }
+        class={[
+          "drawer-backdrop",
+          {
+            "drawer-backdrop--visible": open,
+          },
+        ]}
         on:click={onClose}
       />
       <div
-        class={() => (open() ? "drawer drawer--open" : "drawer")}
+        class={[
+          "drawer",
+          {
+            "drawer--open": open,
+          },
+        ]}
         on:touchstart={handleTouchStart}
         on:touchmove={handleTouchMove}
         on:touchend={handleTouchEnd}

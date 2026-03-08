@@ -63,7 +63,12 @@ const RecipeCard = ({
         {patternGrid.flatMap((row) =>
           row.map((icon) => (
             <div
-              class={icon ? "recipe-cell" : "recipe-cell recipe-cell--empty"}
+              class={[
+                "recipe-cell",
+                {
+                  "recipe-cell--empty": !icon,
+                },
+              ]}
             >
               {icon ?? "·"}
             </div>

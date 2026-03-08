@@ -65,7 +65,7 @@ export const App = () => (
     <header class="app-header">
       <h1>Tiny Towns</h1>
       <ScoreDisplay />
-      <button class="btn-reset" on:click={() => game.resetGame()}>
+      <button class="btn-reset" on:click={game.resetGame}>
         Новая игра
       </button>
     </header>

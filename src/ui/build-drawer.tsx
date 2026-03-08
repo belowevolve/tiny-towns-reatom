@@ -32,9 +32,12 @@ const VariantCard = ({
 
   return (
     <div
-      class={() =>
-        isSelected() ? "variant-card variant-card--selected" : "variant-card"
-      }
+      class={[
+        "variant-card",
+        {
+          "variant-card--selected": isSelected,
+        },
+      ]}
       on:click={onSelect}
     >
       <div class="variant-header">
@@ -54,11 +57,12 @@ const VariantCard = ({
             const inMatch = match.cells.includes(gridIndex);
             return (
               <div
-                class={
-                  inMatch
-                    ? "variant-mini-cell variant-mini-cell--active"
-                    : "variant-mini-cell"
-                }
+                class={[
+                  "variant-mini-cell",
+                  {
+                    "variant-mini-cell--active": inMatch,
+                  },
+                ]}
               >
                 {inMatch
                   ? RESOURCE_ICONS[
@@ -116,11 +120,8 @@ export const BuildDrawer = ({ player }: { player: PlayerState }) => {
         </div>
         <div class="drawer-actions">
           <button
-            class={() =>
-              selectedIndex() === null
-                ? "btn-action btn-action--disabled"
-                : "btn-action"
-            }
+            class="btn-action"
+            disabled={selectedIndex() === null}
             on:click={handleConfirm}
           >
             Построить
