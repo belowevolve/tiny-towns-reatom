@@ -24,10 +24,7 @@ const VariantCard = ({
   const cols = maxC - minC + 1;
 
   const cellsLabel = match.cells
-    .map(
-      (i) =>
-        `(${String(Math.floor(i / GRID_SIZE) + 1)},${String((i % GRID_SIZE) + 1)})`
-    )
+    .map((i) => `(${Math.floor(i / GRID_SIZE) + 1},${(i % GRID_SIZE) + 1})`)
     .join(" ");
 
   return (
@@ -49,7 +46,7 @@ const VariantCard = ({
       </div>
       <div
         class="variant-grid"
-        style:grid-template-columns={`repeat(${String(cols)}, 26px)`}
+        style:grid-template-columns={`repeat(${cols}, 26px)`}
       >
         {Array.from({ length: rows }, (__, r) =>
           Array.from({ length: cols }, (___, c) => {

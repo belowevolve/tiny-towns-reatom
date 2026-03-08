@@ -26,8 +26,7 @@ export const Drawer = ({
     }
     currentY = e.touches[0].clientY;
     const dy = Math.max(0, currentY - startY);
-    (e.currentTarget as HTMLDivElement).style.transform =
-      `translateY(${String(dy)}px)`;
+    (e.currentTarget as HTMLDivElement).style.transform = `translateY(${dy}px)`;
   };
 
   const handleTouchEnd = (e: TouchEvent) => {

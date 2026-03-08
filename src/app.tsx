@@ -41,13 +41,13 @@ const ScoreDisplay = () => {
     const resourceCount = snap.filter((c) => c?.type === "resource").length;
     const parts: string[] = [];
     if (buildingCount > 0) {
-      parts.push(`${String(buildingCount)} зд.`);
+      parts.push(`${buildingCount} зд.`);
     }
     if (resourceCount > 0) {
-      parts.push(`${String(resourceCount)} рес.`);
+      parts.push(`${resourceCount} рес.`);
     }
     if (emptyCount > 0) {
-      parts.push(`${String(emptyCount)} пусто`);
+      parts.push(`${emptyCount} пусто`);
     }
     return parts.join(" · ");
   }, "scoreDisplay.details");
