@@ -1,75 +1,85 @@
-import { resetGame, score } from "./model/game";
+import { computed } from "@reatom/core";
+
+import { currentPlayer, game } from "./model/game";
+import { RESOURCE_ICONS, RESOURCE_NAMES } from "./model/types";
 import { BuildPanel } from "./ui/build-panel";
 import { Grid } from "./ui/grid";
 import { ResourcePanel } from "./ui/resource-panel";
 
-export const App = () => (
-  <div
-    css={`
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      padding: 24px;
-      min-height: 100vh;
-    `}
-  >
-    <header
-      css={`
-        display: flex;
-        align-items: center;
-        gap: 16px;
+const PhaseBar = () => {
+  const phaseContent = computed(() => {
+    const resource = game.currentResource();
+    if (!resource) {
+      return "Выберите ресурс для размещения";
+    }
+    return "";
+  }, "phaseBar.text");
 
-        h1 {
-          margin: 0;
-          font-size: 1.8rem;
-          letter-spacing: 0.02em;
-        }
+  const resourceBadge = computed(() => {
+    const resource = game.currentResource();
+    if (!resource) {
+      return "";
+    }
+    return `${RESOURCE_ICONS[resource]} ${RESOURCE_NAMES[resource]}`;
+  }, "phaseBar.resource");
 
-        .score {
-          font-size: 1rem;
-          color: #aaa;
-          background: #2a2a2a;
-          padding: 4px 12px;
-          border-radius: 6px;
-          border: 1px solid #3a3a3a;
-        }
-      `}
-    >
-      <h1>🏘️ Tiny Towns</h1>
-      <span class="score">Построек: {score}</span>
-      <button
-        on:click={() => resetGame()}
-        css={`
-          padding: 6px 14px;
-          border-radius: 6px;
-          background: #3a2020;
-          border: 1px solid #6a3030;
-          color: #ddd;
-          cursor: pointer;
-          font-size: 0.85rem;
-          transition: all 0.15s ease;
+  return (
+    <div class="phase-indicator">
+      <span>{phaseContent}</span>
+      <span class="resource-announce">{resourceBadge}</span>
+    </div>
+  );
+};
 
-          &:hover {
-            background: #4a2a2a;
-            border-color: #8a4040;
-          }
-        `}
-      >
-        Сбросить
-      </button>
-    </header>
+const ScoreDisplay = () => {
+  const scoreDetails = computed(() => {
+    const snap = currentPlayer.cells.map((c) => c());
+    const buildingCount = snap.filter((c) => c?.type === "building").length;
+    const emptyCount = snap.filter((c) => c === null).length;
+    const resourceCount = snap.filter((c) => c?.type === "resource").length;
+    const parts: string[] = [];
+    if (buildingCount > 0) {
+      parts.push(`${String(buildingCount)} зд.`);
+    }
+    if (resourceCount > 0) {
+      parts.push(`${String(resourceCount)} рес.`);
+    }
+    if (emptyCount > 0) {
+      parts.push(`${String(emptyCount)} пусто`);
+    }
+    return parts.join(" · ");
+  }, "scoreDisplay.details");
 
-    <main
-      css={`
-        display: flex;
-        gap: 32px;
-        align-items: flex-start;
-      `}
-    >
-      <ResourcePanel />
-      <Grid />
-      <BuildPanel />
-    </main>
-  </div>
-);
+  return (
+    <div class="score-display">
+      <span class="score-value">{currentPlayer.score}</span>
+      <span class="score-label">{scoreDetails}</span>
+    </div>
+  );
+};
+
+export const App = () => {
+  const handleReset = () => {
+    game.resetGame();
+  };
+
+  return (
+    <div class="app">
+      <header class="app-header">
+        <h1>Tiny Towns</h1>
+        <ScoreDisplay />
+        <button class="btn-reset" on:click={handleReset}>
+          Новая игра
+        </button>
+      </header>
+
+      <PhaseBar />
+
+      <main class="game-layout">
+        <ResourcePanel player={currentPlayer} />
+        <Grid player={currentPlayer} />
+        <BuildPanel player={currentPlayer} />
+      </main>
+    </div>
+  );
+};

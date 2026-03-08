@@ -1,16 +1,56 @@
 :root {
+  /* Palette */
+  --color-bg: #faf8f5;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f5f0eb;
+  --color-border: #e8e4df;
+  --color-border-hover: #d4cfc8;
+  --color-border-active: #c8a87e;
+  --color-text: #3d3429;
+  --color-text-muted: #9b9082;
+  --color-text-light: #b8ad9f;
+  --color-accent: #7c9a6e;
+  --color-accent-hover: #6b8a5d;
+  --color-accent-soft: #dcecd4;
+  --color-highlight: #f0c66b;
+  --color-highlight-soft: #faf0d4;
+  --color-highlight-glow: rgba(240, 198, 107, 0.35);
+  --color-danger: #c47a6e;
+  --color-danger-hover: #b36a5e;
+  --color-danger-soft: #f5e0dc;
+  --color-selected: #6ea0c4;
+  --color-selected-soft: #dce8f0;
+  --color-selected-glow: rgba(110, 160, 196, 0.3);
+
+  /* Cell states */
+  --color-cell-bg: #f5f1ec;
+  --color-cell-resource: #eee8df;
+  --color-cell-building: #dcecd4;
+  --color-cell-building-border: #b8d4a8;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(61, 52, 41, 0.07);
+  --shadow-cell: 0 1px 4px rgba(61, 52, 41, 0.06);
+  --shadow-elevated: 0 6px 20px rgba(61, 52, 41, 0.1);
+
+  /* Typography */
   font-family:
+    "Segoe UI",
     system-ui,
     -apple-system,
-    "Segoe UI",
-    Roboto,
     sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.9);
-  background-color: #181818;
+  color-scheme: light;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -36,4 +76,444 @@ body {
 
 button {
   font-family: inherit;
+}
+
+/* ========== App Layout ========== */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 16px;
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.app-header .score-badge {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  padding: 4px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+.app-header .btn-reset {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.app-header .btn-reset:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+.game-layout {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 960px;
+  justify-content: center;
+}
+
+/* ========== Grid ========== */
+
+.grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 6px;
+  padding: 14px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-elevated);
+  width: min(360px, calc(100vw - 32px));
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+/* ========== Cell ========== */
+
+.cell {
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: var(--color-cell-bg);
+  user-select: none;
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.cell:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-surface-hover);
+}
+
+.cell--resource {
+  background: var(--color-cell-resource);
+  border-color: var(--color-border-hover);
+}
+
+.cell--building {
+  background: var(--color-cell-building);
+  border-color: var(--color-cell-building-border);
+}
+
+.cell--highlighted {
+  background: var(--color-highlight-soft);
+  border-color: var(--color-highlight);
+  box-shadow: 0 0 12px var(--color-highlight-glow);
+  animation: cell-pulse 1.2s ease-in-out infinite;
+}
+
+.cell--droppable:hover {
+  background: var(--color-selected-soft);
+  border-color: var(--color-selected);
+}
+
+@keyframes cell-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--color-highlight-glow);
+  }
+  50% {
+    box-shadow: 0 0 18px var(--color-highlight-glow);
+  }
+}
+
+/* ========== Resource Panel ========== */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.panel-title {
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.resource-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  transition: all 0.15s ease;
+  background: var(--color-surface);
+  user-select: none;
+  box-shadow: var(--shadow-cell);
+}
+
+.resource-item:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-surface-hover);
+  box-shadow: var(--shadow-card);
+}
+
+.resource-item:active {
+  cursor: grabbing;
+}
+
+.resource-item--selected {
+  border-color: var(--color-selected);
+  background: var(--color-selected-soft);
+  box-shadow: 0 0 12px var(--color-selected-glow);
+}
+
+.resource-item .resource-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.resource-item .resource-label {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========== Build Panel ========== */
+
+.build-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 180px;
+  max-width: 240px;
+}
+
+.recipes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recipe-card {
+  padding: 8px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: var(--shadow-cell);
+}
+
+.recipe-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.recipe-header .recipe-building-icon {
+  font-size: 1.2rem;
+}
+
+.recipe-grid {
+  display: inline-grid;
+  gap: 2px;
+  justify-self: center;
+}
+
+.recipe-cell {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  background: var(--color-cell-bg);
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.recipe-cell--empty {
+  opacity: 0.25;
+  border-color: transparent;
+}
+
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.match-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  text-align: left;
+  box-shadow: var(--shadow-cell);
+}
+
+.match-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+}
+
+.match-btn--active {
+  background: var(--color-highlight-soft);
+  border-color: var(--color-highlight);
+  box-shadow: 0 0 8px var(--color-highlight-glow);
+}
+
+.no-matches {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  padding: 8px 0;
+}
+
+.hint-text {
+  font-size: 0.72rem;
+  color: var(--color-text-light);
+  padding: 4px 0;
+  line-height: 1.4;
+}
+
+/* ========== Game Phase Indicator ========== */
+
+.phase-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  font-size: 0.85rem;
+}
+
+.phase-indicator .resource-announce {
+  font-size: 1.3rem;
+}
+
+.btn-action {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-cell);
+}
+
+.btn-action:hover {
+  background: var(--color-accent-hover);
+  box-shadow: var(--shadow-card);
+}
+
+.btn-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== Score Display ========== */
+
+.score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.score-display .score-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.score-display .score-label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========== Responsive ========== */
+
+@media (max-width: 900px) {
+  .game-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .game-layout .panel,
+  .game-layout .build-panel {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .game-layout .build-panel {
+    max-width: 360px;
+  }
+
+  .recipes-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .recipe-card {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 16px 12px;
+    gap: 16px;
+  }
+
+  .app-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .grid-wrapper {
+    width: calc(100vw - 24px);
+    max-width: 360px;
+    padding: 10px;
+    gap: 5px;
+  }
+
+  .cell {
+    font-size: 1.4rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .resource-item {
+    padding: 8px 10px;
+  }
+
+  .resource-item .resource-icon {
+    font-size: 1.4rem;
+  }
+
+  .panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .panel .panel-title {
+    width: 100%;
+    text-align: center;
+  }
 }

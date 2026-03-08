@@ -1,87 +1,115 @@
-import { action, atom, computed, peek } from "@reatom/core";
+import { action, atom, computed } from "@reatom/core";
 
-import { BUILDINGS } from "./buildings";
-import { findMatches } from "./patterns";
-import type { BuildMatch, CellAtom, CellContent, Resource } from "./types";
-import { GRID_SIZE } from "./types";
+import type { PlayerState } from "./player";
+import { reatomPlayer } from "./player";
+import type { GamePhase, Resource, TurnPhase } from "./types";
+import { RESOURCES } from "./types";
 
-export const cells: CellAtom[] = Array.from(
-  { length: GRID_SIZE * GRID_SIZE },
-  (_, i) => atom<CellContent>(null, `grid.cell#${i}`)
-);
-
-export const selectedResource = atom<Resource | null>(
-  null,
-  "game.selectedResource"
-);
-
-export const highlightedCells = atom<Set<number>>(
-  new Set<number>(),
-  "game.highlightedCells"
-);
-
-export const selectedMatch = atom<BuildMatch | null>(
-  null,
-  "game.selectedMatch"
-);
-
-export const score = atom(0, "game.score");
-
-const getCellContent = (index: number): CellContent => peek(cells[index]);
-
-export const availableBuilds = computed((): BuildMatch[] => {
-  for (const cell of cells) {
-    cell();
+const shuffleArray = <T>(arr: T[]): T[] => {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
   }
-  return findMatches(getCellContent);
-}, "game.availableBuilds");
+  return result;
+};
 
-export const placeResource = action((index: number) => {
-  const resource = selectedResource();
-  if (!resource) {
-    return;
+const createResourceDeck = (): Resource[] => {
+  const deck: Resource[] = [];
+  for (let i = 0; i < 3; i += 1) {
+    deck.push(...RESOURCES);
   }
+  return shuffleArray(deck);
+};
 
-  const content = peek(cells[index]);
-  if (content !== null) {
-    return;
-  }
+export const reatomGame = () => {
+  const phase = atom<GamePhase>("lobby", "game.phase");
+  const turnPhase = atom<TurnPhase>("announce", "game.turnPhase");
+  const players = atom<PlayerState[]>([], "game.players");
+  const currentResource = atom<Resource | null>(null, "game.currentResource");
+  const turnNumber = atom(0, "game.turn");
+  const resourceDeck = atom<Resource[]>([], "game.deck");
 
-  cells[index]?.set({ resource, type: "resource" });
-  selectedResource.set(null);
-}, "game.placeResource");
+  const addPlayer = action((id: string, name: string) => {
+    const player = reatomPlayer(id, name);
+    players.set((list) => [...list, player]);
+    return player;
+  }, "game.addPlayer");
 
-export const selectMatch = action((match: BuildMatch | null) => {
-  selectedMatch.set(match);
-  highlightedCells.set(
-    match ? new Set<number>(match.cells) : new Set<number>()
+  const startGame = action(() => {
+    phase.set("playing");
+    turnPhase.set("announce");
+    turnNumber.set(0);
+    resourceDeck.set(createResourceDeck());
+  }, "game.start");
+
+  const announceResource = action((resource?: Resource) => {
+    if (resource) {
+      currentResource.set(resource);
+    } else {
+      const deck = resourceDeck();
+      if (deck.length === 0) {
+        phase.set("finished");
+        return;
+      }
+      currentResource.set(deck[0]);
+      resourceDeck.set(deck.slice(1));
+    }
+    turnPhase.set("place");
+  }, "game.announceResource");
+
+  const finishPlacement = action(() => {
+    turnPhase.set("build");
+  }, "game.finishPlacement");
+
+  const endTurn = action(() => {
+    turnPhase.set("announce");
+    turnNumber.set((n) => n + 1);
+    currentResource.set(null);
+  }, "game.endTurn");
+
+  const finishGame = action(() => {
+    phase.set("finished");
+  }, "game.finish");
+
+  const resetGame = action(() => {
+    for (const player of players()) {
+      player.reset();
+    }
+    phase.set("playing");
+    turnPhase.set("announce");
+    turnNumber.set(0);
+    resourceDeck.set(createResourceDeck());
+    currentResource.set(null);
+  }, "game.reset");
+
+  const isGameOver = computed(
+    (): boolean => phase() === "finished",
+    "game.isOver"
   );
-}, "game.selectMatch");
 
-export const buildAtCell = action((match: BuildMatch, targetIndex: number) => {
-  const def = BUILDINGS[match.building];
+  return {
+    addPlayer,
+    announceResource,
+    currentResource,
+    endTurn,
+    finishGame,
+    finishPlacement,
+    isGameOver,
+    phase,
+    players,
+    resetGame,
+    resourceDeck,
+    startGame,
+    turnNumber,
+    turnPhase,
+  };
+};
 
-  for (const idx of match.cells) {
-    cells[idx]?.set(null);
-  }
+export type GameState = ReturnType<typeof reatomGame>;
 
-  cells[targetIndex]?.set({
-    building: match.building,
-    icon: def.icon,
-    type: "building",
-  });
+// --- Singleplayer instance ---
 
-  score.set((s) => s + 1);
-  selectedMatch.set(null);
-  highlightedCells.set(new Set<number>());
-}, "game.buildAtCell");
-
-export const resetGame = action(() => {
-  for (const cell of cells) {
-    cell.set(null);
-  }
-  score.set(0);
-  selectedResource.set(null);
-  selectedMatch.set(null);
-  highlightedCells.set(new Set<number>());
-}, "game.reset");
+export const game = reatomGame();
+export const currentPlayer: PlayerState = game.addPlayer("1", "Игрок");
+game.startGame();

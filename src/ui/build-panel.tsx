@@ -1,7 +1,7 @@
 import { computed } from "@reatom/core";
 
 import { BUILDINGS } from "../model/buildings";
-import { availableBuilds, selectMatch, selectedMatch } from "../model/game";
+import type { PlayerState } from "../model/player";
 import type { BuildMatch, BuildingType } from "../model/types";
 import { BUILDING_TYPES, GRID_SIZE, RESOURCE_ICONS } from "../model/types";
 
@@ -19,56 +19,14 @@ const RecipeCard = ({ type }: { type: BuildingType }) => {
   }
 
   return (
-    <div
-      css={`
-        padding: 8px;
-        background: #2a2a2a;
-        border: 1px solid #3a3a3a;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-
-        .recipe-header {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 0.85rem;
-        }
-
-        .recipe-header span:first-child {
-          font-size: 1.3rem;
-        }
-
-        .recipe-grid {
-          display: inline-grid;
-          gap: 2px;
-          justify-self: center;
-        }
-
-        .recipe-cell {
-          width: 24px;
-          height: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.8rem;
-          background: #222;
-          border-radius: 3px;
-        }
-
-        .recipe-cell--empty {
-          opacity: 0.2;
-        }
-      `}
-    >
+    <div class="recipe-card">
       <div class="recipe-header">
-        <span>{def.icon}</span>
+        <span class="recipe-building-icon">{def.icon}</span>
         <span>{def.name}</span>
       </div>
       <div
         class="recipe-grid"
-        style:grid-template-columns={`repeat(${maxDc + 1}, 24px)`}
+        style:grid-template-columns={`repeat(${maxDc + 1}, 22px)`}
       >
         {patternGrid.flatMap((row) =>
           row.map((icon) => (
@@ -86,62 +44,31 @@ const RecipeCard = ({ type }: { type: BuildingType }) => {
 
 const MatchButton = ({
   match,
-  index,
+  player,
 }: {
   match: BuildMatch;
-  index: number;
+  player: PlayerState;
 }) => {
   const def = BUILDINGS[match.building];
 
   const isSelected = computed(() => {
-    const sel = selectedMatch();
-    if (!sel) {
-      return false;
-    }
-    return (
-      sel.building === match.building &&
-      sel.cells.join(",") === match.cells.join(",")
-    );
-  }, `matchBtn#${index}.selected`);
+    const sel = player.selectedMatch();
+    return sel?.key === match.key;
+  }, `match.${match.key}.selected`);
 
   const btnClass = computed(
     () => (isSelected() ? "match-btn match-btn--active" : "match-btn"),
-    `matchBtn#${index}.class`
+    `match.${match.key}.class`
   );
 
   const cellsLabel = match.cells
-    .map((i) => `(${Math.floor(i / GRID_SIZE)},${i % GRID_SIZE})`)
+    .map((i) => `(${Math.floor(i / GRID_SIZE) + 1},${(i % GRID_SIZE) + 1})`)
     .join(" ");
 
   return (
     <button
       class={btnClass}
-      on:click={() => selectMatch(isSelected() ? null : match)}
-      css={`
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        background: #2a2a2a;
-        border: 1px solid #444;
-        border-radius: 6px;
-        color: #ddd;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.15s ease;
-        width: 100%;
-        text-align: left;
-
-        &:hover {
-          background: #333;
-          border-color: #666;
-        }
-
-        &.match-btn--active {
-          background: #3a2a1a;
-          border-color: #f0a030;
-        }
-      `}
+      on:click={() => player.selectMatch(isSelected() ? null : match)}
     >
       <span>{def.icon}</span>
       <span>
@@ -151,74 +78,34 @@ const MatchButton = ({
   );
 };
 
-export const BuildPanel = () => {
+export const BuildPanel = ({ player }: { player: PlayerState }) => {
   const matchList = computed(() => {
-    const builds = availableBuilds();
+    const builds = player.availableBuilds();
     if (builds.length === 0) {
       return <div class="no-matches">Нет доступных построек</div>;
     }
     return (
       <div class="match-list">
-        {builds.map((match, i) => (
-          <MatchButton match={match} index={i} />
+        {builds.map((match) => (
+          <MatchButton match={match} player={player} />
         ))}
       </div>
     );
   }, "buildPanel.matchList");
 
   return (
-    <div
-      css={`
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        min-width: 180px;
-
-        h3 {
-          margin: 0;
-          font-size: 0.9rem;
-          color: #888;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-
-        .recipes {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .no-matches {
-          font-size: 0.8rem;
-          color: #666;
-          padding: 8px;
-        }
-
-        .match-list {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .hint {
-          font-size: 0.75rem;
-          color: #777;
-          padding: 4px 0;
-        }
-      `}
-    >
-      <h3>Рецепты</h3>
-      <div class="recipes">
+    <div class="build-panel">
+      <h3 class="panel-title">Рецепты</h3>
+      <div class="recipes-list">
         {BUILDING_TYPES.map((type) => (
           <RecipeCard type={type} />
         ))}
       </div>
 
-      <h3>Доступные постройки</h3>
+      <h3 class="panel-title">Постройки</h3>
       {matchList}
-      <div class="hint">
-        Выберите постройку, затем кликните на подсвеченную клетку, куда
-        поставить здание
+      <div class="hint-text">
+        Выберите постройку, затем кликните на подсвеченную клетку
       </div>
     </div>
   );

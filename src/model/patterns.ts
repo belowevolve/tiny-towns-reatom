@@ -11,6 +11,7 @@ const normalizePattern = (pattern: PatternCell[]): PatternCell[] => {
   if (pattern.length === 0) {
     return pattern;
   }
+
   const minDr = Math.min(...pattern.map((c) => c.dr));
   const minDc = Math.min(...pattern.map((c) => c.dc));
   const shifted = pattern.map(
@@ -105,7 +106,12 @@ export const findMatches = (
           }
 
           if (valid) {
-            matches.push({ building: buildingType, cells: cellIndices });
+            const sorted = [...cellIndices].toSorted((a, b) => a - b);
+            matches.push({
+              building: buildingType,
+              cells: cellIndices,
+              key: `${buildingType}:${sorted.join(",")}`,
+            });
           }
         }
       }
