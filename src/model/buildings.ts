@@ -31,31 +31,60 @@ const isBuilding = (
 ): cell is { type: "building"; building: BuildingType } =>
   cell?.type === "building" && cell.building === type;
 
-const FEEDER_BUILDINGS: ReadonlySet<BuildingType> = new Set<BuildingType>([
-  "well",
-  "factory",
-]);
+const FEED_CAPACITY: Partial<Record<BuildingType, number>> = {
+  farm: 4,
+};
 
-const isCottageFed = (cottageIndex: number, ctx: ScoringContext): boolean => {
-  const adj = getAdjacentIndices(cottageIndex, ctx.gridSize);
+const countFeedCapacity = (ctx: ScoringContext): number => {
+  let capacity = 0;
+  for (const b of ctx.allBuildings) {
+    capacity += FEED_CAPACITY[b.type] ?? 0;
+  }
+  return capacity;
+};
+
+const isCottageFed = (_cottageIndex: number, ctx: ScoringContext): boolean => {
+  const cottages = ctx.allBuildings.filter((b) => b.type === "cottage");
+  const capacity = countFeedCapacity(ctx);
+  const cottagePos = cottages.findIndex((c) => c.index === _cottageIndex);
+  return cottagePos !== -1 && cottagePos < capacity;
+};
+
+const isAdjacentToFeeder = (index: number, ctx: ScoringContext): boolean => {
+  const adj = getAdjacentIndices(index, ctx.gridSize);
   return adj.some((i) => {
     const cell = ctx.grid[i];
-    return cell?.type === "building" && FEEDER_BUILDINGS.has(cell.building);
+    return (
+      cell?.type === "building" && FEED_CAPACITY[cell.building] !== undefined
+    );
   });
 };
 
-const TAVERN_SCORES = [0, 1, 4, 9, 17];
+const TAVERN_SCORES = [0, 2, 5, 9, 14, 20];
 
 export const BUILDINGS: Record<BuildingType, BuildingDef> = {
+  bakery: {
+    description: "3 очка если рядом есть здание-кормилец (ферма)",
+    icon: "🍞",
+    name: "Пекарня",
+    pattern: [
+      { dc: 1, dr: 0, resource: "wheat" },
+      { dc: 0, dr: 1, resource: "brick" },
+      { dc: 1, dr: 1, resource: "glass" },
+      { dc: 2, dr: 1, resource: "brick" },
+    ],
+    score: (ctx) => (isAdjacentToFeeder(ctx.index, ctx) ? 3 : 0),
+  },
+
   chapel: {
     description: '1 очко за каждый "накормленный" коттедж на поле',
     icon: "⛪",
     name: "Часовня",
     pattern: [
-      { dc: 1, dr: 0, resource: "glass" },
+      { dc: 2, dr: 0, resource: "glass" },
       { dc: 0, dr: 1, resource: "stone" },
-      { dc: 1, dr: 1, resource: "stone" },
-      { dc: 2, dr: 1, resource: "glass" },
+      { dc: 1, dr: 1, resource: "glass" },
+      { dc: 2, dr: 1, resource: "stone" },
     ],
     score: (ctx) =>
       ctx.allBuildings
@@ -64,7 +93,7 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
   },
 
   cottage: {
-    description: "3 очка если рядом есть источник еды (колодец/фабрика)",
+    description: "3 очка если снабжён (ферма кормит до 4 в любом месте)",
     icon: "🏡",
     name: "Коттедж",
     pattern: [
@@ -75,70 +104,49 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
     score: (ctx) => (isCottageFed(ctx.index, ctx) ? 3 : 0),
   },
 
-  factory: {
-    description: "Источник еды для коттеджей. 0 очков за себя",
-    icon: "🏭",
-    name: "Фабрика",
+  farm: {
+    description: "Кормит до 4 коттеджей в любом месте города. 0 очков",
+    icon: "🌻",
+    name: "Ферма",
     pattern: [
-      { dc: 0, dr: 0, resource: "wood" },
-      { dc: 0, dr: 1, resource: "brick" },
-      { dc: 1, dr: 1, resource: "stone" },
-      { dc: 2, dr: 1, resource: "stone" },
-      { dc: 3, dr: 1, resource: "brick" },
+      { dc: 0, dr: 0, resource: "wheat" },
+      { dc: 1, dr: 0, resource: "wheat" },
+      { dc: 0, dr: 1, resource: "wood" },
+      { dc: 1, dr: 1, resource: "wood" },
     ],
     score: () => 0,
   },
 
   tavern: {
-    description: "Очки растут с количеством: 1 / 4 / 9 / 17",
+    description: "Очки за группу: 2 / 5 / 9 / 14 / 20",
     icon: "🍺",
     name: "Таверна",
     pattern: [
       { dc: 0, dr: 0, resource: "brick" },
       { dc: 1, dr: 0, resource: "brick" },
-      { dc: 0, dr: 1, resource: "wood" },
-      { dc: 1, dr: 1, resource: "wheat" },
+      { dc: 2, dr: 0, resource: "glass" },
     ],
     score: (ctx) => {
-      const tavernCount = ctx.allBuildings.filter(
-        (b) => b.type === "tavern"
-      ).length;
-      const total =
-        TAVERN_SCORES[Math.min(tavernCount, TAVERN_SCORES.length - 1)] ?? 0;
-      return Math.floor(total / tavernCount);
+      const taverns = ctx.allBuildings.filter((b) => b.type === "tavern");
+      if (taverns[0]?.index !== ctx.index) {
+        return 0;
+      }
+      return TAVERN_SCORES[Math.min(taverns.length, TAVERN_SCORES.length - 1)];
     },
   },
 
-  theater: {
-    description:
-      "1 очко за каждый уникальный тип здания в его строке и столбце",
-    icon: "🎭",
-    name: "Театр",
+  warehouse: {
+    description: "Хранит до 3 ресурсов. -1 VP за каждый хранимый ресурс",
+    icon: "📦",
+    name: "Склад",
     pattern: [
-      { dc: 1, dr: 0, resource: "glass" },
-      { dc: 0, dr: 1, resource: "wood" },
-      { dc: 1, dr: 1, resource: "stone" },
-      { dc: 2, dr: 1, resource: "wood" },
-      { dc: 1, dr: 2, resource: "glass" },
+      { dc: 0, dr: 0, resource: "wheat" },
+      { dc: 1, dr: 0, resource: "wood" },
+      { dc: 2, dr: 0, resource: "wheat" },
+      { dc: 0, dr: 1, resource: "brick" },
+      { dc: 2, dr: 1, resource: "brick" },
     ],
-    score: (ctx) => {
-      const row = Math.floor(ctx.index / ctx.gridSize);
-      const col = ctx.index % ctx.gridSize;
-      const uniqueTypes = new Set<BuildingType>();
-
-      for (const b of ctx.allBuildings) {
-        if (b.index === ctx.index) {
-          continue;
-        }
-        const bRow = Math.floor(b.index / ctx.gridSize);
-        const bCol = b.index % ctx.gridSize;
-        if (bRow === row || bCol === col) {
-          uniqueTypes.add(b.type);
-        }
-      }
-
-      return uniqueTypes.size;
-    },
+    score: () => 0,
   },
 
   well: {
@@ -166,7 +174,7 @@ export const calculateGridScore = (grid: CellContent[]): number => {
     const cell = grid[i];
     if (cell?.type === "building") {
       allBuildings.push({ index: i, type: cell.building });
-    } else if (cell === null) {
+    } else {
       emptyCount += 1;
     }
   }

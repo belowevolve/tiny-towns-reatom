@@ -20,12 +20,13 @@ export const RESOURCE_NAMES: Record<Resource, string> = {
 };
 
 export const BUILDING_TYPES = [
-  "well",
   "cottage",
+  "farm",
+  "well",
   "chapel",
   "tavern",
-  "theater",
-  "factory",
+  "bakery",
+  "warehouse",
 ] as const;
 export type BuildingType = (typeof BUILDING_TYPES)[number];
 

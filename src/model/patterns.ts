@@ -69,11 +69,13 @@ export const getBuildingVariants = (type: BuildingType): PatternCell[][] => {
 };
 
 export const findMatches = (
-  getCellContent: (index: number) => CellContent
+  getCellContent: (index: number) => CellContent,
+  filterType?: BuildingType
 ): BuildMatch[] => {
   const matches: BuildMatch[] = [];
+  const typesToCheck = filterType ? [filterType] : BUILDING_TYPES;
 
-  for (const buildingType of BUILDING_TYPES) {
+  for (const buildingType of typesToCheck) {
     const variants = getBuildingVariants(buildingType);
 
     for (const variant of variants) {

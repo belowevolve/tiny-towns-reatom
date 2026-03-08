@@ -2,7 +2,9 @@ import { computed } from "@reatom/core";
 
 import { currentPlayer, game } from "./model/game";
 import { RESOURCE_ICONS, RESOURCE_NAMES } from "./model/types";
+import { BuildDrawer } from "./ui/build-drawer";
 import { BuildPanel } from "./ui/build-panel";
+import { Drawer } from "./ui/drawer";
 import { Grid } from "./ui/grid";
 import { ResourcePanel } from "./ui/resource-panel";
 
@@ -58,28 +60,29 @@ const ScoreDisplay = () => {
   );
 };
 
-export const App = () => {
-  const handleReset = () => {
-    game.resetGame();
-  };
+export const App = () => (
+  <div class="app">
+    <header class="app-header">
+      <h1>Tiny Towns</h1>
+      <ScoreDisplay />
+      <button class="btn-reset" on:click={() => game.resetGame()}>
+        Новая игра
+      </button>
+    </header>
 
-  return (
-    <div class="app">
-      <header class="app-header">
-        <h1>Tiny Towns</h1>
-        <ScoreDisplay />
-        <button class="btn-reset" on:click={handleReset}>
-          Новая игра
-        </button>
-      </header>
+    <PhaseBar />
 
-      <PhaseBar />
+    <main class="game-layout">
+      <ResourcePanel player={currentPlayer} />
+      <Grid player={currentPlayer} />
+      <BuildPanel player={currentPlayer} />
+    </main>
 
-      <main class="game-layout">
-        <ResourcePanel player={currentPlayer} />
-        <Grid player={currentPlayer} />
-        <BuildPanel player={currentPlayer} />
-      </main>
-    </div>
-  );
-};
+    <Drawer
+      open={currentPlayer.drawerOpen}
+      onClose={() => currentPlayer.cancelBuild()}
+    >
+      <BuildDrawer player={currentPlayer} />
+    </Drawer>
+  </div>
+);

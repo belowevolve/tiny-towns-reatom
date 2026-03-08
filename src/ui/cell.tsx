@@ -2,8 +2,14 @@ import { computed } from "@reatom/core";
 
 import { BUILDINGS } from "../model/buildings";
 import type { PlayerState } from "../model/player";
-import type { CellAtom, Resource } from "../model/types";
+import type { BuildingType, CellAtom, Resource } from "../model/types";
 import { GRID_SIZE, RESOURCE_ICONS } from "../model/types";
+
+const handleDragOver = (e: DragEvent) => {
+  if (e.dataTransfer?.types.includes("text/plain")) {
+    e.preventDefault();
+  }
+};
 
 export const Cell = ({
   cellAtom,
@@ -30,30 +36,16 @@ export const Cell = ({
     `cell#${index}.highlighted`
   );
 
-  const cellClass = computed(() => {
-    const classes = ["cell"];
-    const c = cellAtom();
-    if (c?.type === "resource") {
-      classes.push("cell--resource");
-    }
-    if (c?.type === "building") {
-      classes.push("cell--building");
-    }
-    if (isHighlighted()) {
-      classes.push("cell--highlighted");
-    }
-    if (!c && player.selectedResource()) {
-      classes.push("cell--droppable");
-    }
-    return classes.join(" ");
-  }, `cell#${index}.class`);
-
   const handleClick = () => {
-    const match = player.selectedMatch();
-    if (match && player.highlightedCells().has(index)) {
-      player.buildAtCell(match, index);
+    if (player.selectedBuilding()) {
+      if (isHighlighted()) {
+        player.tryBuildAt(index);
+      } else {
+        player.selectBuilding(null);
+      }
       return;
     }
+
     const resource = player.selectedResource();
     if (!cellAtom() && resource) {
       player.placeResource(index, resource);
@@ -61,25 +53,44 @@ export const Cell = ({
     }
   };
 
-  const handleDragOver = (e: DragEvent) => {
-    if (!cellAtom()) {
-      e.preventDefault();
-    }
-  };
-
   const handleDrop = (e: DragEvent) => {
     e.preventDefault();
-    const resource = e.dataTransfer?.getData("text/plain") as
-      | Resource
-      | undefined;
-    if (resource && !cellAtom()) {
+    const raw = e.dataTransfer?.getData("text/plain");
+    if (!raw) {
+      return;
+    }
+
+    if (raw.startsWith("building:")) {
+      const type = raw.slice(9) as BuildingType;
+      player.selectBuilding(type);
+      if (player.highlightedCells().has(index)) {
+        player.tryBuildAt(index);
+      }
+      return;
+    }
+
+    const resource = raw as Resource;
+    if (!cellAtom()) {
       player.placeResource(index, resource);
     }
   };
 
   return (
     <div
-      class={cellClass}
+      class={[
+        "cell",
+        {
+          "cell--buildable": () =>
+            isHighlighted() && player.selectedBuilding() !== null,
+          "cell--building": () => cellAtom()?.type === "building",
+          "cell--droppable": () =>
+            !cellAtom() &&
+            player.selectedResource() !== null &&
+            player.selectedBuilding() === null,
+          "cell--highlighted": isHighlighted,
+          "cell--resource": () => cellAtom()?.type === "resource",
+        },
+      ]}
       on:click={handleClick}
       on:dragover={handleDragOver}
       on:drop={handleDrop}
