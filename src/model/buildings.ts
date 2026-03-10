@@ -105,7 +105,7 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
   },
 
   farm: {
-    description: "Кормит до 4 коттеджей в любом месте города. 0 очков",
+    description: "Кормит до 4 коттеджей в любом месте города.",
     icon: "🌻",
     name: "Ферма",
     pattern: [
@@ -165,6 +165,33 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
 };
 
 export const EMPTY_CELL_PENALTY = -1;
+
+export const calculateCellScore = (
+  grid: CellContent[],
+  index: number
+): number => {
+  const cell = grid[index];
+  if (!cell || cell.type !== "building") {
+    return EMPTY_CELL_PENALTY;
+  }
+
+  const allBuildings: { type: BuildingType; index: number }[] = [];
+  for (let i = 0; i < grid.length; i += 1) {
+    const c = grid[i];
+    if (c?.type === "building") {
+      allBuildings.push({ index: i, type: c.building });
+    }
+  }
+
+  const ctx: ScoringContext = {
+    allBuildings,
+    grid,
+    gridSize: GRID_SIZE,
+    index,
+  };
+
+  return BUILDINGS[cell.building].score(ctx);
+};
 
 export const calculateGridScore = (grid: CellContent[]): number => {
   const allBuildings: { type: BuildingType; index: number }[] = [];

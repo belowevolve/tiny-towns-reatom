@@ -1,9 +1,9 @@
 import { computed } from "@reatom/core";
 
-import { BUILDINGS } from "../model/buildings";
+import { BUILDINGS, calculateCellScore } from "../model/buildings";
 import type { PlayerState } from "../model/player";
 import type { BuildingType, CellAtom, Resource } from "../model/types";
-import { GRID_SIZE, RESOURCE_ICONS } from "../model/types";
+import { GRID_SIZE, RESOURCE_ICONS, RESOURCE_NAMES } from "../model/types";
 
 const handleDragOver = (e: DragEvent) => {
   if (e.dataTransfer?.types.includes("text/plain")) {
@@ -20,6 +20,8 @@ export const Cell = ({
   index: number;
   player: PlayerState;
 }) => {
+  const hintId = `cell-hint-${index}`;
+
   const content = computed(() => {
     const c = cellAtom();
     if (!c) {
@@ -35,6 +37,64 @@ export const Cell = ({
     () => player.highlightedCells().has(index),
     `cell#${index}.highlighted`
   );
+
+  const isBuildable = computed(
+    () => isHighlighted() && player.selectedBuilding() !== null,
+    `cell#${index}.buildable`
+  );
+
+  const isBuilding = computed(
+    () => cellAtom()?.type === "building",
+    `cell#${index}.isBuilding`
+  );
+
+  const isResource = computed(
+    () => cellAtom()?.type === "resource",
+    `cell#${index}.isResource`
+  );
+
+  const isDroppable = computed(
+    () =>
+      !cellAtom() &&
+      player.selectedResource() !== null &&
+      player.selectedBuilding() === null,
+    `cell#${index}.droppable`
+  );
+
+  const hintTitle = computed(() => {
+    const c = cellAtom();
+    if (!c) {
+      return "Пустая клетка";
+    }
+    if (c.type === "resource") {
+      return `${RESOURCE_ICONS[c.resource]} ${RESOURCE_NAMES[c.resource]}`;
+    }
+    const b = BUILDINGS[c.building];
+    return `${b.icon} ${b.name}`;
+  }, `cell#${index}.hint.title`);
+
+  const hintDesc = computed(() => {
+    const c = cellAtom();
+    if (!c) {
+      return "Штраф за пустую ячейку";
+    }
+    if (c.type === "resource") {
+      return "Штраф если ресурс останется";
+    }
+    return BUILDINGS[c.building].description;
+  }, `cell#${index}.hint.desc`);
+
+  const cellScore = computed(
+    () => calculateCellScore(player.gridSnapshot(), index),
+    `cell#${index}.hint.score`
+  );
+
+  const isPositive = computed(() => cellScore() > 0, `cell#${index}.hint.pos`);
+
+  const scoreText = computed(() => {
+    const s = cellScore();
+    return s > 0 ? `+${s}` : String(s);
+  }, `cell#${index}.hint.scoreText`);
 
   const handleClick = () => {
     if (player.selectedBuilding()) {
@@ -76,21 +136,19 @@ export const Cell = ({
   };
 
   return (
-    <div
+    <button
       class={[
         "cell",
         {
-          "cell--buildable": () =>
-            isHighlighted() && player.selectedBuilding() !== null,
-          "cell--building": () => cellAtom()?.type === "building",
-          "cell--droppable": () =>
-            !cellAtom() &&
-            player.selectedResource() !== null &&
-            player.selectedBuilding() === null,
+          "cell--buildable": isBuildable,
+          "cell--building": isBuilding,
+          "cell--droppable": isDroppable,
           "cell--highlighted": isHighlighted,
-          "cell--resource": () => cellAtom()?.type === "resource",
+          "cell--resource": isResource,
         },
       ]}
+      attr:interestfor={hintId}
+      attr:style={`anchor-name: --${hintId}`}
       on:click={handleClick}
       on:dragover={handleDragOver}
       on:drop={handleDrop}
@@ -98,6 +156,19 @@ export const Cell = ({
       data-col={index % GRID_SIZE}
     >
       {content}
-    </div>
+      <div
+        id={hintId}
+        popover="hint"
+        attr:style={`position-anchor: --${hintId}; position-area: top;`}
+        class={[
+          "cell-popover",
+          isPositive() ? "cell-popover--positive" : "cell-popover--negative",
+        ]}
+      >
+        <div class="cell-popover__title">{hintTitle}</div>
+        <div class="cell-popover__desc">{hintDesc}</div>
+        <div class="cell-popover__score">{scoreText}</div>
+      </div>
+    </button>
   );
 };

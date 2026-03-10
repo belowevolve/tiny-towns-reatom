@@ -208,6 +208,7 @@ export const reatomPlayer = (id: string, name: string) => {
     cells,
     confirmBuild,
     drawerOpen,
+    gridSnapshot,
     highlightedCells,
     id,
     name,
