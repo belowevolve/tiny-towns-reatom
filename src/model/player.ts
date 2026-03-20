@@ -70,6 +70,10 @@ export const reatomPlayer = (id: string, name: string) => {
     canStore: boolean;
   } | null>(null, `${prefix}.pendingWarehouseSwap`);
 
+  const pendingFactorySwap = atom<{
+    storedResource: Resource;
+  } | null>(null, `${prefix}.pendingFactorySwap`);
+
   const gridSnapshot = computed(
     (): CellContent[] => cells.map((cell) => cell()),
     `${prefix}.gridSnapshot`
@@ -139,6 +143,10 @@ export const reatomPlayer = (id: string, name: string) => {
 
   const factoryCells = computed((): number[] => {
     const grid = gridSnapshot();
+    const selected = selectedResource();
+    if (!selected) {
+      return [];
+    }
     const result: number[] = [];
     for (let i = 0; i < grid.length; i += 1) {
       const c = grid[i];
@@ -149,7 +157,7 @@ export const reatomPlayer = (id: string, name: string) => {
       if (!def.hooks?.modifyPlacement) {
         continue;
       }
-      const options = def.hooks.modifyPlacement("wood", {
+      const options = def.hooks.modifyPlacement(selected, {
         buildingIndex: i,
         grid,
         stored: c.stored,
@@ -336,8 +344,25 @@ export const reatomPlayer = (id: string, name: string) => {
     if (content?.type !== "building" || content.stored.length === 0) {
       return;
     }
-    selectedResource.set(content.stored[0]);
+    pendingFactorySwap.set({ storedResource: content.stored[0] });
+    selectedResource.set(null);
+    drawerOpen.set(true);
   }, `${prefix}.activateFactory`);
+
+  const confirmFactorySwap = action((resource: Resource) => {
+    selectedResource.set(resource);
+    pendingFactorySwap.set(null);
+    drawerOpen.set(false);
+  }, `${prefix}.confirmFactorySwap`);
+
+  const cancelFactorySwap = action(() => {
+    const swap = peek(pendingFactorySwap);
+    if (swap) {
+      selectedResource.set(swap.storedResource);
+    }
+    pendingFactorySwap.set(null);
+    drawerOpen.set(false);
+  }, `${prefix}.cancelFactorySwap`);
 
   const buildAtCell = action((match: BuildMatch, targetIndex: number) => {
     for (const idx of match.cells) {
@@ -479,6 +504,7 @@ export const reatomPlayer = (id: string, name: string) => {
     pendingBuildEffect.set(null);
     pendingBuildIndex.set(null);
     pendingWarehouseSwap.set(null);
+    pendingFactorySwap.set(null);
   }, `${prefix}.reset`);
 
   return {
@@ -489,9 +515,11 @@ export const reatomPlayer = (id: string, name: string) => {
     buildingCount,
     canSubstituteResource,
     cancelBuild,
+    cancelFactorySwap,
     cancelWarehouseSwap,
     cells,
     confirmBuild,
+    confirmFactorySwap,
     confirmWarehouseSwap,
     drawerOpen,
     factoryCells,
@@ -503,6 +531,7 @@ export const reatomPlayer = (id: string, name: string) => {
     pendingBuildEffect,
     pendingBuildIndex,
     pendingBuilds,
+    pendingFactorySwap,
     pendingTargetCell,
     pendingWarehouseSwap,
     placeResource,

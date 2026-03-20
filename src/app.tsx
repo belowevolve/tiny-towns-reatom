@@ -91,6 +91,10 @@ export const App = () => (
         if (currentPlayer.pendingBuildEffect()) {
           return;
         }
+        if (currentPlayer.pendingFactorySwap()) {
+          currentPlayer.cancelFactorySwap();
+          return;
+        }
         if (currentPlayer.pendingWarehouseSwap()) {
           currentPlayer.cancelWarehouseSwap();
           return;

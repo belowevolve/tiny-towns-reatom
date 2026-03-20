@@ -139,10 +139,26 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
 
   factory: {
     description:
-      "При постройке — положить ресурс. Можно менять тип при размещении.",
+      "При постройке — положить уникальный ресурс. Когда называется этот ресурс, можно заменить на другой.",
     hooks: {
-      modifyPlacement: () => [{ type: "substituteResource" }],
-      onBuild: () => ({ type: "promptStoreResource" }),
+      modifyPlacement: (announced, ctx) => {
+        if (ctx.stored.length > 0 && ctx.stored[0] === announced) {
+          return [{ type: "substituteResource" }];
+        }
+        return [];
+      },
+      onBuild: (ctx) => {
+        const factories = new Set(
+          ctx.grid
+            .filter(
+              (c): c is Extract<CellContent, { type: "building" }> =>
+                c?.type === "building" && c.building === "factory"
+            )
+            .flatMap((c) => c.stored)
+        );
+        const valid = RESOURCES.filter((r) => !factories.has(r));
+        return { type: "promptStoreResource", validResources: valid };
+      },
     },
     icon: "🏭",
     name: "Фабрика",
@@ -207,7 +223,7 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
 
   warehouse: {
     description:
-      "-1 VP за каждый хранимый ресурс (до 3). Можно хранить/менять.",
+      "-1 VP за каждый хранимый ресурс (до 3). Когда другой игрок называет ресурс, вы можете сохранить его или заменить другим с этого склада на другой ресурс.",
     hooks: {
       modifyPlacement: (_announced, ctx) => {
         const options: PlacementOption[] = [];

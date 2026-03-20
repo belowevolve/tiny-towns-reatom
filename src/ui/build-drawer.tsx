@@ -170,12 +170,55 @@ const WarehouseSwapPrompt = ({ player }: { player: PlayerState }) => {
   );
 };
 
+const FactorySwapPrompt = ({ player }: { player: PlayerState }) => {
+  const swap = player.pendingFactorySwap();
+  if (!swap) {
+    return <div />;
+  }
+
+  const available = RESOURCES.filter((r) => r !== swap.storedResource);
+
+  return (
+    <div class="build-drawer-content">
+      <h3 class="drawer-title">
+        🏭 Заменить{" "}
+        <span
+          class="resource-swatch resource-swatch--sm"
+          attr:style={`background: ${RESOURCE_COLORS[swap.storedResource]}`}
+        />{" "}
+        {RESOURCE_NAMES[swap.storedResource]}
+      </h3>
+      <p class="drawer-subtitle">Выберите ресурс для замены</p>
+      <div class="resource-picker-list">
+        {available.map((r) => (
+          <ResourcePickerItem
+            resource={r}
+            onPick={() => player.confirmFactorySwap(r)}
+          />
+        ))}
+      </div>
+      <div class="drawer-actions">
+        <button
+          class="btn-secondary"
+          on:click={() => player.cancelFactorySwap()}
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const BuildDrawer = ({ player }: { player: PlayerState }) => {
   const selectedIndex = atom<number | null>(null, "buildDrawer.selectedIdx");
 
   const content = computed(() => {
     if (player.pendingBuildEffect()) {
       return <OnBuildPrompt player={player} />;
+    }
+
+    if (player.pendingFactorySwap()) {
+      return <FactorySwapPrompt player={player} />;
     }
 
     if (player.pendingWarehouseSwap()) {

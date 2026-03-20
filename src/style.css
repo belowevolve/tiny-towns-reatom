@@ -298,8 +298,10 @@ button {
 
 /* ========== Cell Popover (hint) ========== */
 [interestfor] {
-  interest-delay: 0.1s;
-  --interest-delay: 0.1s;
+  interest-delay-start: 0.5s;
+  interest-delay-end: 0.1s;
+  --interest-delay-start: 0.5s;
+  --interest-delay-end: 0.1s;
 }
 
 [popover] {
