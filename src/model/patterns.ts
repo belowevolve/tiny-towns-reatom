@@ -82,6 +82,7 @@ export const findMatches = (
       for (let anchorRow = 0; anchorRow < GRID_SIZE; anchorRow += 1) {
         for (let anchorCol = 0; anchorCol < GRID_SIZE; anchorCol += 1) {
           const cellIndices: number[] = [];
+          const wildcardIndices: number[] = [];
           let valid = true;
 
           for (const cell of variant) {
@@ -95,16 +96,24 @@ export const findMatches = (
 
             const index = row * GRID_SIZE + col;
             const content = getCellContent(index);
+
             if (
-              !content ||
-              content.type !== "resource" ||
-              content.resource !== cell.resource
+              content?.type === "resource" &&
+              content.resource === cell.resource
             ) {
+              cellIndices.push(index);
+            } else if (
+              content?.type === "building" &&
+              BUILDINGS[content.building].hooks?.matchAsResource?.(
+                cell.resource
+              )
+            ) {
+              cellIndices.push(index);
+              wildcardIndices.push(index);
+            } else {
               valid = false;
               break;
             }
-
-            cellIndices.push(index);
           }
 
           if (valid) {
@@ -113,6 +122,7 @@ export const findMatches = (
               building: buildingType,
               cells: cellIndices,
               key: `${buildingType}:${sorted.join(",")}`,
+              wildcardCells: wildcardIndices,
             });
           }
         }

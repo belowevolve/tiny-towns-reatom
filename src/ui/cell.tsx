@@ -3,7 +3,12 @@ import { computed } from "@reatom/core";
 import { BUILDINGS, calculateCellScore } from "../model/buildings";
 import type { PlayerState } from "../model/player";
 import type { BuildingType, CellAtom, Resource } from "../model/types";
-import { GRID_SIZE, RESOURCE_ICONS, RESOURCE_NAMES } from "../model/types";
+import {
+  GRID_SIZE,
+  RESOURCE_COLORS,
+  RESOURCE_ICONS,
+  RESOURCE_NAMES,
+} from "../model/types";
 
 const handleDragOver = (e: DragEvent) => {
   if (e.dataTransfer?.types.includes("text/plain")) {
@@ -28,7 +33,12 @@ export const Cell = ({
       return "";
     }
     if (c.type === "resource") {
-      return RESOURCE_ICONS[c.resource];
+      return (
+        <span
+          class="cell-swatch"
+          attr:style={`background: ${RESOURCE_COLORS[c.resource]}`}
+        />
+      );
     }
     return BUILDINGS[c.building].icon;
   }, `cell#${index}.content`);

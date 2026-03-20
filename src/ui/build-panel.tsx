@@ -3,7 +3,7 @@ import { computed } from "@reatom/core";
 import { BUILDINGS } from "../model/buildings";
 import type { PlayerState } from "../model/player";
 import type { BuildingType } from "../model/types";
-import { BUILDING_TYPES, RESOURCE_ICONS } from "../model/types";
+import { BUILDING_TYPES, RESOURCE_COLORS } from "../model/types";
 
 const RecipeCard = ({
   type,
@@ -21,7 +21,7 @@ const RecipeCard = ({
     () => Array.from({ length: maxDc + 1 }, () => null)
   );
   for (const cell of def.pattern) {
-    patternGrid[cell.dr][cell.dc] = RESOURCE_ICONS[cell.resource];
+    patternGrid[cell.dr][cell.dc] = RESOURCE_COLORS[cell.resource];
   }
 
   const hasMatches = computed(
@@ -61,17 +61,16 @@ const RecipeCard = ({
         style:grid-template-columns={`repeat(${maxDc + 1}, 22px)`}
       >
         {patternGrid.flatMap((row) =>
-          row.map((icon) => (
+          row.map((color) => (
             <div
               class={[
                 "recipe-cell",
                 {
-                  "recipe-cell--empty": !icon,
+                  "recipe-cell--empty": !color,
                 },
               ]}
-            >
-              {icon ?? "·"}
-            </div>
+              attr:style={color ? `background: ${color}` : ""}
+            />
           ))
         )}
       </div>

@@ -2,8 +2,13 @@ import { atom, computed } from "@reatom/core";
 
 import { BUILDINGS } from "../model/buildings";
 import type { PlayerState } from "../model/player";
-import type { BuildMatch } from "../model/types";
-import { GRID_SIZE, RESOURCE_ICONS } from "../model/types";
+import type { BuildMatch, Resource } from "../model/types";
+import {
+  GRID_SIZE,
+  RESOURCES,
+  RESOURCE_COLORS,
+  RESOURCE_NAMES,
+} from "../model/types";
 
 const VariantCard = ({
   match,
@@ -60,17 +65,57 @@ const VariantCard = ({
                     "variant-mini-cell--active": inMatch,
                   },
                 ]}
-              >
-                {inMatch
-                  ? RESOURCE_ICONS[
-                      def.pattern.find((_, pi) => match.cells[pi] === gridIndex)
-                        ?.resource ?? def.pattern[0].resource
-                    ]
-                  : ""}
-              </div>
+                attr:style={
+                  inMatch
+                    ? `background: ${RESOURCE_COLORS[def.pattern.find((_, pi) => match.cells[pi] === gridIndex)?.resource ?? def.pattern[0].resource]}`
+                    : ""
+                }
+              />
             );
           })
         )}
+      </div>
+    </div>
+  );
+};
+
+const ResourcePickerItem = ({
+  resource,
+  onPick,
+}: {
+  resource: Resource;
+  onPick: () => void;
+}) => (
+  <button class="resource-picker-item" on:click={onPick}>
+    <span
+      class="resource-swatch"
+      attr:style={`background: ${RESOURCE_COLORS[resource]}`}
+    />
+    <span class="resource-picker-label">{RESOURCE_NAMES[resource]}</span>
+  </button>
+);
+
+const OnBuildPrompt = ({ player }: { player: PlayerState }) => {
+  const effect = player.pendingBuildEffect();
+  if (!effect) {
+    return <div />;
+  }
+
+  const available: Resource[] =
+    effect.validResources && effect.validResources.length > 0
+      ? effect.validResources
+      : [...RESOURCES];
+
+  return (
+    <div class="build-drawer-content">
+      <h3 class="drawer-title">Выберите ресурс для хранения</h3>
+      <div class="resource-picker-list">
+        {available.map((r) => (
+          <ResourcePickerItem
+            resource={r}
+            onPick={() => player.storeResourceOnBuilding(r)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -80,6 +125,10 @@ export const BuildDrawer = ({ player }: { player: PlayerState }) => {
   const selectedIndex = atom<number | null>(null, "buildDrawer.selectedIdx");
 
   const content = computed(() => {
+    if (player.pendingBuildEffect()) {
+      return <OnBuildPrompt player={player} />;
+    }
+
     const builds = player.pendingBuilds();
     if (builds.length === 0) {
       return <div />;

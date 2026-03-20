@@ -1,7 +1,7 @@
 import { computed } from "@reatom/core";
 
 import { currentPlayer, game } from "./model/game";
-import { RESOURCE_ICONS, RESOURCE_NAMES } from "./model/types";
+import { RESOURCE_COLORS, RESOURCE_NAMES } from "./model/types";
 import { BuildDrawer } from "./ui/build-drawer";
 import { BuildPanel } from "./ui/build-panel";
 import { Drawer } from "./ui/drawer";
@@ -22,7 +22,15 @@ const PhaseBar = () => {
     if (!resource) {
       return "";
     }
-    return `${RESOURCE_ICONS[resource]} ${RESOURCE_NAMES[resource]}`;
+    return (
+      <span style="display:inline-flex;align-items:center;gap:6px">
+        <span
+          class="resource-swatch"
+          attr:style={`background:${RESOURCE_COLORS[resource]};width:20px;height:20px`}
+        />
+        {RESOURCE_NAMES[resource]}
+      </span>
+    );
   }, "phaseBar.resource");
 
   return (

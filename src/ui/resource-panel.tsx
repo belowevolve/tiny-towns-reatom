@@ -2,7 +2,7 @@ import { computed } from "@reatom/core";
 
 import type { PlayerState } from "../model/player";
 import type { Resource } from "../model/types";
-import { RESOURCES, RESOURCE_ICONS, RESOURCE_NAMES } from "../model/types";
+import { RESOURCES, RESOURCE_COLORS, RESOURCE_NAMES } from "../model/types";
 
 const ResourceItem = ({
   resource,
@@ -36,7 +36,10 @@ const ResourceItem = ({
       on:click={handleClick}
       on:dragstart={handleDragStart}
     >
-      <span class="resource-icon">{RESOURCE_ICONS[resource]}</span>
+      <span
+        class="resource-swatch"
+        attr:style={`background: ${RESOURCE_COLORS[resource]}`}
+      />
       <span class="resource-label">{RESOURCE_NAMES[resource]}</span>
     </div>
   );

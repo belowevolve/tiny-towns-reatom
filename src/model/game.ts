@@ -1,4 +1,4 @@
-import { action, atom, computed } from "@reatom/core";
+import { action, atom, computed, reatomNumber } from "@reatom/core";
 
 import type { PlayerState } from "./player";
 import { reatomPlayer } from "./player";
@@ -27,7 +27,7 @@ export const reatomGame = () => {
   const turnPhase = atom<TurnPhase>("announce", "game.turnPhase");
   const players = atom<PlayerState[]>([], "game.players");
   const currentResource = atom<Resource | null>(null, "game.currentResource");
-  const turnNumber = atom(0, "game.turn");
+  const turnNumber = reatomNumber(0, "game.turn");
   const resourceDeck = atom<Resource[]>([], "game.deck");
 
   const addPlayer = action((id: string, name: string) => {
@@ -39,7 +39,7 @@ export const reatomGame = () => {
   const startGame = action(() => {
     phase.set("playing");
     turnPhase.set("announce");
-    turnNumber.set(0);
+    turnNumber.reset();
     resourceDeck.set(createResourceDeck());
   }, "game.start");
 
@@ -64,7 +64,7 @@ export const reatomGame = () => {
 
   const endTurn = action(() => {
     turnPhase.set("announce");
-    turnNumber.set((n) => n + 1);
+    turnNumber.increment();
     currentResource.set(null);
   }, "game.endTurn");
 
