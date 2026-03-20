@@ -130,17 +130,34 @@ const WarehouseSwapPrompt = ({ player }: { player: PlayerState }) => {
   return (
     <div class="build-drawer-content">
       <h3 class="drawer-title">
-        Обмен: {RESOURCE_NAMES[swap.incoming]} → 📦 Склад
+        📦 Склад ←{" "}
+        <span
+          class="resource-swatch resource-swatch--sm"
+          attr:style={`background: ${RESOURCE_COLORS[swap.incoming]}`}
+        />{" "}
+        {RESOURCE_NAMES[swap.incoming]}
       </h3>
-      <p class="drawer-subtitle">Выберите ресурс для обмена</p>
-      <div class="resource-picker-list">
-        {swap.stored.map((r, i) => (
-          <ResourcePickerItem
-            resource={r}
-            onPick={() => player.confirmWarehouseSwap(i)}
-          />
-        ))}
-      </div>
+      {swap.canStore && (
+        <button
+          class="btn-action warehouse-store-btn"
+          on:click={() => player.storeOnWarehouseFromPrompt()}
+        >
+          Положить на склад
+        </button>
+      )}
+      {swap.stored.length > 0 && (
+        <>
+          <p class="drawer-subtitle">Или заменить:</p>
+          <div class="resource-picker-list">
+            {swap.stored.map((r, i) => (
+              <ResourcePickerItem
+                resource={r}
+                onPick={() => player.confirmWarehouseSwap(i)}
+              />
+            ))}
+          </div>
+        </>
+      )}
       <div class="drawer-actions">
         <button
           class="btn-secondary"

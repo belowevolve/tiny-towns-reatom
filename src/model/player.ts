@@ -67,6 +67,7 @@ export const reatomPlayer = (id: string, name: string) => {
     warehouseIndex: number;
     incoming: Resource;
     stored: Resource[];
+    canStore: boolean;
   } | null>(null, `${prefix}.pendingWarehouseSwap`);
 
   const gridSnapshot = computed(
@@ -135,6 +136,30 @@ export const reatomPlayer = (id: string, name: string) => {
     }
     return result;
   }, `${prefix}.warehouseCells`);
+
+  const factoryCells = computed((): number[] => {
+    const grid = gridSnapshot();
+    const result: number[] = [];
+    for (let i = 0; i < grid.length; i += 1) {
+      const c = grid[i];
+      if (c?.type !== "building" || c.stored.length === 0) {
+        continue;
+      }
+      const def = BUILDINGS[c.building];
+      if (!def.hooks?.modifyPlacement) {
+        continue;
+      }
+      const options = def.hooks.modifyPlacement("wood", {
+        buildingIndex: i,
+        grid,
+        stored: c.stored,
+      });
+      if (options.some((o) => o.type === "substituteResource")) {
+        result.push(i);
+      }
+    }
+    return result;
+  }, `${prefix}.factoryCells`);
 
   const restrictedResources = computed((): Set<Resource> => {
     const grid = gridSnapshot();
@@ -236,18 +261,30 @@ export const reatomPlayer = (id: string, name: string) => {
       }
       const def = BUILDINGS[content.building];
       const capacity = def.storageCapacity ?? 0;
+      const hasCapacity = content.stored.length < capacity;
+      const alreadyStored = content.stored.includes(resource);
 
-      if (content.stored.length < capacity) {
+      if (alreadyStored && hasCapacity) {
         storeOnWarehouse(warehouseIndex, resource);
         selectedResource.set(null);
-      } else if (content.stored.length > 0) {
+        return;
+      }
+
+      if (!alreadyStored && content.stored.length > 0) {
         pendingWarehouseSwap.set({
+          canStore: hasCapacity,
           incoming: resource,
           stored: [...content.stored],
           warehouseIndex,
         });
         selectedResource.set(null);
         drawerOpen.set(true);
+        return;
+      }
+
+      if (hasCapacity) {
+        storeOnWarehouse(warehouseIndex, resource);
+        selectedResource.set(null);
       }
     },
     `${prefix}.initiateWarehouseStore`
@@ -283,6 +320,24 @@ export const reatomPlayer = (id: string, name: string) => {
     pendingWarehouseSwap.set(null);
     drawerOpen.set(false);
   }, `${prefix}.cancelWarehouseSwap`);
+
+  const storeOnWarehouseFromPrompt = action(() => {
+    const swap = peek(pendingWarehouseSwap);
+    if (!swap) {
+      return;
+    }
+    storeOnWarehouse(swap.warehouseIndex, swap.incoming);
+    pendingWarehouseSwap.set(null);
+    drawerOpen.set(false);
+  }, `${prefix}.storeFromPrompt`);
+
+  const activateFactory = action((factoryIndex: number) => {
+    const content = peek(cells[factoryIndex]);
+    if (content?.type !== "building" || content.stored.length === 0) {
+      return;
+    }
+    selectedResource.set(content.stored[0]);
+  }, `${prefix}.activateFactory`);
 
   const buildAtCell = action((match: BuildMatch, targetIndex: number) => {
     for (const idx of match.cells) {
@@ -427,6 +482,7 @@ export const reatomPlayer = (id: string, name: string) => {
   }, `${prefix}.reset`);
 
   return {
+    activateFactory,
     availableBuilds,
     availableResources,
     buildAtCell,
@@ -438,6 +494,7 @@ export const reatomPlayer = (id: string, name: string) => {
     confirmBuild,
     confirmWarehouseSwap,
     drawerOpen,
+    factoryCells,
     gridSnapshot,
     highlightedCells,
     id,
@@ -458,6 +515,7 @@ export const reatomPlayer = (id: string, name: string) => {
     selectedBuilding,
     selectedResource,
     storeOnWarehouse,
+    storeOnWarehouseFromPrompt,
     storeResourceOnBuilding,
     swapWarehouseResource,
     tryBuildAt,

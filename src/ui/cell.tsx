@@ -43,6 +43,23 @@ export const Cell = ({
     return BUILDINGS[c.building].icon;
   }, `cell#${index}.content`);
 
+  const storedPreview = computed(() => {
+    const c = cellAtom();
+    if (!c || c.type !== "building" || c.stored.length === 0) {
+      return "";
+    }
+    return (
+      <div class="cell-stored-preview">
+        {c.stored.map((r) => (
+          <span
+            class="cell-stored-dot"
+            attr:style={`background: ${RESOURCE_COLORS[r]}`}
+          />
+        ))}
+      </div>
+    );
+  }, `cell#${index}.storedPreview`);
+
   const isHighlighted = computed(
     () => player.highlightedCells().has(index),
     `cell#${index}.highlighted`
@@ -80,6 +97,16 @@ export const Cell = ({
     }
     return player.warehouseCells().includes(index);
   }, `cell#${index}.storable`);
+
+  const isSubstitutable = computed(() => {
+    if (player.selectedResource() === null) {
+      return false;
+    }
+    if (player.selectedBuilding() !== null) {
+      return false;
+    }
+    return player.factoryCells().includes(index);
+  }, `cell#${index}.substitutable`);
 
   const hintTitle = computed(() => {
     const c = cellAtom();
@@ -136,6 +163,11 @@ export const Cell = ({
       return;
     }
 
+    if (isSubstitutable()) {
+      player.activateFactory(index);
+      return;
+    }
+
     if (isStorable()) {
       player.initiateWarehouseStore(index, resource);
       return;
@@ -180,6 +212,7 @@ export const Cell = ({
           "cell--highlighted": isHighlighted,
           "cell--resource": isResource,
           "cell--storable": isStorable,
+          "cell--substitutable": isSubstitutable,
         },
       ]}
       attr:interestfor={hintId}
@@ -191,6 +224,7 @@ export const Cell = ({
       data-col={index % GRID_SIZE}
     >
       {content}
+      {storedPreview}
       <div
         id={hintId}
         popover="hint"

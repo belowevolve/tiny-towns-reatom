@@ -9,35 +9,35 @@ import { Grid } from "./ui/grid";
 import { ResourcePanel } from "./ui/resource-panel";
 
 const PhaseBar = () => {
-  const phaseContent = computed(() => {
+  const text = computed(() => {
     const resource = game.currentResource();
     if (!resource) {
-      return "🔨 Выберите ресурс для размещения";
+      return "🔨 Выберите ресурс";
     }
     return "";
   }, "phaseBar.text");
 
-  const resourceBadge = computed(() => {
+  const badge = computed(() => {
     const resource = game.currentResource();
     if (!resource) {
       return "";
     }
     return (
-      <span style="display:inline-flex;align-items:center;gap:6px">
+      <span class="phase-badge">
         <span
-          class="resource-swatch"
-          attr:style={`background:${RESOURCE_COLORS[resource]};width:20px;height:20px`}
+          class="resource-swatch resource-swatch--sm"
+          attr:style={`background:${RESOURCE_COLORS[resource]}`}
         />
         {RESOURCE_NAMES[resource]}
       </span>
     );
-  }, "phaseBar.resource");
+  }, "phaseBar.badge");
 
   return (
-    <div class="phase-indicator">
-      <span>{phaseContent}</span>
-      <span class="resource-announce">{resourceBadge}</span>
-    </div>
+    <span class="phase-bar">
+      {text}
+      {badge}
+    </span>
   );
 };
 
@@ -71,20 +71,19 @@ const ScoreDisplay = () => {
 export const App = () => (
   <div class="app">
     <header class="app-header">
-      <h1>Tiny Towns</h1>
-      <ScoreDisplay />
-      <button class="btn-reset" on:click={game.resetGame}>
-        Новая игра
-      </button>
+      <PhaseBar />
+      <div class="app-header__right">
+        <ScoreDisplay />
+        <button class="btn-reset" on:click={game.resetGame}>
+          Сброс
+        </button>
+      </div>
     </header>
 
-    <PhaseBar />
+    <Grid player={currentPlayer} />
 
-    <main class="game-layout">
-      <ResourcePanel player={currentPlayer} />
-      <Grid player={currentPlayer} />
-      <BuildPanel player={currentPlayer} />
-    </main>
+    <ResourcePanel player={currentPlayer} />
+    <BuildPanel player={currentPlayer} />
 
     <Drawer
       open={currentPlayer.drawerOpen}

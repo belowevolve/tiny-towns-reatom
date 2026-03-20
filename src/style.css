@@ -90,47 +90,47 @@ button {
 .app {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 24px;
+  align-items: stretch;
+  gap: 12px;
+  padding: 12px;
   min-height: 100vh;
+  max-width: 520px;
+  margin: 0 auto;
 }
 
 .app-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 10px;
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--color-text);
+  white-space: nowrap;
 }
 
-.app-header .score-badge {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  background: var(--color-surface);
-  padding: 4px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 .app-header .btn-reset {
-  padding: 6px 16px;
+  padding: 4px 12px;
   border-radius: var(--radius-sm);
   background: var(--color-danger-soft);
   border: 1px solid var(--color-danger);
   color: var(--color-danger);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 500;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .app-header .btn-reset:hover {
@@ -138,13 +138,37 @@ button {
   color: white;
 }
 
-.game-layout {
+/* ========== Phase Bar (inline) ========== */
+
+.phase-bar {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ========== Score Display (compact) ========== */
+
+.score-display {
   display: flex;
-  gap: 28px;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 960px;
-  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.score-display .score-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.score-display .score-label {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
 }
 
 /* ========== Grid ========== */
@@ -154,14 +178,13 @@ button {
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 6px;
-  padding: 14px;
+  padding: 10px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-elevated);
-  width: min(360px, calc(100vw - 32px));
+  width: 100%;
   aspect-ratio: 1;
-  flex-shrink: 0;
 }
 
 /* ========== Cell ========== */
@@ -174,7 +197,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
+  font-size: 2rem;
   cursor: pointer;
   transition: all 0.15s ease;
   background: var(--color-cell-bg);
@@ -233,6 +256,17 @@ button {
   background: var(--color-accent-soft);
 }
 
+.cell--substitutable {
+  border-color: var(--color-selected);
+  box-shadow: 0 0 10px var(--color-selected-glow);
+  animation: cell-pulse 1.2s ease-in-out infinite;
+}
+
+.cell--substitutable:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
 @keyframes cell-pulse {
   0%,
   100% {
@@ -241,6 +275,25 @@ button {
   50% {
     box-shadow: 0 0 18px var(--color-highlight-glow);
   }
+}
+
+/* ========== Cell Stored Preview ========== */
+
+.cell-stored-preview {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: flex;
+  gap: 2px;
+}
+
+.cell-stored-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  display: block;
 }
 
 /* ========== Cell Popover (hint) ========== */
@@ -314,30 +367,25 @@ button {
   color: var(--color-danger);
 }
 
-/* ========== Resource Panel ========== */
+/* ========== Resource Panel (horizontal row) ========== */
 
 .panel {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
+  gap: 6px;
+  align-items: stretch;
 }
 
 .panel-title {
-  margin: 0 0 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  display: none;
 }
 
 .resource-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 6px;
+  gap: 2px;
+  padding: 6px 4px;
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: grab;
@@ -345,6 +393,7 @@ button {
   background: var(--color-surface);
   user-select: none;
   box-shadow: var(--shadow-cell);
+  position: relative;
 }
 
 .resource-item:hover {
@@ -366,89 +415,121 @@ button {
   opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
-  position: relative;
 }
 
 .resource-lock {
-  font-size: 0.6rem;
+  font-size: 0.5rem;
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 1px;
+  right: 1px;
 }
 
 .resource-swatch {
   display: block;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   flex-shrink: 0;
 }
 
-.resource-item .resource-icon {
-  font-size: 1.8rem;
-  line-height: 1;
+.resource-swatch--sm {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .resource-item .resource-label {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
-/* ========== Build Panel ========== */
+/* ========== Build Panel (horizontal scroll) ========== */
 
 .build-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 180px;
-  max-width: 240px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.build-panel .panel-title {
+  display: block;
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .recipes-list {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recipes-list::-webkit-scrollbar {
+  height: 4px;
+}
+
+.recipes-list::-webkit-scrollbar-track {
+  background: var(--color-cell-bg);
+  border-radius: 2px;
+}
+
+.recipes-list::-webkit-scrollbar-thumb {
+  background: var(--color-border-hover);
+  border-radius: 2px;
 }
 
 .recipe-card {
+  flex-shrink: 0;
+  min-width: 110px;
   padding: 8px 10px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   box-shadow: var(--shadow-cell);
+  scroll-snap-align: start;
 }
 
 .recipe-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.82rem;
+  gap: 4px;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
 .recipe-header .recipe-building-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .recipe-grid {
   display: inline-grid;
   gap: 2px;
-  justify-self: center;
 }
 
 .recipe-cell {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  border-radius: 4px;
+  font-size: 0.65rem;
+  border-radius: 3px;
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
@@ -459,9 +540,9 @@ button {
 }
 
 .recipe-description {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: var(--color-text-muted);
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .recipe-card--selected {
@@ -485,70 +566,7 @@ button {
   cursor: default;
 }
 
-.match-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.match-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  width: 100%;
-  text-align: left;
-  box-shadow: var(--shadow-cell);
-}
-
-.match-btn:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-border-hover);
-}
-
-.match-btn--active {
-  background: var(--color-highlight-soft);
-  border-color: var(--color-highlight);
-  box-shadow: 0 0 8px var(--color-highlight-glow);
-}
-
-.no-matches {
-  font-size: 0.8rem;
-  color: var(--color-text-light);
-  padding: 8px 0;
-}
-
-.hint-text {
-  font-size: 0.72rem;
-  color: var(--color-text-light);
-  padding: 4px 0;
-  line-height: 1.4;
-}
-
-/* ========== Game Phase Indicator ========== */
-
-.phase-indicator {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  font-size: 0.85rem;
-}
-
-.phase-indicator .resource-announce {
-  font-size: 1.3rem;
-}
+/* ========== Buttons ========== */
 
 .btn-action {
   padding: 8px 18px;
@@ -573,26 +591,22 @@ button {
   cursor: not-allowed;
 }
 
-/* ========== Score Display ========== */
-
-.score-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+.btn-secondary {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  font-family: inherit;
 }
 
-.score-display .score-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--color-accent);
-}
-
-.score-display .score-label {
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.btn-secondary:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
 }
 
 /* ========== Drawer (Bottom Sheet) ========== */
@@ -662,6 +676,10 @@ button {
   font-weight: 600;
   color: var(--color-text);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .drawer-subtitle {
@@ -757,22 +775,8 @@ button {
   padding-top: 4px;
 }
 
-.btn-secondary {
-  padding: 8px 18px;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.15s ease;
-  font-family: inherit;
-}
-
-.btn-secondary:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-border-hover);
+.warehouse-store-btn {
+  align-self: center;
 }
 
 /* ========== Resource Picker (onBuild prompt) ========== */
@@ -813,80 +817,35 @@ button {
 /* ========== Cell resource swatch ========== */
 
 .cell-swatch {
-  width: 60%;
-  height: 60%;
+  width: 55%;
+  height: 55%;
   border-radius: 6px;
 }
 
 /* ========== Responsive ========== */
 
-@media (max-width: 900px) {
-  .game-layout {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .game-layout .panel,
-  .game-layout .build-panel {
-    width: 100%;
-    max-width: 360px;
-  }
-
-  .game-layout .build-panel {
-    max-width: 360px;
-  }
-
-  .recipes-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .recipe-card {
-    flex: 1 1 auto;
-    min-width: 120px;
-  }
-}
-
-@media (max-width: 600px) {
+@media (max-width: 400px) {
   .app {
-    padding: 4px;
-    gap: 16px;
+    padding: 8px;
+    gap: 8px;
   }
 
   .app-header h1 {
-    font-size: 1.3rem;
-  }
-
-  .grid-wrapper {
-    width: calc(100vw - 24px);
-    max-width: 360px;
-    padding: 10px;
-    gap: 5px;
+    font-size: 1rem;
   }
 
   .cell {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     border-radius: var(--radius-sm);
   }
 
-  .resource-item {
-    padding: 8px 10px;
+  .resource-swatch {
+    width: 24px;
+    height: 24px;
   }
 
-  .resource-item .resource-icon {
-    font-size: 1.4rem;
-  }
-
-  .panel {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .panel .panel-title {
-    width: 100%;
-    text-align: center;
+  .cell-stored-dot {
+    width: 7px;
+    height: 7px;
   }
 }

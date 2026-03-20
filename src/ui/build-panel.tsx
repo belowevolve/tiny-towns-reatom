@@ -58,7 +58,7 @@ const RecipeCard = ({
       </div>
       <div
         class="recipe-grid"
-        style:grid-template-columns={`repeat(${maxDc + 1}, 22px)`}
+        style:grid-template-columns={`repeat(${maxDc + 1}, 18px)`}
       >
         {patternGrid.flatMap((row) =>
           row.map((color) => (
