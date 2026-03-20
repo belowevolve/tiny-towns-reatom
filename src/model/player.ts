@@ -10,7 +10,7 @@ import type {
   OnBuildEffect,
   Resource,
 } from "./types";
-import { GRID_SIZE } from "./types";
+import { GRID_SIZE, RESOURCES } from "./types";
 
 const buildableTargets = (matches: BuildMatch[]): Set<number> => {
   const cellSet = new Set<number>();
@@ -62,6 +62,12 @@ export const reatomPlayer = (id: string, name: string) => {
     null,
     `${prefix}.pendingBuildIndex`
   );
+
+  const pendingWarehouseSwap = atom<{
+    warehouseIndex: number;
+    incoming: Resource;
+    stored: Resource[];
+  } | null>(null, `${prefix}.pendingWarehouseSwap`);
 
   const gridSnapshot = computed(
     (): CellContent[] => cells.map((cell) => cell()),
@@ -129,6 +135,28 @@ export const reatomPlayer = (id: string, name: string) => {
     }
     return result;
   }, `${prefix}.warehouseCells`);
+
+  const restrictedResources = computed((): Set<Resource> => {
+    const grid = gridSnapshot();
+    const restricted = new Set<Resource>();
+    for (const c of grid) {
+      if (c?.type !== "building") {
+        continue;
+      }
+      const hook = BUILDINGS[c.building].hooks?.masterBuilderRestriction;
+      if (hook) {
+        for (const r of hook(c.stored)) {
+          restricted.add(r);
+        }
+      }
+    }
+    return restricted;
+  }, `${prefix}.restrictedResources`);
+
+  const availableResources = computed((): Resource[] => {
+    const restricted = restrictedResources();
+    return RESOURCES.filter((r) => !restricted.has(r));
+  }, `${prefix}.availableResources`);
 
   const selectBuilding = action((type: BuildingType | null) => {
     const next = type === peek(selectedBuilding) ? null : type;
@@ -199,6 +227,62 @@ export const reatomPlayer = (id: string, name: string) => {
     },
     `${prefix}.swapWarehouse`
   );
+
+  const initiateWarehouseStore = action(
+    (warehouseIndex: number, resource: Resource) => {
+      const content = peek(cells[warehouseIndex]);
+      if (content?.type !== "building") {
+        return;
+      }
+      const def = BUILDINGS[content.building];
+      const capacity = def.storageCapacity ?? 0;
+
+      if (content.stored.length < capacity) {
+        storeOnWarehouse(warehouseIndex, resource);
+        selectedResource.set(null);
+      } else if (content.stored.length > 0) {
+        pendingWarehouseSwap.set({
+          incoming: resource,
+          stored: [...content.stored],
+          warehouseIndex,
+        });
+        selectedResource.set(null);
+        drawerOpen.set(true);
+      }
+    },
+    `${prefix}.initiateWarehouseStore`
+  );
+
+  const confirmWarehouseSwap = action((swapIdx: number) => {
+    const swap = peek(pendingWarehouseSwap);
+    if (!swap) {
+      return;
+    }
+
+    const content = peek(cells[swap.warehouseIndex]);
+    if (content?.type !== "building") {
+      return;
+    }
+    if (swapIdx < 0 || swapIdx >= content.stored.length) {
+      return;
+    }
+
+    const swappedOut = content.stored[swapIdx];
+    swapWarehouseResource(swap.warehouseIndex, swap.incoming, swapIdx);
+
+    selectedResource.set(swappedOut);
+    pendingWarehouseSwap.set(null);
+    drawerOpen.set(false);
+  }, `${prefix}.confirmWarehouseSwap`);
+
+  const cancelWarehouseSwap = action(() => {
+    const swap = peek(pendingWarehouseSwap);
+    if (swap) {
+      selectedResource.set(swap.incoming);
+    }
+    pendingWarehouseSwap.set(null);
+    drawerOpen.set(false);
+  }, `${prefix}.cancelWarehouseSwap`);
 
   const buildAtCell = action((match: BuildMatch, targetIndex: number) => {
     for (const idx of match.cells) {
@@ -339,29 +423,36 @@ export const reatomPlayer = (id: string, name: string) => {
     drawerOpen.set(false);
     pendingBuildEffect.set(null);
     pendingBuildIndex.set(null);
+    pendingWarehouseSwap.set(null);
   }, `${prefix}.reset`);
 
   return {
     availableBuilds,
+    availableResources,
     buildAtCell,
     buildingCount,
     canSubstituteResource,
     cancelBuild,
+    cancelWarehouseSwap,
     cells,
     confirmBuild,
+    confirmWarehouseSwap,
     drawerOpen,
     gridSnapshot,
     highlightedCells,
     id,
+    initiateWarehouseStore,
     name,
     pendingBuildEffect,
     pendingBuildIndex,
     pendingBuilds,
     pendingTargetCell,
+    pendingWarehouseSwap,
     placeResource,
     previewVariant,
     removeResource,
     reset,
+    restrictedResources,
     score,
     selectBuilding,
     selectedBuilding,

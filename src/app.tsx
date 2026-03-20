@@ -12,7 +12,7 @@ const PhaseBar = () => {
   const phaseContent = computed(() => {
     const resource = game.currentResource();
     if (!resource) {
-      return "Выберите ресурс для размещения";
+      return "🔨 Выберите ресурс для размещения";
     }
     return "";
   }, "phaseBar.text");
@@ -88,7 +88,16 @@ export const App = () => (
 
     <Drawer
       open={currentPlayer.drawerOpen}
-      onClose={() => currentPlayer.cancelBuild()}
+      onClose={() => {
+        if (currentPlayer.pendingBuildEffect()) {
+          return;
+        }
+        if (currentPlayer.pendingWarehouseSwap()) {
+          currentPlayer.cancelWarehouseSwap();
+          return;
+        }
+        currentPlayer.cancelBuild();
+      }}
     >
       <BuildDrawer player={currentPlayer} />
     </Drawer>

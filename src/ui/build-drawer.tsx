@@ -121,12 +121,48 @@ const OnBuildPrompt = ({ player }: { player: PlayerState }) => {
   );
 };
 
+const WarehouseSwapPrompt = ({ player }: { player: PlayerState }) => {
+  const swap = player.pendingWarehouseSwap();
+  if (!swap) {
+    return <div />;
+  }
+
+  return (
+    <div class="build-drawer-content">
+      <h3 class="drawer-title">
+        Обмен: {RESOURCE_NAMES[swap.incoming]} → 📦 Склад
+      </h3>
+      <p class="drawer-subtitle">Выберите ресурс для обмена</p>
+      <div class="resource-picker-list">
+        {swap.stored.map((r, i) => (
+          <ResourcePickerItem
+            resource={r}
+            onPick={() => player.confirmWarehouseSwap(i)}
+          />
+        ))}
+      </div>
+      <div class="drawer-actions">
+        <button
+          class="btn-secondary"
+          on:click={() => player.cancelWarehouseSwap()}
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const BuildDrawer = ({ player }: { player: PlayerState }) => {
   const selectedIndex = atom<number | null>(null, "buildDrawer.selectedIdx");
 
   const content = computed(() => {
     if (player.pendingBuildEffect()) {
       return <OnBuildPrompt player={player} />;
+    }
+
+    if (player.pendingWarehouseSwap()) {
+      return <WarehouseSwapPrompt player={player} />;
     }
 
     const builds = player.pendingBuilds();

@@ -16,11 +16,23 @@ const ResourceItem = ({
     `resourceItem.${resource}.selected`
   );
 
+  const isRestricted = computed(
+    () => player.restrictedResources().has(resource),
+    `resourceItem.${resource}.restricted`
+  );
+
   const handleClick = () => {
+    if (isRestricted()) {
+      return;
+    }
     player.selectedResource.set(isSelected() ? null : resource);
   };
 
   const handleDragStart = (e: DragEvent) => {
+    if (isRestricted()) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer?.setData("text/plain", resource);
   };
 
@@ -29,6 +41,7 @@ const ResourceItem = ({
       class={[
         "resource-item",
         {
+          "resource-item--restricted": isRestricted,
           "resource-item--selected": isSelected,
         },
       ]}
@@ -41,6 +54,7 @@ const ResourceItem = ({
         attr:style={`background: ${RESOURCE_COLORS[resource]}`}
       />
       <span class="resource-label">{RESOURCE_NAMES[resource]}</span>
+      {computed(() => isRestricted() && <span class="resource-lock">🔒</span>)}
     </div>
   );
 };

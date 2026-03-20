@@ -71,6 +71,16 @@ export const Cell = ({
     `cell#${index}.droppable`
   );
 
+  const isStorable = computed(() => {
+    if (player.selectedResource() === null) {
+      return false;
+    }
+    if (player.selectedBuilding() !== null) {
+      return false;
+    }
+    return player.warehouseCells().includes(index);
+  }, `cell#${index}.storable`);
+
   const hintTitle = computed(() => {
     const c = cellAtom();
     if (!c) {
@@ -91,7 +101,12 @@ export const Cell = ({
     if (c.type === "resource") {
       return "Штраф если ресурс останется";
     }
-    return BUILDINGS[c.building].description;
+    const desc = BUILDINGS[c.building].description;
+    if (c.stored.length > 0) {
+      const storedNames = c.stored.map((r) => RESOURCE_NAMES[r]).join(", ");
+      return `${desc}\nХранится: ${storedNames}`;
+    }
+    return desc;
   }, `cell#${index}.hint.desc`);
 
   const cellScore = computed(
@@ -117,7 +132,16 @@ export const Cell = ({
     }
 
     const resource = player.selectedResource();
-    if (!cellAtom() && resource) {
+    if (!resource) {
+      return;
+    }
+
+    if (isStorable()) {
+      player.initiateWarehouseStore(index, resource);
+      return;
+    }
+
+    if (!cellAtom()) {
       player.placeResource(index, resource);
       player.selectedResource.set(null);
     }
@@ -155,6 +179,7 @@ export const Cell = ({
           "cell--droppable": isDroppable,
           "cell--highlighted": isHighlighted,
           "cell--resource": isResource,
+          "cell--storable": isStorable,
         },
       ]}
       attr:interestfor={hintId}
