@@ -2,7 +2,7 @@ import { computed, peek } from "@reatom/core";
 
 import { BUILDINGS, calculateCellScore } from "../model/buildings";
 import { game } from "../model/game";
-import { sendPlaceResource } from "../model/multiplayer/actions";
+import { sendGridSync } from "../model/multiplayer/actions";
 import type { PlayerState } from "../model/player";
 import type { CellAtom } from "../model/types";
 import { GRID_SIZE, RESOURCE_ICONS, RESOURCE_NAMES } from "../model/types";
@@ -95,6 +95,7 @@ export const Cell = ({
       }
       if (isHighlighted()) {
         player.tryBuildAt(index);
+        sendGridSync();
       } else {
         player.selectBuilding(null);
       }
@@ -108,7 +109,7 @@ export const Cell = ({
 
     if (!cellAtom()) {
       player.placeResource(index, resource);
-      sendPlaceResource(index, resource);
+      sendGridSync();
     }
   };
 

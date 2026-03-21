@@ -1,6 +1,7 @@
 import { atom, computed } from "@reatom/core";
 
 import { BUILDINGS } from "../model/buildings";
+import { sendGridSync } from "../model/multiplayer/actions";
 import type { PlayerState } from "../model/player";
 import type { BuildMatch } from "../model/types";
 import { GRID_SIZE, RESOURCE_COLORS } from "../model/types";
@@ -87,6 +88,7 @@ export const BuildDrawer = ({ player }: { player: PlayerState }) => {
       const idx = selectedIndex();
       if (idx !== null && builds[idx]) {
         player.confirmBuild(builds[idx]);
+        sendGridSync();
         selectedIndex.set(null);
       }
     };

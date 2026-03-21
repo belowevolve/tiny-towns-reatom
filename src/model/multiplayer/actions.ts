@@ -2,7 +2,7 @@ import { action, peek } from "@reatom/core";
 
 import { game, localPlayerId } from "../game";
 import { hostPeerId, isHost } from "../lobby";
-import type { BuildMatch, Resource } from "../types";
+import type { Resource } from "../types";
 import { scheduleAdvanceCheck } from "./host";
 import { broadcast, selfId, sendToHost } from "./transport";
 
@@ -32,38 +32,36 @@ export const announceResource = action((resource: Resource) => {
   }
 }, "mp.announceResource");
 
-export const sendPlaceResource = action((index: number, resource: Resource) => {
+export const sendGridSync = action(() => {
+  const myId = peek(localPlayerId);
+  if (!myId) {
+    return;
+  }
+  const player = game.findPlayer(myId);
+  if (!player) {
+    return;
+  }
+
+  const grid = player.cells.map((c) => c());
+  const hasPlaced = player.hasPlacedResource();
+
   if (peek(isHost)) {
     broadcast({
-      action: { index, kind: "place-resource", resource },
+      grid,
+      hasPlacedResource: hasPlaced,
       playerId: selfId,
-      type: "player-action",
+      type: "player-grid",
     });
   } else {
     const host = getHostId();
     if (host) {
-      sendToHost({ index, resource, type: "place-resource" }, host);
+      sendToHost(
+        { grid, hasPlacedResource: hasPlaced, type: "grid-sync" },
+        host
+      );
     }
   }
-}, "mp.sendPlace");
-
-export const sendBuildAtCell = action(
-  (match: BuildMatch, targetIndex: number) => {
-    if (peek(isHost)) {
-      broadcast({
-        action: { kind: "build-at-cell", match, targetIndex },
-        playerId: selfId,
-        type: "player-action",
-      });
-    } else {
-      const host = getHostId();
-      if (host) {
-        sendToHost({ match, targetIndex, type: "build-at-cell" }, host);
-      }
-    }
-  },
-  "mp.sendBuild"
-);
+}, "mp.sendGridSync");
 
 export const markDone = action(() => {
   const myId = peek(localPlayerId);

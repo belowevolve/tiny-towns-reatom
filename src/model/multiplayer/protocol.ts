@@ -1,4 +1,4 @@
-import type { BuildMatch, CellContent, LobbyPlayer, Resource } from "../types";
+import type { CellContent, LobbyPlayer, Resource } from "../types";
 
 // --- Host -> All messages ---
 
@@ -14,15 +14,12 @@ export interface ResourceAnnouncedMsg {
   turnNumber: number;
 }
 
-export interface PlayerActionMsg {
-  type: "player-action";
+export interface PlayerGridMsg {
+  type: "player-grid";
   playerId: string;
-  action: PlayerActionKind;
+  grid: CellContent[];
+  hasPlacedResource: boolean;
 }
-
-export type PlayerActionKind =
-  | { kind: "place-resource"; index: number; resource: Resource }
-  | { kind: "build-at-cell"; match: BuildMatch; targetIndex: number };
 
 export interface PlayerEliminatedMsg {
   type: "player-eliminated";
@@ -53,16 +50,10 @@ export interface KickPlayerMsg {
 
 // --- Player -> Host messages ---
 
-export interface PlaceResourceMsg {
-  type: "place-resource";
-  index: number;
-  resource: Resource;
-}
-
-export interface BuildAtCellMsg {
-  type: "build-at-cell";
-  match: BuildMatch;
-  targetIndex: number;
+export interface GridSyncMsg {
+  type: "grid-sync";
+  grid: CellContent[];
+  hasPlacedResource: boolean;
 }
 
 export interface TurnDoneMsg {
@@ -88,7 +79,7 @@ export interface PlayerInfoMsg {
 export type HostMessage =
   | GameStartMsg
   | ResourceAnnouncedMsg
-  | PlayerActionMsg
+  | PlayerGridMsg
   | PlayerEliminatedMsg
   | AllDoneMsg
   | GameOverMsg
@@ -96,8 +87,7 @@ export type HostMessage =
   | KickPlayerMsg;
 
 export type ClientMessage =
-  | PlaceResourceMsg
-  | BuildAtCellMsg
+  | GridSyncMsg
   | TurnDoneMsg
   | PlayerEliminatedSelfMsg
   | AnnounceResourceMsg

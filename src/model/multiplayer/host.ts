@@ -59,41 +59,17 @@ const handleClientMessage = (msg: ClientMessage, peerId: string): void => {
       break;
     }
 
-    case "place-resource": {
-      if (game.turnPhase() !== "place") {
-        return;
-      }
+    case "grid-sync": {
       const player = game.findPlayer(peerId);
       if (!player) {
         return;
       }
-      player.placeResource(msg.index, msg.resource);
+      player.applyGrid(msg.grid, msg.hasPlacedResource);
       broadcast({
-        action: {
-          index: msg.index,
-          kind: "place-resource",
-          resource: msg.resource,
-        },
+        grid: msg.grid,
+        hasPlacedResource: msg.hasPlacedResource,
         playerId: peerId,
-        type: "player-action",
-      });
-      break;
-    }
-
-    case "build-at-cell": {
-      const player = game.findPlayer(peerId);
-      if (!player) {
-        return;
-      }
-      player.buildAtCell(msg.match, msg.targetIndex);
-      broadcast({
-        action: {
-          kind: "build-at-cell",
-          match: msg.match,
-          targetIndex: msg.targetIndex,
-        },
-        playerId: peerId,
-        type: "player-action",
+        type: "player-grid",
       });
       break;
     }

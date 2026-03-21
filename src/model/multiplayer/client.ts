@@ -25,7 +25,7 @@ const handleHostMessage = (msg: HostMessage): void => {
       break;
     }
 
-    case "player-action": {
+    case "player-grid": {
       if (msg.playerId === peek(localPlayerId)) {
         break;
       }
@@ -35,19 +35,7 @@ const handleHostMessage = (msg: HostMessage): void => {
         break;
       }
 
-      switch (msg.action.kind) {
-        case "place-resource": {
-          player.placeResource(msg.action.index, msg.action.resource);
-          break;
-        }
-        case "build-at-cell": {
-          player.buildAtCell(msg.action.match, msg.action.targetIndex);
-          break;
-        }
-        default: {
-          break;
-        }
-      }
+      player.applyGrid(msg.grid, msg.hasPlacedResource);
       break;
     }
 

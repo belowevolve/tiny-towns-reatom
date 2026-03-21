@@ -176,6 +176,13 @@ export const reatomPlayer = (id: string, name: string) => {
     }
   }, `${prefix}.cancelBuild`);
 
+  const applyGrid = action((grid: CellContent[], placed: boolean) => {
+    for (let i = 0; i < cells.length; i += 1) {
+      cells[i]?.set(grid[i] ?? null);
+    }
+    hasPlacedResource.set(placed);
+  }, `${prefix}.applyGrid`);
+
   const reset = action(() => {
     for (const cell of cells) {
       cell.set(null);
@@ -189,6 +196,7 @@ export const reatomPlayer = (id: string, name: string) => {
   }, `${prefix}.reset`);
 
   return {
+    applyGrid,
     availableBuilds,
     buildAtCell,
     buildingCount,
