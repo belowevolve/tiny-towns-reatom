@@ -5,22 +5,39 @@ import { announceResource, markDone } from "../model/multiplayer/actions";
 import { RESOURCES, RESOURCE_NAMES } from "../model/types";
 import { ResourceSwatch } from "./resource-swatch";
 
-const ResourcePicker = () => (
-  <div class="mp-resource-picker">
-    <h3 class="mp-resource-picker__title">Выберите ресурс для объявления</h3>
-    <div class="mp-resource-picker__list">
-      {RESOURCES.map((r) => (
-        <button
-          class="mp-resource-picker__item"
-          on:click={() => announceResource(r)}
-        >
-          <ResourceSwatch resource={r} />
-          <span class="mp-resource-picker__label">{RESOURCE_NAMES[r]}</span>
-        </button>
-      ))}
+const ResourcePicker = () => {
+  const restricted = computed(() => {
+    const player = currentPlayer();
+    return player?.restrictedResources() ?? new Set();
+  }, "mpPicker.restricted");
+
+  return (
+    <div class="mp-resource-picker">
+      <h3 class="mp-resource-picker__title">Выберите ресурс для объявления</h3>
+      <div class="mp-resource-picker__list">
+        {RESOURCES.map((r) => (
+          <button
+            class={[
+              "mp-resource-picker__item",
+              {
+                "mp-resource-picker__item--restricted": () =>
+                  restricted().has(r),
+              },
+            ]}
+            disabled={() => restricted().has(r)}
+            on:click={() => announceResource(r)}
+          >
+            <ResourceSwatch resource={r} />
+            <span class="mp-resource-picker__label">{RESOURCE_NAMES[r]}</span>
+            {computed(() =>
+              restricted().has(r) ? <span class="resource-lock">🔒</span> : ""
+            )}
+          </button>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const MultiplayerHud = () => {
   const isMasterBuilder = computed(

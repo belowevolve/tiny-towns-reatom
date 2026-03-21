@@ -34,6 +34,10 @@ export const BUILDING_TYPES = [
   "chapel",
   "tavern",
   "bakery",
+  "warehouse",
+  "tradingPost",
+  "bank",
+  "factory",
 ] as const;
 export type BuildingType = (typeof BUILDING_TYPES)[number];
 
@@ -47,7 +51,39 @@ export interface ScoringContext {
   index: number;
   grid: CellContent[];
   gridSize: number;
-  allBuildings: { type: BuildingType; index: number }[];
+  allBuildings: { type: BuildingType; index: number; stored: Resource[] }[];
+}
+
+export interface OnBuildEffect {
+  type: "promptStoreResource";
+  validResources?: Resource[];
+}
+
+export type PlacementOption =
+  | { type: "substituteResource" }
+  | { type: "storeOnBuilding" }
+  | { type: "swapWithStored" };
+
+export interface OnBuildContext {
+  buildingIndex: number;
+  buildingType: BuildingType;
+  grid: CellContent[];
+}
+
+export interface PlacementContext {
+  buildingIndex: number;
+  stored: Resource[];
+  grid: CellContent[];
+}
+
+export interface BuildingHooks {
+  matchAsResource?: (requiredResource: Resource) => boolean;
+  onBuild?: (ctx: OnBuildContext) => OnBuildEffect | null;
+  modifyPlacement?: (
+    announced: Resource,
+    ctx: PlacementContext
+  ) => PlacementOption[];
+  masterBuilderRestriction?: (stored: Resource[]) => Resource[];
 }
 
 export interface BuildingDef {
@@ -56,12 +92,14 @@ export interface BuildingDef {
   description: string;
   pattern: PatternCell[];
   score: (ctx: ScoringContext) => number;
+  storageCapacity?: number;
+  hooks?: BuildingHooks;
 }
 
 export type CellContent =
   | null
   | { type: "resource"; resource: Resource }
-  | { type: "building"; building: BuildingType };
+  | { type: "building"; building: BuildingType; stored: Resource[] };
 
 export const GRID_SIZE = 4;
 

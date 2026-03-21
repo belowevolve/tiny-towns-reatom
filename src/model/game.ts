@@ -93,6 +93,7 @@ export const reatomGame = () => {
     playerReadiness.set({});
     for (const p of activePlayers()) {
       p.hasPlacedResource.set(false);
+      p.resourceOverride.set(null);
     }
   }, "game.endTurn");
 
@@ -104,6 +105,7 @@ export const reatomGame = () => {
     playerReadiness.set({});
     for (const p of activePlayers()) {
       p.hasPlacedResource.set(false);
+      p.resourceOverride.set(null);
     }
   }, "game.applyTurnEnd");
 

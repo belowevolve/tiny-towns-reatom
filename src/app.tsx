@@ -112,7 +112,23 @@ const GameView = () => {
         <Grid player={player} />
         <BuildPanel player={player} />
 
-        <Drawer open={player.drawerOpen} onClose={() => player.cancelBuild()}>
+        <Drawer
+          open={player.drawerOpen}
+          onClose={() => {
+            if (player.pendingBuildEffect()) {
+              return;
+            }
+            if (player.pendingFactorySwap()) {
+              player.cancelFactorySwap();
+              return;
+            }
+            if (player.pendingWarehouseSwap()) {
+              player.cancelWarehouseSwap();
+              return;
+            }
+            player.cancelBuild();
+          }}
+        >
           <BuildDrawer player={player} />
         </Drawer>
       </div>
