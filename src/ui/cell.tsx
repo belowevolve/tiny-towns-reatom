@@ -80,15 +80,27 @@ export const Cell = ({
   );
 
   const isStorable = computed(() => {
-    if (player.selectedBuilding() !== null) {return false;}
-    if (player.resourceOverride() !== null) {return false;}
-    if (isMasterBuilder()) {return false;}
+    if (player.selectedBuilding() !== null) {
+      return false;
+    }
+    if (player.resourceOverride() !== null) {
+      return false;
+    }
+    if (isMasterBuilder()) {
+      return false;
+    }
     const c = cellAtom();
-    if (c?.type !== "building") {return false;}
+    if (c?.type !== "building") {
+      return false;
+    }
     const def = BUILDINGS[c.building];
-    if (!def.hooks?.modifyPlacement) {return false;}
+    if (!def.hooks?.modifyPlacement) {
+      return false;
+    }
     const resource = game.currentResource();
-    if (!resource) {return false;}
+    if (!resource) {
+      return false;
+    }
     const options = def.hooks.modifyPlacement(resource, {
       buildingIndex: index,
       grid: player.gridSnapshot(),
@@ -100,15 +112,27 @@ export const Cell = ({
   }, `cell#${index}.storable`);
 
   const isSubstitutable = computed(() => {
-    if (player.selectedBuilding() !== null) {return false;}
-    if (player.resourceOverride() !== null) {return false;}
-    if (isMasterBuilder()) {return false;}
+    if (player.selectedBuilding() !== null) {
+      return false;
+    }
+    if (player.resourceOverride() !== null) {
+      return false;
+    }
+    if (isMasterBuilder()) {
+      return false;
+    }
     const c = cellAtom();
-    if (c?.type !== "building" || c.stored.length === 0) {return false;}
+    if (c?.type !== "building" || c.stored.length === 0) {
+      return false;
+    }
     const def = BUILDINGS[c.building];
-    if (!def.hooks?.modifyPlacement) {return false;}
+    if (!def.hooks?.modifyPlacement) {
+      return false;
+    }
     const resource = game.currentResource();
-    if (!resource) {return false;}
+    if (!resource) {
+      return false;
+    }
     const options = def.hooks.modifyPlacement(resource, {
       buildingIndex: index,
       grid: player.gridSnapshot(),
