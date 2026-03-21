@@ -3,24 +3,6 @@ import { action, atom, computed, peek, reatomNumber } from "@reatom/core";
 import type { PlayerState } from "./player";
 import { reatomPlayer } from "./player";
 import type { GamePhase, Resource, TurnPhase } from "./types";
-import { RESOURCES } from "./types";
-
-const shuffleArray = <T>(arr: T[]): T[] => {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-};
-
-const createResourceDeck = (): Resource[] => {
-  const deck: Resource[] = [];
-  for (let i = 0; i < 3; i += 1) {
-    deck.push(...RESOURCES);
-  }
-  return shuffleArray(deck);
-};
 
 export const reatomGame = () => {
   const phase = atom<GamePhase>("lobby", "game.phase");
@@ -28,8 +10,6 @@ export const reatomGame = () => {
   const players = atom<PlayerState[]>([], "game.players");
   const currentResource = atom<Resource | null>(null, "game.currentResource");
   const turnNumber = reatomNumber(0, "game.turn");
-  const resourceDeck = atom<Resource[]>([], "game.deck");
-  const isMultiplayer = atom(false, "game.isMultiplayer");
 
   const masterBuilderIndex = reatomNumber(0, "game.masterBuilder");
   const playerReadiness = atom<Record<string, boolean>>({}, "game.readiness");
@@ -76,24 +56,10 @@ export const reatomGame = () => {
     masterBuilderIndex.reset();
     playerReadiness.set({});
     eliminatedPlayers.set(new Set<string>());
-
-    if (!peek(isMultiplayer)) {
-      resourceDeck.set(createResourceDeck());
-    }
   }, "game.start");
 
-  const announceResource = action((resource?: Resource) => {
-    if (resource) {
-      currentResource.set(resource);
-    } else {
-      const deck = resourceDeck();
-      if (deck.length === 0) {
-        phase.set("finished");
-        return;
-      }
-      currentResource.set(deck[0]);
-      resourceDeck.set(deck.slice(1));
-    }
+  const announceResource = action((resource: Resource) => {
+    currentResource.set(resource);
     turnPhase.set("place");
 
     const readiness: Record<string, boolean> = {};
@@ -144,7 +110,6 @@ export const reatomGame = () => {
   const eliminatePlayer = action((playerId: string) => {
     const current = new Set([...eliminatedPlayers(), playerId]);
     eliminatedPlayers.set(current);
-
     markPlayerDone(playerId);
   }, "game.eliminate");
 
@@ -171,8 +136,6 @@ export const reatomGame = () => {
     masterBuilderIndex.set(0);
     playerReadiness.set({});
     eliminatedPlayers.set(new Set<string>());
-    isMultiplayer.set(false);
-    resourceDeck.set([]);
     currentResource.set(null);
   }, "game.reset");
 
@@ -190,14 +153,12 @@ export const reatomGame = () => {
     findPlayer,
     finishGame,
     isGameOver,
-    isMultiplayer,
     markPlayerDone,
     masterBuilderIndex,
     phase,
     playerReadiness,
     players,
     resetGame,
-    resourceDeck,
     rotateMasterBuilder,
     startGame,
     turnNumber,
@@ -206,8 +167,6 @@ export const reatomGame = () => {
 };
 
 export type GameState = ReturnType<typeof reatomGame>;
-
-// --- Singleton game instance ---
 
 export const game = reatomGame();
 export const localPlayerId = atom<string | null>(null, "game.localPlayerId");

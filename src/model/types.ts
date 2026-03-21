@@ -34,10 +34,6 @@ export const BUILDING_TYPES = [
   "chapel",
   "tavern",
   "bakery",
-  "warehouse",
-  "tradingPost",
-  "bank",
-  "factory",
 ] as const;
 export type BuildingType = (typeof BUILDING_TYPES)[number];
 
@@ -51,41 +47,7 @@ export interface ScoringContext {
   index: number;
   grid: CellContent[];
   gridSize: number;
-  allBuildings: { type: BuildingType; index: number; stored: Resource[] }[];
-}
-
-// --- Building ability hook system ---
-
-export interface OnBuildEffect {
-  type: "promptStoreResource";
-  validResources?: Resource[];
-}
-
-export type PlacementOption =
-  | { type: "substituteResource" }
-  | { type: "storeOnBuilding" }
-  | { type: "swapWithStored" };
-
-export interface OnBuildContext {
-  buildingIndex: number;
-  buildingType: BuildingType;
-  grid: CellContent[];
-}
-
-export interface PlacementContext {
-  buildingIndex: number;
-  stored: Resource[];
-  grid: CellContent[];
-}
-
-export interface BuildingHooks {
-  matchAsResource?: (requiredResource: Resource) => boolean;
-  onBuild?: (ctx: OnBuildContext) => OnBuildEffect | null;
-  modifyPlacement?: (
-    announced: Resource,
-    ctx: PlacementContext
-  ) => PlacementOption[];
-  masterBuilderRestriction?: (stored: Resource[]) => Resource[];
+  allBuildings: { type: BuildingType; index: number }[];
 }
 
 export interface BuildingDef {
@@ -94,14 +56,12 @@ export interface BuildingDef {
   description: string;
   pattern: PatternCell[];
   score: (ctx: ScoringContext) => number;
-  storageCapacity?: number;
-  hooks?: BuildingHooks;
 }
 
 export type CellContent =
   | null
   | { type: "resource"; resource: Resource }
-  | { type: "building"; building: BuildingType; stored: Resource[] };
+  | { type: "building"; building: BuildingType };
 
 export const GRID_SIZE = 4;
 
@@ -114,10 +74,8 @@ export interface BuildMatch {
 
 export type CellAtom = Atom<CellContent, [newState: CellContent]>;
 
-export type GamePhase = "lobby" | "playing" | "scoring" | "finished";
-export type TurnPhase = "announce" | "place" | "build";
-
-// --- Multiplayer types ---
+export type GamePhase = "lobby" | "playing" | "finished";
+export type TurnPhase = "announce" | "place";
 
 export type ConnectionStatus =
   | "disconnected"
@@ -132,6 +90,3 @@ export interface LobbyPlayer {
 }
 
 export const MAX_PLAYERS = 6;
-
-export type PlaceCallback = (index: number, resource: Resource) => void;
-export type BuildCallback = (match: BuildMatch, targetIndex: number) => void;

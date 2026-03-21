@@ -2,20 +2,11 @@ import { computed, peek } from "@reatom/core";
 
 import { BUILDINGS, calculateCellScore } from "../model/buildings";
 import { game } from "../model/game";
+import { sendPlaceResource } from "../model/multiplayer/actions";
 import type { PlayerState } from "../model/player";
-import type { BuildingType, CellAtom, Resource } from "../model/types";
-import {
-  GRID_SIZE,
-  RESOURCE_COLORS,
-  RESOURCE_ICONS,
-  RESOURCE_NAMES,
-} from "../model/types";
-
-const handleDragOver = (e: DragEvent) => {
-  if (e.dataTransfer?.types.includes("text/plain")) {
-    e.preventDefault();
-  }
-};
+import type { CellAtom } from "../model/types";
+import { GRID_SIZE, RESOURCE_ICONS, RESOURCE_NAMES } from "../model/types";
+import { ResourceSwatch } from "./resource-swatch";
 
 export const Cell = ({
   cellAtom,
@@ -34,32 +25,10 @@ export const Cell = ({
       return "";
     }
     if (c.type === "resource") {
-      return (
-        <span
-          class="cell-swatch"
-          attr:style={`background: ${RESOURCE_COLORS[c.resource]}`}
-        />
-      );
+      return <ResourceSwatch resource={c.resource} />;
     }
     return BUILDINGS[c.building].icon;
   }, `cell#${index}.content`);
-
-  const storedPreview = computed(() => {
-    const c = cellAtom();
-    if (!c || c.type !== "building" || c.stored.length === 0) {
-      return "";
-    }
-    return (
-      <div class="cell-stored-preview">
-        {c.stored.map((r) => (
-          <span
-            class="cell-stored-dot"
-            attr:style={`background: ${RESOURCE_COLORS[r]}`}
-          />
-        ))}
-      </div>
-    );
-  }, `cell#${index}.storedPreview`);
 
   const isHighlighted = computed(
     () => player.highlightedCells().has(index),
@@ -81,33 +50,7 @@ export const Cell = ({
     `cell#${index}.isResource`
   );
 
-  const isDroppable = computed(
-    () =>
-      !cellAtom() &&
-      player.selectedResource() !== null &&
-      player.selectedBuilding() === null,
-    `cell#${index}.droppable`
-  );
-
-  const isStorable = computed(() => {
-    if (player.selectedResource() === null) {
-      return false;
-    }
-    if (player.selectedBuilding() !== null) {
-      return false;
-    }
-    return player.warehouseCells().includes(index);
-  }, `cell#${index}.storable`);
-
-  const isSubstitutable = computed(() => {
-    if (player.selectedResource() === null) {
-      return false;
-    }
-    if (player.selectedBuilding() !== null) {
-      return false;
-    }
-    return player.factoryCells().includes(index);
-  }, `cell#${index}.substitutable`);
+  const isEmpty = computed(() => !cellAtom(), `cell#${index}.empty`);
 
   const hintTitle = computed(() => {
     const c = cellAtom();
@@ -129,12 +72,7 @@ export const Cell = ({
     if (c.type === "resource") {
       return "Штраф если ресурс останется";
     }
-    const desc = BUILDINGS[c.building].description;
-    if (c.stored.length > 0) {
-      const storedNames = c.stored.map((r) => RESOURCE_NAMES[r]).join(", ");
-      return `${desc}\nХранится: ${storedNames}`;
-    }
-    return desc;
+    return BUILDINGS[c.building].description;
   }, `cell#${index}.hint.desc`);
 
   const cellScore = computed(
@@ -150,10 +88,8 @@ export const Cell = ({
   }, `cell#${index}.hint.scoreText`);
 
   const handleClick = () => {
-    const mp = peek(game.isMultiplayer);
-
     if (player.selectedBuilding()) {
-      if (mp && !peek(player.hasPlacedResource)) {
+      if (!peek(player.hasPlacedResource)) {
         player.selectBuilding(null);
         return;
       }
@@ -165,48 +101,14 @@ export const Cell = ({
       return;
     }
 
-    const resource = player.selectedResource();
-    if (!resource) {
-      return;
-    }
-
-    if (isSubstitutable()) {
-      player.activateFactory(index);
-      return;
-    }
-
-    if (isStorable()) {
-      player.initiateWarehouseStore(index, resource);
+    const resource = peek(game.currentResource);
+    if (!resource || peek(player.hasPlacedResource)) {
       return;
     }
 
     if (!cellAtom()) {
       player.placeResource(index, resource);
-      player.selectedResource.set(null);
-    }
-  };
-
-  const handleDrop = (e: DragEvent) => {
-    e.preventDefault();
-    const raw = e.dataTransfer?.getData("text/plain");
-    if (!raw) {
-      return;
-    }
-
-    if (raw.startsWith("building:")) {
-      const type = raw.slice(9) as BuildingType;
-      player.selectBuilding(type);
-      if (player.highlightedCells().has(index)) {
-        player.tryBuildAt(index);
-      }
-      return;
-    }
-
-    const resource = peek(game.isMultiplayer)
-      ? peek(game.currentResource)
-      : (raw as Resource);
-    if (resource && !cellAtom()) {
-      player.placeResource(index, resource);
+      sendPlaceResource(index, resource);
     }
   };
 
@@ -217,23 +119,18 @@ export const Cell = ({
         {
           "cell--buildable": isBuildable,
           "cell--building": isBuilding,
-          "cell--droppable": isDroppable,
+          "cell--empty": isEmpty,
           "cell--highlighted": isHighlighted,
           "cell--resource": isResource,
-          "cell--storable": isStorable,
-          "cell--substitutable": isSubstitutable,
         },
       ]}
       attr:interestfor={hintId}
       attr:style={`anchor-name: --${hintId}`}
       on:click={handleClick}
-      on:dragover={handleDragOver}
-      on:drop={handleDrop}
       data-row={Math.floor(index / GRID_SIZE)}
       data-col={index % GRID_SIZE}
     >
       {content}
-      {storedPreview}
       <div
         id={hintId}
         popover="hint"

@@ -2,16 +2,9 @@ import { action, peek } from "@reatom/core";
 
 import { game, localPlayerId } from "../game";
 import { isHost, lobbyPlayers } from "../lobby";
-import type { BuildMatch, Resource } from "../types";
 import type { ClientMessage } from "./protocol";
 import { broadcast, onMessage, selfId } from "./transport";
 
-/**
- * Deferred to a microtask so it always reads fully committed atom values.
- * When called from inside a reatom action (e.g. hostMarkDone), atom reads
- * may return stale pre-commit values; deferring guarantees the transaction
- * has settled before we inspect readiness.
- */
 const advanceIfAllDone = (): void => {
   const active = game.activePlayers();
 
@@ -45,8 +38,8 @@ const advanceIfAllDone = (): void => {
   });
 };
 
-const scheduleAdvanceCheck = (): void => {
-  queueMicrotask(advanceIfAllDone);
+export const scheduleAdvanceCheck = (): void => {
+  setTimeout(advanceIfAllDone, 0);
 };
 
 const handleClientMessage = (msg: ClientMessage, peerId: string): void => {
@@ -128,49 +121,6 @@ const handleClientMessage = (msg: ClientMessage, peerId: string): void => {
   }
 };
 
-// --- Exported actions ---
-
-export const hostAnnounceResource = action((resource: Resource) => {
-  if (!peek(isHost)) {
-    return;
-  }
-  const mb = game.currentMasterBuilder();
-  if (!mb || mb.id !== peek(localPlayerId)) {
-    return;
-  }
-
-  game.announceResource(resource);
-  broadcast({
-    masterBuilderId: mb.id,
-    resource,
-    turnNumber: game.turnNumber(),
-    type: "resource-announced",
-  });
-}, "host.announce");
-
-export const hostMarkDone = action(() => {
-  const myId = peek(localPlayerId);
-  if (!myId) {
-    return;
-  }
-  const player = game.findPlayer(myId);
-  if (!player || !player.hasPlacedResource()) {
-    return;
-  }
-  game.markPlayerDone(myId);
-  scheduleAdvanceCheck();
-}, "host.markDone");
-
-export const hostEliminateSelf = action(() => {
-  const myId = peek(localPlayerId);
-  if (!myId) {
-    return;
-  }
-  broadcast({ playerId: myId, type: "player-eliminated" });
-  game.eliminatePlayer(myId);
-  scheduleAdvanceCheck();
-}, "host.eliminateSelf");
-
 export const startMultiplayerGame = action(() => {
   if (!peek(isHost)) {
     return;
@@ -181,33 +131,12 @@ export const startMultiplayerGame = action(() => {
     return;
   }
 
-  game.isMultiplayer.set(true);
-
   for (const p of players) {
     game.addPlayer(p.peerId, p.name);
   }
 
   localPlayerId.set(selfId);
   game.startGame();
-
-  const localPlayer = game.findPlayer(selfId);
-  if (localPlayer) {
-    localPlayer.onPlace.set((index: number, resource: Resource) => {
-      broadcast({
-        action: { index, kind: "place-resource", resource },
-        playerId: selfId,
-        type: "player-action",
-      });
-    });
-
-    localPlayer.onBuild.set((match: BuildMatch, targetIndex: number) => {
-      broadcast({
-        action: { kind: "build-at-cell", match, targetIndex },
-        playerId: selfId,
-        type: "player-action",
-      });
-    });
-  }
 
   broadcast({
     players: players.map((p) => ({ id: p.peerId, name: p.name })),

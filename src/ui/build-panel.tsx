@@ -1,7 +1,6 @@
 import { computed, peek } from "@reatom/core";
 
 import { BUILDINGS } from "../model/buildings";
-import { game } from "../model/game";
 import type { PlayerState } from "../model/player";
 import type { BuildingType } from "../model/types";
 import { BUILDING_TYPES, RESOURCE_COLORS } from "../model/types";
@@ -31,18 +30,10 @@ const RecipeCard = ({
   );
 
   const handleClick = () => {
-    if (peek(game.isMultiplayer) && !peek(player.hasPlacedResource)) {
+    if (!peek(player.hasPlacedResource)) {
       return;
     }
     player.selectBuilding(type);
-  };
-
-  const handleDragStart = (e: DragEvent) => {
-    if (peek(game.isMultiplayer) && !peek(player.hasPlacedResource)) {
-      e.preventDefault();
-      return;
-    }
-    e.dataTransfer?.setData("text/plain", `building:${type}`);
   };
 
   return (
@@ -57,8 +48,6 @@ const RecipeCard = ({
         },
       ]}
       on:click={handleClick}
-      draggable={true}
-      on:dragstart={handleDragStart}
     >
       <div class="recipe-header">
         <span class="recipe-building-icon">{def.icon}</span>

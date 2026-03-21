@@ -2,11 +2,9 @@ import type {
   BuildingDef,
   BuildingType,
   CellContent,
-  PlacementOption,
-  Resource,
   ScoringContext,
 } from "./types";
-import { GRID_SIZE, RESOURCES } from "./types";
+import { GRID_SIZE } from "./types";
 
 const getAdjacentIndices = (index: number, gridSize: number): number[] => {
   const row = Math.floor(index / gridSize);
@@ -30,7 +28,7 @@ const getAdjacentIndices = (index: number, gridSize: number): number[] => {
 const isBuilding = (
   cell: CellContent,
   type: BuildingType
-): cell is { type: "building"; building: BuildingType; stored: Resource[] } =>
+): cell is { type: "building"; building: BuildingType } =>
   cell?.type === "building" && cell.building === type;
 
 const FEED_CAPACITY: Partial<Record<BuildingType, number>> = {
@@ -78,37 +76,6 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
     score: (ctx) => (isAdjacentToFeeder(ctx.index, ctx) ? 3 : 0),
   },
 
-  bank: {
-    description:
-      "4 VP. При постройке — положить уникальный ресурс. Как главный стороить вы больше не можете исопльзовать этот ресурс",
-    hooks: {
-      masterBuilderRestriction: (stored) => [...stored],
-      onBuild: (ctx) => {
-        const banks = new Set(
-          ctx.grid
-            .filter(
-              (c): c is Extract<CellContent, { type: "building" }> =>
-                c?.type === "building" && c.building === "bank"
-            )
-            .flatMap((c) => c.stored)
-        );
-        const valid = RESOURCES.filter((r) => !banks.has(r));
-        return { type: "promptStoreResource", validResources: valid };
-      },
-    },
-    icon: "🏦",
-    name: "Банк",
-    pattern: [
-      { dc: 0, dr: 0, resource: "wheat" },
-      { dc: 1, dr: 0, resource: "wheat" },
-      { dc: 0, dr: 1, resource: "wood" },
-      { dc: 1, dr: 1, resource: "glass" },
-      { dc: 2, dr: 1, resource: "brick" },
-    ],
-    score: () => 4,
-    storageCapacity: 1,
-  },
-
   chapel: {
     description: '1 очко за каждый "накормленный" коттедж на поле',
     icon: "⛪",
@@ -135,42 +102,6 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
       { dc: 1, dr: 1, resource: "glass" },
     ],
     score: (ctx) => (isCottageFed(ctx.index, ctx) ? 3 : 0),
-  },
-
-  factory: {
-    description:
-      "При постройке — положить уникальный ресурс. Когда называется этот ресурс, можно заменить на другой.",
-    hooks: {
-      modifyPlacement: (announced, ctx) => {
-        if (ctx.stored.length > 0 && ctx.stored[0] === announced) {
-          return [{ type: "substituteResource" }];
-        }
-        return [];
-      },
-      onBuild: (ctx) => {
-        const factories = new Set(
-          ctx.grid
-            .filter(
-              (c): c is Extract<CellContent, { type: "building" }> =>
-                c?.type === "building" && c.building === "factory"
-            )
-            .flatMap((c) => c.stored)
-        );
-        const valid = RESOURCES.filter((r) => !factories.has(r));
-        return { type: "promptStoreResource", validResources: valid };
-      },
-    },
-    icon: "🏭",
-    name: "Фабрика",
-    pattern: [
-      { dc: 0, dr: 0, resource: "wood" },
-      { dc: 0, dr: 1, resource: "brick" },
-      { dc: 1, dr: 1, resource: "stone" },
-      { dc: 2, dr: 1, resource: "stone" },
-      { dc: 3, dr: 1, resource: "brick" },
-    ],
-    score: () => 0,
-    storageCapacity: 1,
   },
 
   farm: {
@@ -204,57 +135,6 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
     },
   },
 
-  tradingPost: {
-    description: "1 VP. Считается любым ресурсом для будущих построек",
-    hooks: {
-      matchAsResource: () => true,
-    },
-    icon: "🏪",
-    name: "Торговый пост",
-    pattern: [
-      { dc: 0, dr: 0, resource: "stone" },
-      { dc: 1, dr: 0, resource: "wood" },
-      { dc: 0, dr: 1, resource: "stone" },
-      { dc: 1, dr: 1, resource: "wood" },
-      { dc: 2, dr: 1, resource: "brick" },
-    ],
-    score: () => 1,
-  },
-
-  warehouse: {
-    description:
-      "-1 VP за каждый хранимый ресурс (до 3). Когда другой игрок называет ресурс, вы можете сохранить его или заменить другим с этого склада на другой ресурс.",
-    hooks: {
-      modifyPlacement: (_announced, ctx) => {
-        const options: PlacementOption[] = [];
-        if (ctx.stored.length < 3) {
-          options.push({ type: "storeOnBuilding" });
-        }
-        if (ctx.stored.length > 0) {
-          options.push({ type: "swapWithStored" });
-        }
-        return options;
-      },
-    },
-    icon: "📦",
-    name: "Склад",
-    pattern: [
-      { dc: 0, dr: 0, resource: "wheat" },
-      { dc: 1, dr: 0, resource: "wood" },
-      { dc: 2, dr: 0, resource: "wheat" },
-      { dc: 0, dr: 1, resource: "brick" },
-      { dc: 2, dr: 1, resource: "brick" },
-    ],
-    score: (ctx) => {
-      const cell = ctx.grid[ctx.index];
-      if (cell?.type !== "building") {
-        return 0;
-      }
-      return -cell.stored.length;
-    },
-    storageCapacity: 3,
-  },
-
   well: {
     description: "1 очко за каждый смежный коттедж",
     icon: "⛲",
@@ -270,19 +150,16 @@ export const BUILDINGS: Record<BuildingType, BuildingDef> = {
   },
 };
 
-//
-
 export const EMPTY_CELL_PENALTY = -1;
 
 const collectBuildings = (
   grid: CellContent[]
-): { type: BuildingType; index: number; stored: Resource[] }[] => {
-  const result: { type: BuildingType; index: number; stored: Resource[] }[] =
-    [];
+): { type: BuildingType; index: number }[] => {
+  const result: { type: BuildingType; index: number }[] = [];
   for (let i = 0; i < grid.length; i += 1) {
     const c = grid[i];
     if (c?.type === "building") {
-      result.push({ index: i, stored: c.stored, type: c.building });
+      result.push({ index: i, type: c.building });
     }
   }
   return result;

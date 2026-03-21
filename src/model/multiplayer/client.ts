@@ -1,46 +1,18 @@
-import { action, peek } from "@reatom/core";
+import { peek } from "@reatom/core";
 
 import { game, localPlayerId } from "../game";
-import { hostPeerId, isHost } from "../lobby";
-import type { BuildMatch, Resource } from "../types";
 import type { HostMessage } from "./protocol";
-import { onMessage, selfId, sendToHost } from "./transport";
-
-const getHostId = (): string | null => peek(hostPeerId);
-
-const setupLocalPlayerCallbacks = (): void => {
-  const localPlayer = game.findPlayer(selfId);
-  if (!localPlayer) {
-    return;
-  }
-
-  localPlayer.onPlace.set((index: number, resource: Resource) => {
-    const host = getHostId();
-    if (host) {
-      sendToHost({ index, resource, type: "place-resource" }, host);
-    }
-  });
-
-  localPlayer.onBuild.set((match: BuildMatch, targetIndex: number) => {
-    const host = getHostId();
-    if (host) {
-      sendToHost({ match, targetIndex, type: "build-at-cell" }, host);
-    }
-  });
-};
+import { onMessage, selfId } from "./transport";
 
 const handleHostMessage = (msg: HostMessage): void => {
   switch (msg.type) {
     case "game-start": {
-      game.isMultiplayer.set(true);
-
       for (const p of msg.players) {
         game.addPlayer(p.id, p.name);
       }
 
       localPlayerId.set(selfId);
       game.startGame();
-      setupLocalPlayerCallbacks();
       break;
     }
 
@@ -73,7 +45,6 @@ const handleHostMessage = (msg: HostMessage): void => {
           break;
         }
         default: {
-          console.warn(`Unknown action: ${JSON.stringify(msg.action)}`);
           break;
         }
       }
@@ -101,7 +72,6 @@ const handleHostMessage = (msg: HostMessage): void => {
     }
 
     default: {
-      console.warn(`Unknown message: ${JSON.stringify(msg)}`);
       break;
     }
   }
@@ -112,37 +82,3 @@ export const initClientListener = (): void => {
     handleHostMessage(msg as HostMessage);
   });
 };
-
-export const clientAnnounceResource = action((resource: Resource) => {
-  if (peek(isHost)) {
-    return;
-  }
-  game.announceResource(resource);
-  const host = getHostId();
-  if (host) {
-    sendToHost({ resource, type: "announce-resource" }, host);
-  }
-}, "client.announceResource");
-
-export const clientMarkDone = action(() => {
-  const myId = peek(localPlayerId);
-  if (!myId) {
-    return;
-  }
-  const player = game.findPlayer(myId);
-  if (!player || !player.hasPlacedResource()) {
-    return;
-  }
-  game.markPlayerDone(myId);
-  const host = getHostId();
-  if (host) {
-    sendToHost({ type: "turn-done" }, host);
-  }
-}, "client.markDone");
-
-export const clientEliminateSelf = action(() => {
-  const host = getHostId();
-  if (host) {
-    sendToHost({ type: "player-eliminated-self" }, host);
-  }
-}, "client.eliminateSelf");

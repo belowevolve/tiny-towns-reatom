@@ -115,7 +115,6 @@ const RoomView = () => {
           class="btn-secondary"
           on:click={() => {
             leaveRoom();
-            game.isMultiplayer.set(false);
             game.phase.set("lobby");
           }}
         >
@@ -179,9 +178,7 @@ const MenuView = () => {
         </button>
         <button
           class="btn-secondary lobby-btn-large"
-          on:click={() => {
-            game.isMultiplayer.set(false);
-          }}
+          on:click={() => lobbyView.set("menu")}
         >
           Назад
         </button>

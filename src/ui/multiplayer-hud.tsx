@@ -1,13 +1,9 @@
-import { computed, peek } from "@reatom/core";
+import { computed } from "@reatom/core";
 
 import { currentPlayer, game, localPlayerId } from "../model/game";
-import { isHost } from "../model/lobby";
-import {
-  clientAnnounceResource,
-  clientMarkDone,
-} from "../model/multiplayer/client";
-import { hostAnnounceResource, hostMarkDone } from "../model/multiplayer/host";
-import { RESOURCES, RESOURCE_COLORS, RESOURCE_NAMES } from "../model/types";
+import { announceResource, markDone } from "../model/multiplayer/actions";
+import { RESOURCES, RESOURCE_NAMES } from "../model/types";
+import { ResourceSwatch } from "./resource-swatch";
 
 const ResourcePicker = () => (
   <div class="mp-resource-picker">
@@ -16,18 +12,9 @@ const ResourcePicker = () => (
       {RESOURCES.map((r) => (
         <button
           class="mp-resource-picker__item"
-          on:click={() => {
-            if (peek(isHost)) {
-              hostAnnounceResource(r);
-            } else {
-              clientAnnounceResource(r);
-            }
-          }}
+          on:click={() => announceResource(r)}
         >
-          <span
-            class="resource-swatch"
-            attr:style={`background: ${RESOURCE_COLORS[r]}`}
-          />
+          <ResourceSwatch resource={r} />
           <span class="mp-resource-picker__label">{RESOURCE_NAMES[r]}</span>
         </button>
       ))}
@@ -56,14 +43,6 @@ export const MultiplayerHud = () => {
     return game.playerReadiness()[myId] ?? false;
   }, "mpHud.myReady");
 
-  const handleDone = () => {
-    if (peek(isHost)) {
-      hostMarkDone();
-    } else {
-      clientMarkDone();
-    }
-  };
-
   const announceSection = computed(() => {
     if (turnPhase() !== "announce") {
       return "";
@@ -86,10 +65,7 @@ export const MultiplayerHud = () => {
 
     return (
       <div class="mp-announced-resource">
-        <span
-          class="resource-swatch resource-swatch--sm"
-          attr:style={`background: ${RESOURCE_COLORS[resource]}`}
-        />
+        <ResourceSwatch resource={resource} small />
         <span>{RESOURCE_NAMES[resource]}</span>
         {computed(() =>
           isMasterBuilder()
@@ -118,7 +94,7 @@ export const MultiplayerHud = () => {
     }
 
     return (
-      <button class="btn-action mp-done-btn" on:click={handleDone}>
+      <button class="btn-action mp-done-btn" on:click={() => markDone()}>
         Готово
       </button>
     );

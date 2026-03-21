@@ -102,14 +102,6 @@ export const findMatches = (
               content.resource === cell.resource
             ) {
               cellIndices.push(index);
-            } else if (
-              content?.type === "building" &&
-              BUILDINGS[content.building].hooks?.matchAsResource?.(
-                cell.resource
-              )
-            ) {
-              cellIndices.push(index);
-              wildcardIndices.push(index);
             } else {
               valid = false;
               break;

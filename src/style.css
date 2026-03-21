@@ -104,54 +104,6 @@ button {
   gap: 10px;
 }
 
-.app-header h1 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--color-text);
-  white-space: nowrap;
-}
-
-.app-header__right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-}
-
-.app-header .btn-reset {
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--color-danger-soft);
-  border: 1px solid var(--color-danger);
-  color: var(--color-danger);
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.app-header .btn-reset:hover {
-  background: var(--color-danger);
-  color: white;
-}
-
-/* ========== Phase Bar (inline) ========== */
-
-.phase-bar {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
-.phase-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
 /* ========== Score Display (compact) ========== */
 
 .score-display {
@@ -240,33 +192,6 @@ button {
   border-color: var(--color-accent-hover);
 }
 
-.cell--droppable:hover {
-  background: var(--color-selected-soft);
-  border-color: var(--color-selected);
-}
-
-.cell--storable {
-  border-color: var(--color-highlight);
-  box-shadow: 0 0 10px var(--color-highlight-glow);
-  animation: cell-pulse 1.2s ease-in-out infinite;
-}
-
-.cell--storable:hover {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-}
-
-.cell--substitutable {
-  border-color: var(--color-selected);
-  box-shadow: 0 0 10px var(--color-selected-glow);
-  animation: cell-pulse 1.2s ease-in-out infinite;
-}
-
-.cell--substitutable:hover {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-}
-
 @keyframes cell-pulse {
   0%,
   100% {
@@ -277,26 +202,8 @@ button {
   }
 }
 
-/* ========== Cell Stored Preview ========== */
-
-.cell-stored-preview {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  display: flex;
-  gap: 2px;
-}
-
-.cell-stored-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-  display: block;
-}
-
 /* ========== Cell Popover (hint) ========== */
+
 [interestfor] {
   interest-delay-start: 0.5s;
   interest-delay-end: 0.1s;
@@ -369,62 +276,7 @@ button {
   color: var(--color-danger);
 }
 
-/* ========== Resource Panel (horizontal row) ========== */
-
-.panel {
-  display: flex;
-  gap: 6px;
-  align-items: stretch;
-}
-
-.panel-title {
-  display: none;
-}
-
-.resource-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 4px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  cursor: grab;
-  transition: all 0.15s ease;
-  background: var(--color-surface);
-  user-select: none;
-  box-shadow: var(--shadow-cell);
-  position: relative;
-}
-
-.resource-item:hover {
-  border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
-}
-
-.resource-item:active {
-  cursor: grabbing;
-}
-
-.resource-item--selected {
-  border-color: var(--color-selected);
-  box-shadow: 0 0 12px var(--color-selected-glow);
-}
-
-.resource-item--restricted {
-  opacity: 0.4;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.resource-lock {
-  font-size: 0.5rem;
-  position: absolute;
-  top: 1px;
-  right: 1px;
-}
+/* ========== Resource Swatch ========== */
 
 .resource-swatch {
   display: block;
@@ -440,14 +292,6 @@ button {
   border-radius: 3px;
   display: inline-block;
   vertical-align: middle;
-}
-
-.resource-item .resource-label {
-  font-size: 0.55rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1;
 }
 
 /* ========== Build Panel (horizontal scroll) ========== */
@@ -684,13 +528,6 @@ button {
   gap: 6px;
 }
 
-.drawer-subtitle {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
 .variant-list {
   display: flex;
   flex-direction: row;
@@ -775,83 +612,6 @@ button {
   gap: 10px;
   justify-content: center;
   padding-top: 4px;
-}
-
-.warehouse-store-btn {
-  align-self: center;
-}
-
-/* ========== Resource Picker (onBuild prompt) ========== */
-
-.resource-picker-list {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.resource-picker-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  background: var(--color-surface);
-  font-family: inherit;
-}
-
-.resource-picker-item:hover {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
-}
-
-.resource-picker-label {
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-  font-weight: 500;
-}
-
-/* ========== Cell resource swatch ========== */
-
-.cell-swatch {
-  width: 55%;
-  height: 55%;
-  border-radius: 6px;
-}
-
-/* ========== Responsive ========== */
-
-/* ========== Main Menu ========== */
-
-.main-menu {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
-  min-height: 100vh;
-  padding: 24px;
-}
-
-.main-menu__title {
-  font-size: 2.4rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--color-text);
-  margin: 0;
-}
-
-.main-menu__buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 300px;
 }
 
 /* ========== Lobby ========== */
@@ -1175,13 +935,6 @@ button {
   border-color: var(--color-cell-building-border);
 }
 
-.mini-cell-swatch {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  display: block;
-}
-
 .opponent-status {
   font-size: 0.6rem;
   color: var(--color-text-muted);
@@ -1366,10 +1119,6 @@ button {
     gap: 8px;
   }
 
-  .app-header h1 {
-    font-size: 1rem;
-  }
-
   .cell {
     font-size: 1.6rem;
     border-radius: var(--radius-sm);
@@ -1378,11 +1127,6 @@ button {
   .resource-swatch {
     width: 24px;
     height: 24px;
-  }
-
-  .cell-stored-dot {
-    width: 7px;
-    height: 7px;
   }
 
   .mini-cell {

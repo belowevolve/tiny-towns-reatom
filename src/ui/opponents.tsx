@@ -3,7 +3,7 @@ import { computed } from "@reatom/core";
 import { BUILDINGS } from "../model/buildings";
 import { game, localPlayerId } from "../model/game";
 import type { PlayerState } from "../model/player";
-import { RESOURCE_COLORS } from "../model/types";
+import { ResourceSwatch } from "./resource-swatch";
 
 const MiniCell = ({
   player,
@@ -18,12 +18,7 @@ const MiniCell = ({
       return "";
     }
     if (c.type === "resource") {
-      return (
-        <span
-          class="mini-cell-swatch"
-          attr:style={`background: ${RESOURCE_COLORS[c.resource]}`}
-        />
-      );
+      return <ResourceSwatch resource={c.resource} small />;
     }
     return BUILDINGS[c.building].icon;
   }, `opponent.${player.id}.cell#${index}`);
