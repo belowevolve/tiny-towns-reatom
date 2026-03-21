@@ -91,6 +91,11 @@ export const reatomPlayer = (id: string, name: string) => {
     `${prefix}.score`
   );
 
+  const isBoardFull = computed(
+    (): boolean => gridSnapshot().every((c) => c !== null),
+    `${prefix}.isBoardFull`
+  );
+
   const buildingCount = computed(
     (): number => gridSnapshot().filter((c) => c?.type === "building").length,
     `${prefix}.buildingCount`
@@ -454,6 +459,7 @@ export const reatomPlayer = (id: string, name: string) => {
     highlightedCells,
     id,
     initiateWarehouseStore,
+    isBoardFull,
     name,
     pendingBuildEffect,
     pendingBuildIndex,

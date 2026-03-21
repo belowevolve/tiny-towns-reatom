@@ -115,6 +115,18 @@ export const reatomGame = () => {
     markPlayerDone(playerId);
   }, "game.eliminate");
 
+  const autoEliminateFullBoards = action((): string[] => {
+    const active = activePlayers();
+    const eliminated: string[] = [];
+    for (const p of active) {
+      if (p.cells.every((c) => peek(c) !== null)) {
+        eliminatePlayer(p.id);
+        eliminated.push(p.id);
+      }
+    }
+    return eliminated;
+  }, "game.autoEliminate");
+
   const isGameOver = computed((): boolean => {
     if (phase() !== "playing") {
       return phase() === "finished";
@@ -147,6 +159,7 @@ export const reatomGame = () => {
     allPlayersReady,
     announceResource,
     applyTurnEnd,
+    autoEliminateFullBoards,
     currentMasterBuilder,
     currentResource,
     eliminatePlayer,

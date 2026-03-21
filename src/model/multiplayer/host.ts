@@ -26,13 +26,28 @@ const advanceIfAllDone = (): void => {
     return;
   }
 
-  const currentIdx = game.masterBuilderIndex();
-  const newMBIdx = (currentIdx + 1) % active.length;
-
   game.endTurn();
 
+  const eliminated = game.autoEliminateFullBoards();
+  for (const id of eliminated) {
+    broadcast({ playerId: id, type: "player-eliminated" });
+  }
+
+  if (game.activePlayers().length === 0) {
+    game.finishGame();
+    broadcast({
+      scores: game.players().map((p) => ({
+        grid: p.cells.map((c) => c()),
+        playerId: p.id,
+        score: p.score(),
+      })),
+      type: "game-over",
+    });
+    return;
+  }
+
   broadcast({
-    masterBuilderIndex: newMBIdx,
+    masterBuilderIndex: game.masterBuilderIndex(),
     turnNumber: game.turnNumber(),
     type: "all-done",
   });
