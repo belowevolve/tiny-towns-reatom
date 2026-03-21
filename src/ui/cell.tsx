@@ -1,6 +1,7 @@
-import { computed } from "@reatom/core";
+import { computed, peek } from "@reatom/core";
 
 import { BUILDINGS, calculateCellScore } from "../model/buildings";
+import { game } from "../model/game";
 import type { PlayerState } from "../model/player";
 import type { BuildingType, CellAtom, Resource } from "../model/types";
 import {
@@ -149,7 +150,13 @@ export const Cell = ({
   }, `cell#${index}.hint.scoreText`);
 
   const handleClick = () => {
+    const mp = peek(game.isMultiplayer);
+
     if (player.selectedBuilding()) {
+      if (mp && !peek(player.hasPlacedResource)) {
+        player.selectBuilding(null);
+        return;
+      }
       if (isHighlighted()) {
         player.tryBuildAt(index);
       } else {
@@ -195,8 +202,10 @@ export const Cell = ({
       return;
     }
 
-    const resource = raw as Resource;
-    if (!cellAtom()) {
+    const resource = peek(game.isMultiplayer)
+      ? peek(game.currentResource)
+      : (raw as Resource);
+    if (resource && !cellAtom()) {
       player.placeResource(index, resource);
     }
   };

@@ -8,6 +8,8 @@ import type {
   CellAtom,
   CellContent,
   OnBuildEffect,
+  PlaceCallback,
+  BuildCallback,
   Resource,
 } from "./types";
 import { GRID_SIZE, RESOURCES } from "./types";
@@ -73,6 +75,11 @@ export const reatomPlayer = (id: string, name: string) => {
   const pendingFactorySwap = atom<{
     storedResource: Resource;
   } | null>(null, `${prefix}.pendingFactorySwap`);
+
+  const onPlace = atom<PlaceCallback | null>(null, `${prefix}.onPlace`);
+  const onBuild = atom<BuildCallback | null>(null, `${prefix}.onBuild`);
+
+  const hasPlacedResource = atom(false, `${prefix}.hasPlacedResource`);
 
   const gridSnapshot = computed(
     (): CellContent[] => cells.map((cell) => cell()),
@@ -214,6 +221,8 @@ export const reatomPlayer = (id: string, name: string) => {
       return;
     }
     cells[index]?.set({ resource, type: "resource" });
+    hasPlacedResource.set(true);
+    peek(onPlace)?.(index, resource);
   }, `${prefix}.placeResource`);
 
   const removeResource = action((index: number) => {
@@ -377,6 +386,8 @@ export const reatomPlayer = (id: string, name: string) => {
       type: "building",
     });
 
+    peek(onBuild)?.(match, targetIndex);
+
     selectedBuilding.set(null);
     highlightedCells.set(new Set<number>());
     pendingBuilds.set([]);
@@ -505,6 +516,7 @@ export const reatomPlayer = (id: string, name: string) => {
     pendingBuildIndex.set(null);
     pendingWarehouseSwap.set(null);
     pendingFactorySwap.set(null);
+    hasPlacedResource.set(false);
   }, `${prefix}.reset`);
 
   return {
@@ -524,10 +536,13 @@ export const reatomPlayer = (id: string, name: string) => {
     drawerOpen,
     factoryCells,
     gridSnapshot,
+    hasPlacedResource,
     highlightedCells,
     id,
     initiateWarehouseStore,
     name,
+    onBuild,
+    onPlace,
     pendingBuildEffect,
     pendingBuildIndex,
     pendingBuilds,

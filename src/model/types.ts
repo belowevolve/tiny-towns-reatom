@@ -116,3 +116,22 @@ export type CellAtom = Atom<CellContent, [newState: CellContent]>;
 
 export type GamePhase = "lobby" | "playing" | "scoring" | "finished";
 export type TurnPhase = "announce" | "place" | "build";
+
+// --- Multiplayer types ---
+
+export type ConnectionStatus =
+  | "disconnected"
+  | "connecting"
+  | "connected"
+  | "error";
+
+export interface LobbyPlayer {
+  peerId: string;
+  name: string;
+  ready: boolean;
+}
+
+export const MAX_PLAYERS = 6;
+
+export type PlaceCallback = (index: number, resource: Resource) => void;
+export type BuildCallback = (match: BuildMatch, targetIndex: number) => void;

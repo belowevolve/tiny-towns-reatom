@@ -14,7 +14,8 @@
   "dependencies": {
     "@reatom/core": "^1000.15.1",
     "@reatom/jsx": "^1000.1.0",
-    "interestfor": "^1.0.7"
+    "interestfor": "^1.0.7",
+    "trystero": "^0.22.0"
   },
   "devDependencies": {
     "husky": "^9.1.7",
