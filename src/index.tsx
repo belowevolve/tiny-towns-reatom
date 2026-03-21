@@ -9,6 +9,8 @@ if (!("interestForElement" in HTMLButtonElement.prototype)) {
 
 if (import.meta.env.MODE === "development") {
   connectLogger();
+  const { initDebugPanel } = await import("./debug/debug-panel");
+  initDebugPanel();
 }
 
 // oxlint-disable-next-line typescript/no-non-null-assertion

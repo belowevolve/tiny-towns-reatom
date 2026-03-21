@@ -29,12 +29,18 @@ export const currentRoom = atom<Room | null>(null, "transport.room");
 export const currentRoomCode = atom<string | null>(null, "transport.roomCode");
 
 type MessageHandler = (msg: NetworkMessage, peerId: string) => void;
+type SendHandler = (msg: NetworkMessage, targetPeerId?: string) => void;
 
 const messageHandlers: MessageHandler[] = [];
+const sendHandlers: SendHandler[] = [];
 let sendFn: ((data: NetworkMessage, target?: string) => void) | null = null;
 
 export const onMessage = (handler: MessageHandler): void => {
   messageHandlers.push(handler);
+};
+
+export const onSend = (handler: SendHandler): void => {
+  sendHandlers.push(handler);
 };
 
 export const clearMessageHandlers = (): void => {
@@ -44,6 +50,9 @@ export const clearMessageHandlers = (): void => {
 export const send = (msg: NetworkMessage, targetPeerId?: string): void => {
   if (!sendFn) {
     return;
+  }
+  for (const handler of sendHandlers) {
+    handler(msg, targetPeerId);
   }
   if (targetPeerId) {
     sendFn(msg, targetPeerId);
