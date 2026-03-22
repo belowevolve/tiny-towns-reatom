@@ -4,17 +4,6 @@ import { currentPlayer, game, localPlayerId } from "./game";
 import type { PlayerState } from "./player";
 import type { Resource } from "./types";
 
-export const appView = computed((): "lobby" | "game" | "results" => {
-  const phase = game.phase();
-  if (phase === "playing") {
-    return "game";
-  }
-  if (phase === "finished") {
-    return "results";
-  }
-  return "lobby";
-}, "gameUI.appView");
-
 export const scoreValue = computed(
   () => currentPlayer()?.score() ?? 0,
   "gameUI.scoreValue"

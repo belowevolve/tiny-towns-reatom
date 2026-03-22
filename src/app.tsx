@@ -2,7 +2,6 @@ import { computed, peek } from "@reatom/core";
 
 import { game, localPlayerId } from "./model/game";
 import {
-  appView,
   masterBuilderLabel,
   scoreDetails,
   scoreValue,
@@ -18,20 +17,6 @@ import { Drawer } from "./ui/drawer";
 import { Grid } from "./ui/grid";
 import { Lobby } from "./ui/lobby";
 import { Opponents } from "./ui/opponents";
-
-const ScoreDisplay = () => (
-  <div class="score-display">
-    <span class="score-value">{scoreValue}</span>
-    <span class="score-label">{scoreDetails}</span>
-  </div>
-);
-
-const TurnInfo = () => (
-  <div class="turn-info">
-    <span class="turn-info__turn">{turnLabel}</span>
-    <span class="turn-info__mb">{masterBuilderLabel}</span>
-  </div>
-);
 
 const GameFinished = () => {
   const list = computed(
@@ -72,51 +57,59 @@ const GameFinished = () => {
   );
 };
 
-const GameView = () => {
-  const view = computed(() => {
-    const ui = localPlayerUI();
-    if (!ui) {
-      return <div>Загрузка…</div>;
-    }
+const ScoreDisplay = () => (
+  <div class="score-display">
+    <span class="score-value">{scoreValue}</span>
+    <span class="score-label">{scoreDetails}</span>
+  </div>
+);
 
-    return (
-      <div class="app">
-        <header class="game-header">
-          <div class="game-header__left">
-            <ScoreDisplay />
-            <TurnInfo />
-          </div>
-          <div class="game-header__right">
-            <Opponents />
-          </div>
-        </header>
+const TurnInfo = () => (
+  <div class="turn-info">
+    <span class="turn-info__turn">{turnLabel}</span>
+    <span class="turn-info__mb">{masterBuilderLabel}</span>
+  </div>
+);
 
-        <Grid ui={ui} />
-        <BuildPanel ui={ui} />
+const GameView = computed(() => {
+  const ui = localPlayerUI();
+  if (!ui) {
+    return <div>Загрузка…</div>;
+  }
+  return (
+    <div class="app">
+      <header class="game-header">
+        <div class="game-header__left">
+          <ScoreDisplay />
+          <TurnInfo />
+        </div>
+        <div class="game-header__right">
+          <Opponents />
+        </div>
+      </header>
 
-        <ActionBar />
+      <Grid ui={ui} />
+      <BuildPanel ui={ui} />
 
-        <Drawer open={ui.drawerOpen} onClose={() => ui.closeDrawer()}>
-          <BuildDrawer ui={ui} />
-        </Drawer>
-      </div>
-    );
-  }, "app.gameView");
+      <ActionBar />
 
-  return <>{view}</>;
-};
+      <Drawer open={ui.drawerOpen} onClose={() => ui.closeDrawer()}>
+        <BuildDrawer ui={ui} />
+      </Drawer>
+    </div>
+  );
+}, "app.gameView");
 
-export const App = () => {
-  const root = computed(() => {
-    const view = appView();
-    if (view === "game") {
+export const App = computed(() => {
+  switch (game.phase()) {
+    case "playing": {
       return <GameView />;
     }
-    if (view === "results") {
+    case "finished": {
       return <GameFinished />;
     }
-    return <Lobby />;
-  }, "app.root");
-
-  return <>{root}</>;
-};
+    default: {
+      return <Lobby />;
+    }
+  }
+}, "app.root");
