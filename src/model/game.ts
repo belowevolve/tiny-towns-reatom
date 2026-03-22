@@ -104,29 +104,21 @@ export const reatomGame = () => {
     masterBuilderIndex.set((peek(masterBuilderIndex) + 1) % active.length);
   }, "game.rotateMB");
 
-  const endTurn = action(() => {
+  const endTurn = action((newMBIndex?: number) => {
     turnPhase.set("announce");
     turnNumber.increment();
     currentResource.set(null);
-    rotateMasterBuilder();
+    if (newMBIndex === undefined) {
+      rotateMasterBuilder();
+    } else {
+      masterBuilderIndex.set(newMBIndex);
+    }
     playerReadiness.set({});
     for (const p of activePlayers()) {
       p.hasPlacedResource.set(false);
       p.resourceOverride.set(null);
     }
   }, "game.endTurn");
-
-  const applyTurnEnd = action((newMBIndex: number) => {
-    turnPhase.set("announce");
-    turnNumber.increment();
-    currentResource.set(null);
-    masterBuilderIndex.set(newMBIndex);
-    playerReadiness.set({});
-    for (const p of activePlayers()) {
-      p.hasPlacedResource.set(false);
-      p.resourceOverride.set(null);
-    }
-  }, "game.applyTurnEnd");
 
   const autoEliminateFullBoards = action((): string[] => {
     const active = activePlayers();
@@ -139,14 +131,6 @@ export const reatomGame = () => {
     }
     return eliminated;
   }, "game.autoEliminate");
-
-  const isGameOver = computed((): boolean => {
-    if (phase() !== "playing") {
-      return phase() === "finished";
-    }
-    const active = activePlayers();
-    return active.length === 0 && players().length > 0;
-  }, "game.isOver");
 
   const finishGame = action(() => {
     phase.set("finished");
@@ -171,7 +155,6 @@ export const reatomGame = () => {
     addPlayer,
     allPlayersReady,
     announceResource,
-    applyTurnEnd,
     autoEliminateFullBoards,
     currentMasterBuilder,
     currentResource,
@@ -180,7 +163,6 @@ export const reatomGame = () => {
     endTurn,
     findPlayer,
     finishGame,
-    isGameOver,
     markPlayerDone,
     masterBuilderIndex,
     phase,

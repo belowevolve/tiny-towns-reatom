@@ -9,7 +9,7 @@ import type {
   OnBuildEffect,
   Resource,
 } from "./types";
-import { GRID_SIZE, RESOURCES } from "./types";
+import { GRID_SIZE } from "./types";
 
 export const reatomPlayer = (id: string, name: string) => {
   const prefix = `player#${id}`;
@@ -59,16 +59,6 @@ export const reatomPlayer = (id: string, name: string) => {
     return parts.join(" · ");
   }, `${prefix}.scoreDetails`);
 
-  const isBoardFull = computed(
-    (): boolean => gridSnapshot().every((c) => c !== null),
-    `${prefix}.isBoardFull`
-  );
-
-  const buildingCount = computed(
-    (): number => gridSnapshot().filter((c) => c?.type === "building").length,
-    `${prefix}.buildingCount`
-  );
-
   const restrictedResources = computed((): Set<Resource> => {
     const grid = gridSnapshot();
     const restricted = new Set<Resource>();
@@ -85,11 +75,6 @@ export const reatomPlayer = (id: string, name: string) => {
     }
     return restricted;
   }, `${prefix}.restrictedResources`);
-
-  const availableResources = computed((): Resource[] => {
-    const restricted = restrictedResources();
-    return RESOURCES.filter((r) => !restricted.has(r));
-  }, `${prefix}.availableResources`);
 
   const placeResource = action((index: number, resource: Resource) => {
     const content = peek(cells[index]);
@@ -108,26 +93,6 @@ export const reatomPlayer = (id: string, name: string) => {
     }
     cells[index]?.set(null);
   }, `${prefix}.removeResource`);
-
-  const storeOnWarehouse = action(
-    (warehouseIndex: number, resource: Resource) => {
-      const content = peek(cells[warehouseIndex]);
-      if (content?.type !== "building") {
-        return;
-      }
-      const def = BUILDINGS[content.building];
-      const capacity = def.storageCapacity ?? 0;
-      if (content.stored.length >= capacity) {
-        return;
-      }
-
-      cells[warehouseIndex]?.set({
-        ...content,
-        stored: [...content.stored, resource],
-      });
-    },
-    `${prefix}.storeOnWarehouse`
-  );
 
   const swapWarehouseResource = action(
     (warehouseIndex: number, incoming: Resource, swapIdx: number) => {
@@ -215,14 +180,11 @@ export const reatomPlayer = (id: string, name: string) => {
   return {
     applyGrid,
     availableBuilds,
-    availableResources,
     buildAtCell,
-    buildingCount,
     cells,
     gridSnapshot,
     hasPlacedResource,
     id,
-    isBoardFull,
     name,
     placeResource,
     removeResource,
@@ -231,7 +193,6 @@ export const reatomPlayer = (id: string, name: string) => {
     restrictedResources,
     score,
     scoreDetails,
-    storeOnWarehouse,
     storeResourceOnBuilding,
     swapWarehouseResource,
   };

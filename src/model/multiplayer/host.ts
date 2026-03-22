@@ -4,6 +4,7 @@ import { gameRoute, resultsRoute } from "../../routes";
 import { game, localPlayerId } from "../game";
 import { isHost, lobbyPlayers } from "../lobby";
 import { localPlayerUI, reatomPlayerUI } from "../player-ui";
+import type { Resource } from "../types";
 import type { ClientMessage } from "./protocol";
 import { broadcast, onMessage, selfId } from "./transport";
 
@@ -61,6 +62,22 @@ export const scheduleAdvanceCheck = (): void => {
   setTimeout(advanceIfAllDone, 0);
 };
 
+export const hostAnnounce = (resource: Resource, announcerId: string): void => {
+  const eliminated = game.announceResource(resource);
+  for (const id of eliminated) {
+    broadcast({ playerId: id, type: "player-eliminated" });
+  }
+  broadcast({
+    masterBuilderId: announcerId,
+    resource,
+    turnNumber: game.turnNumber(),
+    type: "resource-announced",
+  });
+  if (eliminated.length > 0) {
+    scheduleAdvanceCheck();
+  }
+};
+
 const handleClientMessage = (msg: ClientMessage, peerId: string): void => {
   switch (msg.type) {
     case "announce-resource": {
@@ -68,19 +85,7 @@ const handleClientMessage = (msg: ClientMessage, peerId: string): void => {
       if (!mb || mb.id !== peerId) {
         return;
       }
-      const eliminated = game.announceResource(msg.resource);
-      for (const id of eliminated) {
-        broadcast({ playerId: id, type: "player-eliminated" });
-      }
-      broadcast({
-        masterBuilderId: peerId,
-        resource: msg.resource,
-        turnNumber: game.turnNumber(),
-        type: "resource-announced",
-      });
-      if (eliminated.length > 0) {
-        scheduleAdvanceCheck();
-      }
+      hostAnnounce(msg.resource, peerId);
       break;
     }
 

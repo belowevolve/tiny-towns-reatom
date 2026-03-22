@@ -3,7 +3,7 @@ import { action, peek } from "@reatom/core";
 import { game, localPlayerId } from "../game";
 import { hostPeerId, isHost } from "../lobby";
 import type { Resource } from "../types";
-import { scheduleAdvanceCheck } from "./host";
+import { hostAnnounce, scheduleAdvanceCheck } from "./host";
 import { broadcast, sendToHost } from "./transport";
 
 const getHostId = (): string | null => peek(hostPeerId);
@@ -15,22 +15,10 @@ export const announceResource = action((resource: Resource) => {
     return;
   }
 
-  const eliminated = game.announceResource(resource);
-
   if (peek(isHost)) {
-    for (const id of eliminated) {
-      broadcast({ playerId: id, type: "player-eliminated" });
-    }
-    broadcast({
-      masterBuilderId: myId,
-      resource,
-      turnNumber: game.turnNumber(),
-      type: "resource-announced",
-    });
-    if (eliminated.length > 0) {
-      scheduleAdvanceCheck();
-    }
+    hostAnnounce(resource, myId);
   } else {
+    game.announceResource(resource);
     const host = getHostId();
     if (host) {
       sendToHost({ resource, type: "announce-resource" }, host);

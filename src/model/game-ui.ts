@@ -4,24 +4,9 @@ import { currentPlayer, game, localPlayerId } from "./game";
 import type { PlayerState } from "./player";
 import type { Resource } from "./types";
 
-export const scoreValue = computed(
-  () => currentPlayer()?.score() ?? 0,
-  "gameUI.scoreValue"
-);
-
-export const scoreDetails = computed(
-  () => currentPlayer()?.scoreDetails() ?? "",
-  "gameUI.scoreDetails"
-);
-
 export const turnLabel = computed(
   () => `Ход ${game.turnNumber() + 1}`,
   "gameUI.turnLabel"
-);
-
-export const isMasterBuilder = computed(
-  () => game.currentMasterBuilder()?.id === localPlayerId(),
-  "gameUI.isMasterBuilder"
 );
 
 export const masterBuilderLabel = computed(() => {
@@ -32,14 +17,6 @@ export const masterBuilderLabel = computed(() => {
   const myId = localPlayerId();
   return mb.id === myId ? "🔨 Вы — строитель" : `🔨 ${mb.name}`;
 }, "gameUI.masterBuilderLabel");
-
-export const isEliminated = computed(() => {
-  const myId = localPlayerId();
-  if (!myId) {
-    return false;
-  }
-  return game.eliminatedPlayers().has(myId);
-}, "gameUI.isEliminated");
 
 export type ActionBarMode =
   | { type: "eliminated" }

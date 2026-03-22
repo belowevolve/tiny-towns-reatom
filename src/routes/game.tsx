@@ -1,11 +1,7 @@
 import { computed } from "@reatom/core";
 
-import {
-  masterBuilderLabel,
-  scoreDetails,
-  scoreValue,
-  turnLabel,
-} from "../model/game-ui";
+import { currentPlayer } from "../model/game";
+import { masterBuilderLabel, turnLabel } from "../model/game-ui";
 import { localPlayerUI } from "../model/player-ui";
 import { ActionBar } from "../ui/action-bar";
 import { BuildDrawer } from "../ui/build-drawer";
@@ -16,8 +12,12 @@ import { Opponents } from "../ui/opponents";
 
 const ScoreDisplay = () => (
   <div class="score-display">
-    <span class="score-value">{scoreValue}</span>
-    <span class="score-label">{scoreDetails}</span>
+    <span class="score-value">
+      {computed(() => currentPlayer()?.score() ?? 0, "score.value")}
+    </span>
+    <span class="score-label">
+      {computed(() => currentPlayer()?.scoreDetails() ?? "", "score.details")}
+    </span>
   </div>
 );
 

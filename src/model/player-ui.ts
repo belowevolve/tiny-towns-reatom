@@ -3,7 +3,6 @@ import { action, atom, computed, peek } from "@reatom/core";
 import { BUILDINGS, calculateCellScore } from "./buildings";
 import { game, localPlayerId } from "./game";
 import { sendGridSync } from "./multiplayer/sync";
-import { findMatches } from "./patterns";
 import type { PlayerState } from "./player";
 import type {
   BuildMatch,
@@ -100,7 +99,9 @@ export const reatomPlayerUI = (player: PlayerState) => {
     pendingTargetCell.set(null);
 
     if (next) {
-      const matches = findMatches((i) => peek(cells[i]), next);
+      const matches = peek(player.availableBuilds).filter(
+        (m) => m.building === next
+      );
       highlightedCells.set(buildableTargets(matches));
     } else {
       highlightedCells.set(new Set<number>());
@@ -144,7 +145,9 @@ export const reatomPlayerUI = (player: PlayerState) => {
       return;
     }
 
-    const matches = findMatches((i) => peek(cells[i]), building);
+    const matches = peek(player.availableBuilds).filter(
+      (m) => m.building === building
+    );
     const matchesAtCell = matches.filter(
       (m) => m.cells.includes(cellIndex) && !m.wildcardCells.includes(cellIndex)
     );
@@ -163,14 +166,6 @@ export const reatomPlayerUI = (player: PlayerState) => {
     drawerOpen.set(true);
   }, `${prefix}.tryBuildAt`);
 
-  const confirmBuild = action((match: BuildMatch) => {
-    const target = peek(pendingTargetCell);
-    if (target === null) {
-      return;
-    }
-    buildAtCell(match, target);
-  }, `${prefix}.confirmBuild`);
-
   const previewVariant = action((match: BuildMatch | null) => {
     if (match) {
       const nonWild = match.cells.filter(
@@ -180,7 +175,9 @@ export const reatomPlayerUI = (player: PlayerState) => {
     } else {
       const building = peek(selectedBuilding);
       if (building) {
-        const matches = findMatches((i) => peek(cells[i]), building);
+        const matches = peek(player.availableBuilds).filter(
+          (m) => m.building === building
+        );
         highlightedCells.set(buildableTargets(matches));
       } else {
         highlightedCells.set(new Set<number>());
@@ -196,7 +193,9 @@ export const reatomPlayerUI = (player: PlayerState) => {
 
     const building = peek(selectedBuilding);
     if (building) {
-      const matches = findMatches((i) => peek(cells[i]), building);
+      const matches = peek(player.availableBuilds).filter(
+        (m) => m.building === building
+      );
       highlightedCells.set(buildableTargets(matches));
     } else {
       highlightedCells.set(new Set<number>());
@@ -216,7 +215,7 @@ export const reatomPlayerUI = (player: PlayerState) => {
       const alreadyStored = content.stored.includes(resource);
 
       if (alreadyStored && hasCapacity) {
-        player.storeOnWarehouse(warehouseIndex, resource);
+        player.storeResourceOnBuilding(warehouseIndex, resource);
         player.hasPlacedResource.set(true);
         sendGridSync();
         return;
@@ -234,7 +233,7 @@ export const reatomPlayerUI = (player: PlayerState) => {
       }
 
       if (hasCapacity) {
-        player.storeOnWarehouse(warehouseIndex, resource);
+        player.storeResourceOnBuilding(warehouseIndex, resource);
         player.hasPlacedResource.set(true);
         sendGridSync();
       }
@@ -276,7 +275,7 @@ export const reatomPlayerUI = (player: PlayerState) => {
       return;
     }
 
-    player.storeOnWarehouse(swap.warehouseIndex, swap.incoming);
+    player.storeResourceOnBuilding(swap.warehouseIndex, swap.incoming);
     sendGridSync();
     pendingWarehouseSwap.set(null);
     drawerOpen.set(false);
@@ -364,9 +363,10 @@ export const reatomPlayerUI = (player: PlayerState) => {
 
   const confirmSelectedVariant = action(() => {
     const idx = peek(drawerSelectedVariant);
+    const target = peek(pendingTargetCell);
     const builds = peek(pendingBuilds);
-    if (idx !== null && builds[idx]) {
-      confirmBuild(builds[idx]);
+    if (idx !== null && target !== null && builds[idx]) {
+      buildAtCell(builds[idx], target);
       drawerSelectedVariant.set(null);
     }
   }, `${prefix}.confirmVariant`);

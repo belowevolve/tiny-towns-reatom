@@ -52,7 +52,7 @@ const handleHostMessage = (msg: HostMessage): void => {
     }
 
     case "all-done": {
-      game.applyTurnEnd(msg.masterBuilderIndex);
+      game.endTurn(msg.masterBuilderIndex);
       break;
     }
 
