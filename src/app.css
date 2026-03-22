@@ -538,6 +538,10 @@ button {
   border-color: var(--color-border-hover);
 }
 
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 /* ========== Drawer (Bottom Sheet) ========== */
 
 .drawer-backdrop {
@@ -772,7 +776,9 @@ button {
 .lobby-form {
   width: 100%;
   max-width: 300px;
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .lobby-label {
@@ -808,7 +814,6 @@ button {
   font-weight: 700;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  width: 200px;
 }
 
 .lobby-menu-buttons {
@@ -819,17 +824,11 @@ button {
   max-width: 300px;
 }
 
-.lobby-btn-large {
-  padding: 14px 24px;
-  font-size: 1rem;
-  border-radius: var(--radius-md);
-  width: 100%;
-}
-
 .lobby-menu {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 24px;
 }
 
 .lobby-join {

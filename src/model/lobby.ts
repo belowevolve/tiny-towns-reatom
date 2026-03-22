@@ -1,4 +1,4 @@
-import { action, atom } from "@reatom/core";
+import { action, atom, withLocalStorage } from "@reatom/core";
 
 import { initClientListener } from "./multiplayer/client";
 import type { NetworkMessage } from "./multiplayer/protocol";
@@ -17,7 +17,9 @@ import {
 import type { LobbyPlayer } from "./types";
 import { MAX_PLAYERS } from "./types";
 
-export const playerName = atom("", "lobby.playerName");
+export const playerName = atom("", "lobby.playerName").extend(
+  withLocalStorage("player-name")
+);
 export const isHost = atom(false, "lobby.isHost");
 export const lobbyPlayers = atom<LobbyPlayer[]>([], "lobby.players");
 export const hostPeerId = atom<string | null>(null, "lobby.hostPeerId");
