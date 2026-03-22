@@ -12,20 +12,20 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@reatom/core": "^1000.15.1",
+    "@reatom/core": "^1000.15.2",
     "@reatom/jsx": "^1000.1.0",
-    "interestfor": "^1.0.7",
+    "interestfor": "^1.0.8",
     "trystero": "^0.22.0"
   },
   "devDependencies": {
     "@tweakpane/core": "^2.0.5",
     "husky": "^9.1.7",
-    "oxfmt": "^0.36.0",
-    "oxlint": "^1.51.0",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
     "tweakpane": "^4.0.5",
     "typescript": "~5.9.3",
-    "ultracite": "7.2.5",
-    "vite": "^8.0.0-beta.13"
+    "ultracite": "7.3.2",
+    "vite": "^8.0.1"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"

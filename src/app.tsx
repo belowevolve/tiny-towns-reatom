@@ -169,5 +169,5 @@ export const App = () => {
     }
   }, "app.root");
 
-  return <>{root}</>;
+  return root();
 };
