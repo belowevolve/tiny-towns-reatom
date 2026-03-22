@@ -1,7 +1,7 @@
 import { computed } from "@reatom/core";
 
 import { BUILDINGS } from "../model/buildings";
-import { game, localPlayerId } from "../model/game";
+import { opponents, reatomOpponentVM } from "../model/game-ui";
 import type { PlayerState } from "../model/player";
 import { ResourceSwatch } from "./resource-swatch";
 
@@ -21,7 +21,7 @@ const MiniCell = ({
       return <ResourceSwatch resource={c.resource} small />;
     }
     return BUILDINGS[c.building].icon;
-  }, `opponent.${player.id}.cell#${index}`);
+  }, `opp.${player.id}.cell#${index}`);
 
   const cellClass = computed(() => {
     const c = player.cells[index]();
@@ -32,56 +32,43 @@ const MiniCell = ({
       return "mini-cell mini-cell--resource";
     }
     return "mini-cell mini-cell--building";
-  }, `opponent.${player.id}.cell#${index}.class`);
+  }, `opp.${player.id}.cell#${index}.cls`);
 
   return <div class={cellClass}>{content}</div>;
 };
 
-const OpponentBoard = ({ player }: { player: PlayerState }) => {
-  const isEliminated = computed(
-    () => game.eliminatedPlayers().has(player.id),
-    `opponent.${player.id}.eliminated`
-  );
-
-  const readiness = computed(
-    () => game.playerReadiness()[player.id] ?? false,
-    `opponent.${player.id}.ready`
-  );
-
-  const isMasterBuilder = computed(
-    () => game.currentMasterBuilder()?.id === player.id,
-    `opponent.${player.id}.mb`
-  );
+const OpponentBadge = ({ player }: { player: PlayerState }) => {
+  const vm = reatomOpponentVM(player);
 
   return (
     <div
       class={[
-        "opponent-card",
+        "opponent-badge",
         {
-          "opponent-card--eliminated": isEliminated,
-          "opponent-card--master-builder": isMasterBuilder,
+          "opponent-badge--eliminated": vm.isEliminated,
+          "opponent-badge--master-builder": vm.isMasterBuilder,
         },
       ]}
     >
-      <div class="opponent-header">
-        <span class="opponent-name">
-          {computed(() => (isMasterBuilder() ? "🔨 " : ""))}
+      <div class="opponent-badge__header">
+        <span class="opponent-badge__name">
+          {computed(() => (vm.isMasterBuilder() ? "🔨 " : ""))}
           {player.name}
         </span>
-        <span class="opponent-score">{player.score}</span>
+        <span class="opponent-badge__score">{player.score}</span>
       </div>
-      <div class="opponent-grid">
+      <div class="opponent-badge__grid">
         {player.cells.map((_, i) => (
           <MiniCell player={player} index={i} />
         ))}
       </div>
-      <div class="opponent-status">
+      <div class="opponent-badge__status">
         {computed(() => {
-          if (isEliminated()) {
+          if (vm.isEliminated()) {
             return "Выбыл";
           }
-          if (readiness()) {
-            return "✓ Готов";
+          if (vm.readiness()) {
+            return "✓";
           }
           return "";
         })}
@@ -90,15 +77,8 @@ const OpponentBoard = ({ player }: { player: PlayerState }) => {
   );
 };
 
-export const Opponents = () => {
-  const opponents = computed(() => {
-    const myId = localPlayerId();
-    return game.players().filter((p) => p.id !== myId);
-  }, "opponents.list");
-
-  return (
-    <div class="opponents-panel">
-      {computed(() => opponents().map((p) => <OpponentBoard player={p} />))}
-    </div>
-  );
-};
+export const Opponents = () => (
+  <div class="opponents-row">
+    {computed(() => opponents().map((p) => <OpponentBadge player={p} />))}
+  </div>
+);

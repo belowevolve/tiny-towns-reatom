@@ -1,10 +1,10 @@
-import type { PlayerState } from "../model/player";
+import type { PlayerUIState } from "../model/player-ui";
 import { Cell } from "./cell";
 
-export const Grid = ({ player }: { player: PlayerState }) => (
+export const Grid = ({ ui }: { ui: PlayerUIState }) => (
   <div class="grid-wrapper">
-    {player.cells.map((cellAtom, index) => (
-      <Cell cellAtom={cellAtom} index={index} player={player} />
+    {ui.cellVMs.map((vm, index) => (
+      <Cell vm={vm} index={index} />
     ))}
   </div>
 );

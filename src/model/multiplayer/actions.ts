@@ -4,7 +4,7 @@ import { game, localPlayerId } from "../game";
 import { hostPeerId, isHost } from "../lobby";
 import type { Resource } from "../types";
 import { scheduleAdvanceCheck } from "./host";
-import { broadcast, selfId, sendToHost } from "./transport";
+import { broadcast, sendToHost } from "./transport";
 
 const getHostId = (): string | null => peek(hostPeerId);
 
@@ -15,15 +15,21 @@ export const announceResource = action((resource: Resource) => {
     return;
   }
 
-  game.announceResource(resource);
+  const eliminated = game.announceResource(resource);
 
   if (peek(isHost)) {
+    for (const id of eliminated) {
+      broadcast({ playerId: id, type: "player-eliminated" });
+    }
     broadcast({
       masterBuilderId: myId,
       resource,
       turnNumber: game.turnNumber(),
       type: "resource-announced",
     });
+    if (eliminated.length > 0) {
+      scheduleAdvanceCheck();
+    }
   } else {
     const host = getHostId();
     if (host) {
@@ -31,37 +37,6 @@ export const announceResource = action((resource: Resource) => {
     }
   }
 }, "mp.announceResource");
-
-export const sendGridSync = action(() => {
-  const myId = peek(localPlayerId);
-  if (!myId) {
-    return;
-  }
-  const player = game.findPlayer(myId);
-  if (!player) {
-    return;
-  }
-
-  const grid = player.cells.map((c) => c());
-  const hasPlaced = player.hasPlacedResource();
-
-  if (peek(isHost)) {
-    broadcast({
-      grid,
-      hasPlacedResource: hasPlaced,
-      playerId: selfId,
-      type: "player-grid",
-    });
-  } else {
-    const host = getHostId();
-    if (host) {
-      sendToHost(
-        { grid, hasPlacedResource: hasPlaced, type: "grid-sync" },
-        host
-      );
-    }
-  }
-}, "mp.sendGridSync");
 
 export const markDone = action(() => {
   const myId = peek(localPlayerId);

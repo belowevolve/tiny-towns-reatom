@@ -1,6 +1,5 @@
 import { atom, computed } from "@reatom/core";
 
-import { game } from "../model/game";
 import {
   connectionStatus,
   createRoom,
@@ -16,8 +15,7 @@ import {
 } from "../model/lobby";
 import { startMultiplayerGame } from "../model/multiplayer/host";
 import { MAX_PLAYERS } from "../model/types";
-
-const lobbyView = atom<"menu" | "create" | "join">("menu", "lobby.view");
+import { homeRoute, roomRoute } from "../routes";
 
 const PlayerListItem = ({
   name,
@@ -53,10 +51,6 @@ const RoomView = () => {
     const players = lobbyPlayers();
     return isHost() && players.length >= 2 && players.length <= MAX_PLAYERS;
   }, "lobby.canStart");
-
-  const handleStart = () => {
-    startMultiplayerGame();
-  };
 
   return (
     <div class="lobby-room">
@@ -103,7 +97,7 @@ const RoomView = () => {
             <button
               class="btn-action"
               disabled={!canStart()}
-              on:click={handleStart}
+              on:click={() => startMultiplayerGame()}
             >
               Начать игру
             </button>
@@ -115,72 +109,10 @@ const RoomView = () => {
           class="btn-secondary"
           on:click={() => {
             leaveRoom();
-            game.phase.set("lobby");
+            homeRoute.go();
           }}
         >
           Покинуть
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const MenuView = () => {
-  const nameValue = atom("", "lobby.nameInput");
-
-  const handleNameInput = (e: Event) => {
-    const val = (e.target as HTMLInputElement).value;
-    nameValue.set(val);
-    playerName.set(val);
-  };
-
-  return (
-    <div class="lobby-menu">
-      <h1 class="lobby-title">Tiny Towns</h1>
-      <p class="lobby-subtitle">Мультиплеер</p>
-
-      <div class="lobby-form">
-        <label class="lobby-label">
-          Ваше имя
-          <input
-            class="lobby-input"
-            type="text"
-            maxlength={20}
-            placeholder="Введите имя…"
-            on:input={handleNameInput}
-          />
-        </label>
-      </div>
-
-      <div class="lobby-menu-buttons">
-        <button
-          class="btn-action lobby-btn-large"
-          on:click={() => {
-            if (!nameValue()) {
-              return;
-            }
-            lobbyView.set("create");
-            createRoom();
-          }}
-        >
-          Создать комнату
-        </button>
-        <button
-          class="btn-secondary lobby-btn-large"
-          on:click={() => {
-            if (!nameValue()) {
-              return;
-            }
-            lobbyView.set("join");
-          }}
-        >
-          Присоединиться
-        </button>
-        <button
-          class="btn-secondary lobby-btn-large"
-          on:click={() => lobbyView.set("menu")}
-        >
-          Назад
         </button>
       </div>
     </div>
@@ -198,6 +130,7 @@ const JoinView = () => {
     const code = codeInput();
     if (code.length >= 4) {
       joinRoom(code);
+      roomRoute.go({ code: code.toUpperCase() });
     }
   };
 
@@ -215,12 +148,121 @@ const JoinView = () => {
         <button class="btn-action" on:click={handleJoin}>
           Войти
         </button>
-        <button class="btn-secondary" on:click={() => lobbyView.set("menu")}>
+        <button class="btn-secondary" on:click={() => homeRoute.go()}>
           Назад
         </button>
       </div>
     </div>
   );
+};
+
+const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
+  const nameValue = atom("", "lobby.namePrompt");
+
+  const handleInput = (e: Event) => {
+    const val = (e.target as HTMLInputElement).value;
+    nameValue.set(val);
+  };
+
+  return (
+    <div class="lobby-menu">
+      <h1 class="lobby-title">Tiny Towns</h1>
+      <p class="lobby-subtitle">Введите имя чтобы продолжить</p>
+      <div class="lobby-form">
+        <label class="lobby-label">
+          Ваше имя
+          <input
+            class="lobby-input"
+            type="text"
+            maxlength={20}
+            placeholder="Введите имя…"
+            on:input={handleInput}
+          />
+        </label>
+      </div>
+      <div class="lobby-menu-buttons">
+        <button
+          class="btn-action lobby-btn-large"
+          on:click={() => {
+            const name = nameValue();
+            if (name.trim()) {
+              onSubmit(name);
+            }
+          }}
+        >
+          Продолжить
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const MenuView = () => {
+  const nameValue = atom("", "lobby.nameInput");
+  const showJoin = atom(false, "lobby.showJoin");
+
+  const handleNameInput = (e: Event) => {
+    const val = (e.target as HTMLInputElement).value;
+    nameValue.set(val);
+    playerName.set(val);
+  };
+
+  const view = computed(() => {
+    if (showJoin()) {
+      return <JoinView />;
+    }
+
+    return (
+      <div class="lobby-menu">
+        <h1 class="lobby-title">Tiny Towns</h1>
+        <p class="lobby-subtitle">Мультиплеер</p>
+
+        <div class="lobby-form">
+          <label class="lobby-label">
+            Ваше имя
+            <input
+              class="lobby-input"
+              type="text"
+              maxlength={20}
+              placeholder="Введите имя…"
+              on:input={handleNameInput}
+            />
+          </label>
+        </div>
+
+        <div class="lobby-menu-buttons">
+          <button
+            class="btn-action lobby-btn-large"
+            on:click={() => {
+              if (!nameValue()) {
+                return;
+              }
+              createRoom();
+              const code = currentRoomCode();
+              if (code) {
+                roomRoute.go({ code });
+              }
+            }}
+          >
+            Создать комнату
+          </button>
+          <button
+            class="btn-secondary lobby-btn-large"
+            on:click={() => {
+              if (!nameValue()) {
+                return;
+              }
+              showJoin.set(true);
+            }}
+          >
+            Присоединиться
+          </button>
+        </div>
+      </div>
+    );
+  }, "lobby.menuView");
+
+  return <>{view}</>;
 };
 
 export const Lobby = () => {
@@ -233,14 +275,32 @@ export const Lobby = () => {
   }, "lobby.errorDisplay");
 
   const view = computed(() => {
-    const roomCode = currentRoomCode();
-    if (roomCode) {
-      return <RoomView />;
-    }
+    const routeParams = roomRoute();
 
-    const v = lobbyView();
-    if (v === "join") {
-      return <JoinView />;
+    if (routeParams) {
+      const { code } = routeParams;
+      const currentCode = currentRoomCode();
+
+      if (currentCode === code) {
+        return <RoomView />;
+      }
+
+      if (!playerName()) {
+        return (
+          <NamePrompt
+            onSubmit={(name) => {
+              playerName.set(name);
+              joinRoom(code);
+            }}
+          />
+        );
+      }
+
+      if (!currentCode) {
+        joinRoom(code);
+      }
+
+      return <RoomView />;
     }
 
     return <MenuView />;

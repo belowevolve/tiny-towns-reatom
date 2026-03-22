@@ -18,10 +18,23 @@ export const reatomGame = () => {
     "game.eliminated"
   );
 
+  const markPlayerDone = action((playerId: string) => {
+    playerReadiness.set({
+      ...playerReadiness(),
+      [playerId]: true,
+    });
+  }, "game.markDone");
+
   const activePlayers = computed((): PlayerState[] => {
     const eliminated = eliminatedPlayers();
     return players().filter((p) => !eliminated.has(p.id));
   }, "game.activePlayers");
+
+  const eliminatePlayer = action((playerId: string) => {
+    const current = new Set([...eliminatedPlayers(), playerId]);
+    eliminatedPlayers.set(current);
+    markPlayerDone(playerId);
+  }, "game.eliminate");
 
   const currentMasterBuilder = computed((): PlayerState | null => {
     const active = activePlayers();
@@ -58,24 +71,30 @@ export const reatomGame = () => {
     eliminatedPlayers.set(new Set<string>());
   }, "game.start");
 
-  const announceResource = action((resource: Resource) => {
+  const announceResource = action((resource: Resource): string[] => {
     currentResource.set(resource);
     turnPhase.set("place");
 
+    const active = activePlayers();
     const readiness: Record<string, boolean> = {};
-    for (const p of activePlayers()) {
-      readiness[p.id] = false;
-      p.hasPlacedResource.set(false);
+    const fullBoardIds: string[] = [];
+
+    for (const p of active) {
+      if (p.cells.every((c) => peek(c) !== null)) {
+        fullBoardIds.push(p.id);
+      } else {
+        readiness[p.id] = false;
+        p.hasPlacedResource.set(false);
+      }
     }
     playerReadiness.set(readiness);
-  }, "game.announceResource");
 
-  const markPlayerDone = action((playerId: string) => {
-    playerReadiness.set({
-      ...playerReadiness(),
-      [playerId]: true,
-    });
-  }, "game.markDone");
+    for (const id of fullBoardIds) {
+      eliminatePlayer(id);
+    }
+
+    return fullBoardIds;
+  }, "game.announceResource");
 
   const rotateMasterBuilder = action(() => {
     const active = activePlayers();
@@ -108,12 +127,6 @@ export const reatomGame = () => {
       p.resourceOverride.set(null);
     }
   }, "game.applyTurnEnd");
-
-  const eliminatePlayer = action((playerId: string) => {
-    const current = new Set([...eliminatedPlayers(), playerId]);
-    eliminatedPlayers.set(current);
-    markPlayerDone(playerId);
-  }, "game.eliminate");
 
   const autoEliminateFullBoards = action((): string[] => {
     const active = activePlayers();

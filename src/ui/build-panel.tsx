@@ -1,16 +1,14 @@
-import { computed, peek } from "@reatom/core";
-
 import { BUILDINGS } from "../model/buildings";
-import type { PlayerState } from "../model/player";
+import type { PlayerUIState } from "../model/player-ui";
 import type { BuildingType } from "../model/types";
 import { BUILDING_TYPES, RESOURCE_COLORS } from "../model/types";
 
 const RecipeCard = ({
   type,
-  player,
+  ui,
 }: {
   type: BuildingType;
-  player: PlayerState;
+  ui: PlayerUIState;
 }) => {
   const def = BUILDINGS[type];
   const maxDr = Math.max(...def.pattern.map((c) => c.dr));
@@ -24,30 +22,19 @@ const RecipeCard = ({
     patternGrid[cell.dr][cell.dc] = RESOURCE_COLORS[cell.resource];
   }
 
-  const hasMatches = computed(
-    () => player.availableBuilds().some((m) => m.building === type),
-    `recipe.${type}.hasMatches`
-  );
-
-  const handleClick = () => {
-    if (!peek(player.hasPlacedResource)) {
-      return;
-    }
-    player.selectBuilding(type);
-  };
+  const bvm = ui.buildingVMs[type];
 
   return (
     <div
       class={[
         "recipe-card",
         {
-          "recipe-card--available": hasMatches,
-          "recipe-card--selected": () => player.selectedBuilding() === type,
-          "recipe-card--unavailable": () =>
-            !hasMatches() && player.selectedBuilding() !== type,
+          "recipe-card--available": bvm.hasMatches,
+          "recipe-card--selected": bvm.isSelected,
+          "recipe-card--unavailable": bvm.isUnavailable,
         },
       ]}
-      on:click={handleClick}
+      on:click={() => ui.selectBuilding(type)}
     >
       <div class="recipe-header">
         <span class="recipe-building-icon">{def.icon}</span>
@@ -60,12 +47,7 @@ const RecipeCard = ({
         {patternGrid.flatMap((row) =>
           row.map((color) => (
             <div
-              class={[
-                "recipe-cell",
-                {
-                  "recipe-cell--empty": !color,
-                },
-              ]}
+              class={["recipe-cell", { "recipe-cell--empty": !color }]}
               attr:style={color ? `background: ${color}` : ""}
             />
           ))
@@ -76,12 +58,12 @@ const RecipeCard = ({
   );
 };
 
-export const BuildPanel = ({ player }: { player: PlayerState }) => (
+export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => (
   <div class="build-panel">
     <h3 class="panel-title">Здания</h3>
     <div class="recipes-list">
       {BUILDING_TYPES.map((type) => (
-        <RecipeCard type={type} player={player} />
+        <RecipeCard type={type} ui={ui} />
       ))}
     </div>
   </div>

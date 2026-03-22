@@ -1,6 +1,8 @@
 import { peek } from "@reatom/core";
 
+import { gameRoute, resultsRoute } from "../../routes";
 import { game, localPlayerId } from "../game";
+import { localPlayerUI, reatomPlayerUI } from "../player-ui";
 import type { HostMessage } from "./protocol";
 import { onMessage, selfId } from "./transport";
 
@@ -12,7 +14,12 @@ const handleHostMessage = (msg: HostMessage): void => {
       }
 
       localPlayerId.set(selfId);
+      const me = game.findPlayer(selfId);
+      if (me) {
+        localPlayerUI.set(reatomPlayerUI(me));
+      }
       game.startGame();
+      gameRoute.go();
       break;
     }
 
@@ -51,6 +58,7 @@ const handleHostMessage = (msg: HostMessage): void => {
 
     case "game-over": {
       game.finishGame();
+      resultsRoute.go();
       break;
     }
 

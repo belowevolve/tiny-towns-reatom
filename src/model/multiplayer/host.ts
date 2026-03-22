@@ -1,7 +1,9 @@
 import { action, peek } from "@reatom/core";
 
+import { gameRoute, resultsRoute } from "../../routes";
 import { game, localPlayerId } from "../game";
 import { isHost, lobbyPlayers } from "../lobby";
+import { localPlayerUI, reatomPlayerUI } from "../player-ui";
 import type { ClientMessage } from "./protocol";
 import { broadcast, onMessage, selfId } from "./transport";
 
@@ -10,6 +12,7 @@ const advanceIfAllDone = (): void => {
 
   if (active.length === 0) {
     game.finishGame();
+    resultsRoute.go();
     broadcast({
       scores: game.players().map((p) => ({
         grid: p.cells.map((c) => c()),
@@ -35,6 +38,7 @@ const advanceIfAllDone = (): void => {
 
   if (game.activePlayers().length === 0) {
     game.finishGame();
+    resultsRoute.go();
     broadcast({
       scores: game.players().map((p) => ({
         grid: p.cells.map((c) => c()),
@@ -64,13 +68,19 @@ const handleClientMessage = (msg: ClientMessage, peerId: string): void => {
       if (!mb || mb.id !== peerId) {
         return;
       }
-      game.announceResource(msg.resource);
+      const eliminated = game.announceResource(msg.resource);
+      for (const id of eliminated) {
+        broadcast({ playerId: id, type: "player-eliminated" });
+      }
       broadcast({
         masterBuilderId: peerId,
         resource: msg.resource,
         turnNumber: game.turnNumber(),
         type: "resource-announced",
       });
+      if (eliminated.length > 0) {
+        scheduleAdvanceCheck();
+      }
       break;
     }
 
@@ -127,7 +137,12 @@ export const startMultiplayerGame = action(() => {
   }
 
   localPlayerId.set(selfId);
+  const me = game.findPlayer(selfId);
+  if (me) {
+    localPlayerUI.set(reatomPlayerUI(me));
+  }
   game.startGame();
+  gameRoute.go();
 
   broadcast({
     players: players.map((p) => ({ id: p.peerId, name: p.name })),

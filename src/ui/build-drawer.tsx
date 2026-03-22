@@ -1,15 +1,9 @@
-import { atom, computed } from "@reatom/core";
+import { computed } from "@reatom/core";
 
 import { BUILDINGS } from "../model/buildings";
-import { sendGridSync } from "../model/multiplayer/actions";
-import type { PlayerState } from "../model/player";
+import type { PlayerUIState } from "../model/player-ui";
 import type { BuildMatch, Resource } from "../model/types";
-import {
-  GRID_SIZE,
-  RESOURCES,
-  RESOURCE_COLORS,
-  RESOURCE_NAMES,
-} from "../model/types";
+import { GRID_SIZE, RESOURCE_COLORS, RESOURCE_NAMES } from "../model/types";
 
 const VariantCard = ({
   match,
@@ -35,12 +29,7 @@ const VariantCard = ({
 
   return (
     <div
-      class={[
-        "variant-card",
-        {
-          "variant-card--selected": isSelected,
-        },
-      ]}
+      class={["variant-card", { "variant-card--selected": isSelected }]}
       on:click={onSelect}
     >
       <div class="variant-header">
@@ -62,9 +51,7 @@ const VariantCard = ({
               <div
                 class={[
                   "variant-mini-cell",
-                  {
-                    "variant-mini-cell--active": inMatch,
-                  },
+                  { "variant-mini-cell--active": inMatch },
                 ]}
                 attr:style={
                   inMatch
@@ -96,170 +83,106 @@ const ResourcePickerItem = ({
   </button>
 );
 
-const OnBuildPrompt = ({ player }: { player: PlayerState }) => {
-  const effect = player.pendingBuildEffect();
-  if (!effect) {
-    return <div />;
-  }
-
-  const available: Resource[] =
-    effect.validResources && effect.validResources.length > 0
-      ? effect.validResources
-      : [...RESOURCES];
-
-  return (
-    <div class="build-drawer-content">
-      <h3 class="drawer-title">Выберите ресурс для хранения</h3>
-      <div class="resource-picker-list">
-        {available.map((r) => (
-          <ResourcePickerItem
-            resource={r}
-            onPick={() => {
-              player.storeResourceOnBuilding(r);
-              sendGridSync();
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const WarehouseSwapPrompt = ({ player }: { player: PlayerState }) => {
-  const swap = player.pendingWarehouseSwap();
-  if (!swap) {
-    return <div />;
-  }
-
-  return (
-    <div class="build-drawer-content">
-      <h3 class="drawer-title">
-        📦 Склад ←{" "}
-        <span
-          class="resource-swatch resource-swatch--sm"
-          attr:style={`background: ${RESOURCE_COLORS[swap.incoming]}`}
-        />{" "}
-        {RESOURCE_NAMES[swap.incoming]}
-      </h3>
-      {swap.canStore && (
-        <button
-          class="btn-action warehouse-store-btn"
-          on:click={() => {
-            player.storeOnWarehouseFromPrompt();
-            sendGridSync();
-          }}
-        >
-          Положить на склад
-        </button>
-      )}
-      {swap.stored.length > 0 && (
-        <>
-          <p class="drawer-subtitle">Или заменить:</p>
-          <div class="resource-picker-list">
-            {swap.stored.map((r, i) => (
-              <ResourcePickerItem
-                resource={r}
-                onPick={() => {
-                  player.confirmWarehouseSwap(i);
-                  sendGridSync();
-                }}
-              />
-            ))}
-          </div>
-        </>
-      )}
-      <div class="drawer-actions">
-        <button
-          class="btn-secondary"
-          on:click={() => player.cancelWarehouseSwap()}
-        >
-          Отмена
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const FactorySwapPrompt = ({ player }: { player: PlayerState }) => {
-  const swap = player.pendingFactorySwap();
-  if (!swap) {
-    return <div />;
-  }
-
-  const available = RESOURCES.filter((r) => r !== swap.storedResource);
-
-  return (
-    <div class="build-drawer-content">
-      <h3 class="drawer-title">
-        🏭 Заменить{" "}
-        <span
-          class="resource-swatch resource-swatch--sm"
-          attr:style={`background: ${RESOURCE_COLORS[swap.storedResource]}`}
-        />{" "}
-        {RESOURCE_NAMES[swap.storedResource]}
-      </h3>
-      <p class="drawer-subtitle">Выберите ресурс для замены</p>
-      <div class="resource-picker-list">
-        {available.map((r) => (
-          <ResourcePickerItem
-            resource={r}
-            onPick={() => {
-              player.confirmFactorySwap(r);
-            }}
-          />
-        ))}
-      </div>
-      <div class="drawer-actions">
-        <button
-          class="btn-secondary"
-          on:click={() => player.cancelFactorySwap()}
-        >
-          Отмена
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export const BuildDrawer = ({ player }: { player: PlayerState }) => {
-  const selectedIndex = atom<number | null>(null, "buildDrawer.selectedIdx");
-
+export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
   const content = computed(() => {
-    if (player.pendingBuildEffect()) {
-      return <OnBuildPrompt player={player} />;
-    }
-
-    if (player.pendingFactorySwap()) {
-      return <FactorySwapPrompt player={player} />;
-    }
-
-    if (player.pendingWarehouseSwap()) {
-      return <WarehouseSwapPrompt player={player} />;
-    }
-
-    const builds = player.pendingBuilds();
-    if (builds.length === 0) {
+    const mode = ui.drawerMode();
+    if (!mode) {
       return <div />;
     }
 
-    const handleConfirm = () => {
-      const idx = selectedIndex();
-      if (idx !== null && builds[idx]) {
-        player.confirmBuild(builds[idx]);
-        sendGridSync();
-        selectedIndex.set(null);
-      }
-    };
+    if (mode.type === "onBuild") {
+      return (
+        <div class="build-drawer-content">
+          <h3 class="drawer-title">Выберите ресурс для хранения</h3>
+          <div class="resource-picker-list">
+            {mode.validResources.map((r) => (
+              <ResourcePickerItem
+                resource={r}
+                onPick={() => ui.storeResourceOnBuilding(r)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
 
-    const handleCancel = () => {
-      player.cancelBuild();
-      selectedIndex.set(null);
-    };
+    if (mode.type === "factorySwap") {
+      return (
+        <div class="build-drawer-content">
+          <h3 class="drawer-title">
+            🏭 Заменить{" "}
+            <span
+              class="resource-swatch resource-swatch--sm"
+              attr:style={`background: ${RESOURCE_COLORS[mode.storedResource]}`}
+            />{" "}
+            {RESOURCE_NAMES[mode.storedResource]}
+          </h3>
+          <p class="drawer-subtitle">Выберите ресурс для замены</p>
+          <div class="resource-picker-list">
+            {mode.available.map((r) => (
+              <ResourcePickerItem
+                resource={r}
+                onPick={() => ui.confirmFactorySwap(r)}
+              />
+            ))}
+          </div>
+          <div class="drawer-actions">
+            <button
+              class="btn-secondary"
+              on:click={() => ui.cancelFactorySwap()}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      );
+    }
 
-    const handleSelect = (i: number) => {
-      selectedIndex.set(i);
-      player.previewVariant(builds[i]);
-    };
+    if (mode.type === "warehouseSwap") {
+      return (
+        <div class="build-drawer-content">
+          <h3 class="drawer-title">
+            📦 Склад ←{" "}
+            <span
+              class="resource-swatch resource-swatch--sm"
+              attr:style={`background: ${RESOURCE_COLORS[mode.incoming]}`}
+            />{" "}
+            {RESOURCE_NAMES[mode.incoming]}
+          </h3>
+          {mode.canStore && (
+            <button
+              class="btn-action warehouse-store-btn"
+              on:click={() => ui.storeOnWarehouseFromPrompt()}
+            >
+              Положить на склад
+            </button>
+          )}
+          {mode.stored.length > 0 && (
+            <>
+              <p class="drawer-subtitle">Или заменить:</p>
+              <div class="resource-picker-list">
+                {mode.stored.map((r, i) => (
+                  <ResourcePickerItem
+                    resource={r}
+                    onPick={() => ui.confirmWarehouseSwap(i)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+          <div class="drawer-actions">
+            <button
+              class="btn-secondary"
+              on:click={() => ui.cancelWarehouseSwap()}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const { builds } = mode;
 
     return (
       <div class="build-drawer-content">
@@ -268,20 +191,23 @@ export const BuildDrawer = ({ player }: { player: PlayerState }) => {
           {builds.map((match, i) => (
             <VariantCard
               match={match}
-              isSelected={() => selectedIndex() === i}
-              onSelect={() => handleSelect(i)}
+              isSelected={() => ui.drawerSelectedVariant() === i}
+              onSelect={() => ui.selectDrawerVariant(i)}
             />
           ))}
         </div>
         <div class="drawer-actions">
           <button
             class="btn-action"
-            disabled={selectedIndex() === null}
-            on:click={handleConfirm}
+            disabled={computed(() => ui.drawerSelectedVariant() === null)}
+            on:click={() => ui.confirmSelectedVariant()}
           >
             Построить
           </button>
-          <button class="btn-secondary" on:click={handleCancel}>
+          <button
+            class="btn-secondary"
+            on:click={() => ui.cancelVariantSelection()}
+          >
             Отмена
           </button>
         </div>
