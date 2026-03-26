@@ -1,9 +1,116 @@
 import { computed } from "@reatom/core";
+import { css } from "@reatom/jsx";
 
 import { BUILDINGS } from "../model/buildings";
 import { opponents, reatomOpponentVM } from "../model/game-ui";
 import type { PlayerState } from "../model/player";
-import { ResourceSwatch } from "./resource-swatch";
+import { palette, radius, shadow } from "../shared/ui/design-system";
+import { ResourceSwatch } from "../shared/ui/resource-swatch";
+
+const rowCss = css`
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${palette.borderHover};
+    border-radius: 2px;
+  }
+`;
+
+const badgeCss = css`
+  flex-shrink: 0;
+  padding: 5px 6px;
+  background: ${palette.surface};
+  border: 1px solid ${palette.border};
+  border-radius: ${radius.sm};
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: ${shadow.cell};
+
+  &[data-eliminated="true"] {
+    opacity: 0.45;
+  }
+
+  &[data-master-builder="true"] {
+    border-color: ${palette.highlight};
+    box-shadow: 0 0 6px ${palette.highlightGlow};
+  }
+`;
+
+const badgeHeaderCss = css`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+`;
+
+const badgeNameCss = css`
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: ${palette.text};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60px;
+
+  @media (max-width: 400px) {
+    max-width: 48px;
+  }
+`;
+
+const badgeScoreCss = css`
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: ${palette.accent};
+`;
+
+const badgeGridCss = css`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+`;
+
+const miniCellCss = css`
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.45rem;
+  background: ${palette.cellBg};
+  border-radius: 2px;
+  border: 1px solid ${palette.border};
+
+  &[data-resource="true"] {
+    background: ${palette.cellResource};
+    border-color: ${palette.borderHover};
+  }
+
+  &[data-building="true"] {
+    background: ${palette.building};
+    border-color: ${palette.buildingBorder};
+  }
+
+  @media (max-width: 400px) {
+    width: 14px;
+    height: 14px;
+    font-size: 0.4rem;
+  }
+`;
+
+const statusCss = css`
+  font-size: 0.5rem;
+  color: ${palette.textMuted};
+  text-align: center;
+  min-height: 0.6em;
+`;
 
 const MiniCell = ({
   player,
@@ -23,18 +130,21 @@ const MiniCell = ({
     return BUILDINGS[c.building].icon;
   }, `opp.${player.id}.cell#${index}`);
 
-  const cellClass = computed(() => {
-    const c = player.cells[index]();
-    if (!c) {
-      return "mini-cell";
-    }
-    if (c.type === "resource") {
-      return "mini-cell mini-cell--resource";
-    }
-    return "mini-cell mini-cell--building";
-  }, `opp.${player.id}.cell#${index}.cls`);
-
-  return <div class={cellClass}>{content}</div>;
+  return (
+    <div
+      css={miniCellCss}
+      attr:data-resource={computed(() => {
+        const c = player.cells[index]();
+        return String(c?.type === "resource");
+      })}
+      attr:data-building={computed(() => {
+        const c = player.cells[index]();
+        return String(Boolean(c && c.type !== "resource"));
+      })}
+    >
+      {content}
+    </div>
+  );
 };
 
 const OpponentBadge = ({ player }: { player: PlayerState }) => {
@@ -42,27 +152,23 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
 
   return (
     <div
-      class={[
-        "opponent-badge",
-        {
-          "opponent-badge--eliminated": vm.isEliminated,
-          "opponent-badge--master-builder": vm.isMasterBuilder,
-        },
-      ]}
+      css={badgeCss}
+      attr:data-eliminated={computed(() => String(vm.isEliminated()))}
+      attr:data-master-builder={computed(() => String(vm.isMasterBuilder()))}
     >
-      <div class="opponent-badge__header">
-        <span class="opponent-badge__name">
+      <div css={badgeHeaderCss}>
+        <span css={badgeNameCss}>
           {computed(() => (vm.isMasterBuilder() ? "🔨 " : ""))}
           {player.name}
         </span>
-        <span class="opponent-badge__score">{player.score}</span>
+        <span css={badgeScoreCss}>{player.score}</span>
       </div>
-      <div class="opponent-badge__grid">
+      <div css={badgeGridCss}>
         {player.cells.map((_, i) => (
           <MiniCell player={player} index={i} />
         ))}
       </div>
-      <div class="opponent-badge__status">
+      <div css={statusCss}>
         {computed(() => {
           if (vm.isEliminated()) {
             return "Выбыл";
@@ -78,7 +184,7 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
 };
 
 export const Opponents = () => (
-  <div class="opponents-row">
+  <div css={rowCss}>
     {computed(() => opponents().map((p) => <OpponentBadge player={p} />))}
   </div>
 );

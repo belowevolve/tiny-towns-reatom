@@ -13,4 +13,7 @@ export default defineConfig({
       jsxPragmaFrag: "hf",
     },
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
 });

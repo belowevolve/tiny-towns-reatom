@@ -1,5 +1,59 @@
 import type { Atom } from "@reatom/core";
 import type { JSX } from "@reatom/jsx";
+import { css } from "@reatom/jsx";
+
+import { palette, radius } from "../shared/ui/design-system";
+
+const backdropCss = css`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+
+  &[data-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+`;
+
+const drawerCss = css`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 101;
+  background: ${palette.surface};
+  border-radius: ${radius.xl} ${radius.xl} 0 0;
+  box-shadow: 0 -4px 24px rgba(61, 52, 41, 0.15);
+  padding: 12px 20px 24px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+  max-height: 70vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &[data-open="true"] {
+    transform: translateY(0);
+  }
+`;
+
+const handleCss = css`
+  width: 40px;
+  height: 4px;
+  background: ${palette.borderHover};
+  border-radius: 2px;
+  margin: 0 auto 16px;
+  flex-shrink: 0;
+`;
+
+const bodyCss = css`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
 
 export const Drawer = ({
   open,
@@ -45,28 +99,16 @@ export const Drawer = ({
 
   return (
     <>
+      <div css={backdropCss} attr:data-visible={open} on:click={onClose} />
       <div
-        class={[
-          "drawer-backdrop",
-          {
-            "drawer-backdrop--visible": open,
-          },
-        ]}
-        on:click={onClose}
-      />
-      <div
-        class={[
-          "drawer",
-          {
-            "drawer--open": open,
-          },
-        ]}
+        css={drawerCss}
+        attr:data-open={open}
         on:touchstart={handleTouchStart}
         on:touchmove={handleTouchMove}
         on:touchend={handleTouchEnd}
       >
-        <div class="drawer-handle" />
-        <div class="drawer-body">{children}</div>
+        <div css={handleCss} />
+        <div css={bodyCss}>{children}</div>
       </div>
     </>
   );
