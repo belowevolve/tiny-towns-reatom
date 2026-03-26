@@ -2,22 +2,29 @@ import { css } from "@reatom/jsx";
 
 import type { Resource } from "../../model/types";
 import { RESOURCE_COLORS } from "../../model/types";
+import { createCssVariants } from "./style-variants";
 
-const baseSwatch = css`
-  display: block;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  flex-shrink: 0;
-`;
-
-const smallSwatch = css`
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
-  display: inline-block;
-  vertical-align: middle;
-`;
+const getSwatchCss = createCssVariants({
+  base: css`
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  `,
+  variants: {
+    small: {
+      false: "",
+      true: css`
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        display: inline-block;
+        vertical-align: middle;
+      `,
+    },
+  },
+});
 
 export const ResourceSwatch = ({
   resource,
@@ -27,9 +34,7 @@ export const ResourceSwatch = ({
   small?: boolean;
 }) => (
   <span
-    css={css`
-      ${baseSwatch}${small ? smallSwatch : ""}
-    `}
+    css={getSwatchCss({ small: small ? "true" : "false" })}
     style:background={RESOURCE_COLORS[resource]}
   />
 );

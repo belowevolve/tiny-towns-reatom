@@ -20,11 +20,11 @@ export const RESOURCE_NAMES: Record<Resource, string> = {
 };
 
 export const RESOURCE_COLORS: Record<Resource, string> = {
-  brick: "#e07868",
-  glass: "#7cb8d4",
-  stone: "#b8b4ac",
-  wheat: "#f2d477",
-  wood: "#c49a6c",
+  brick: "oklch(0.69 0.12 35)",
+  glass: "oklch(0.77 0.08 230)",
+  stone: "oklch(0.76 0.02 80)",
+  wheat: "oklch(0.88 0.11 92)",
+  wood: "oklch(0.73 0.08 65)",
 };
 
 export const BUILDING_TYPES = [

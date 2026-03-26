@@ -1,141 +1,12 @@
 import { computed } from "@reatom/core";
-import { css } from "@reatom/jsx";
 
 import { BUILDINGS } from "../model/buildings";
 import type { PlayerUIState } from "../model/player-ui";
 import type { BuildMatch, Resource } from "../model/types";
 import { GRID_SIZE, RESOURCE_COLORS, RESOURCE_NAMES } from "../model/types";
-import { Button } from "../shared/ui/button";
+import { Button, IconButton } from "../shared/ui/button";
 import { palette, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
-
-const contentCss = css`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const titleCss = css`
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${palette.text};
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-`;
-
-const subtitleCss = css`
-  margin: 0;
-  font-size: 0.8rem;
-  color: ${palette.textMuted};
-  text-align: center;
-`;
-
-const actionsCss = css`
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  padding-top: 4px;
-`;
-
-const variantListCss = css`
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-`;
-
-const variantCardCss = css`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: ${palette.cellBg};
-  border: 2px solid ${palette.border};
-  border-radius: ${radius.md};
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    border-color: ${palette.borderHover};
-    background: ${palette.surfaceHover};
-  }
-
-  &[data-selected="true"] {
-    border-color: ${palette.highlight};
-    background: ${palette.highlightSoft};
-    box-shadow: 0 0 10px ${palette.highlightGlow};
-  }
-`;
-
-const variantHeaderCss = css`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const variantInfoCss = css`
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-`;
-
-const variantGridCss = css`
-  display: inline-grid;
-  gap: 3px;
-  justify-self: start;
-`;
-
-const miniCellCss = css`
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  background: ${palette.surface};
-  border-radius: 4px;
-  border: 1px solid ${palette.border};
-
-  &[data-active="true"] {
-    border-color: ${palette.borderHover};
-  }
-`;
-
-const pickerListCss = css`
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-`;
-
-const pickerItemCss = css`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border: 2px solid ${palette.border};
-  border-radius: ${radius.md};
-  cursor: pointer;
-  transition: all 0.15s ease;
-  background: ${palette.surface};
-  font-family: inherit;
-
-  &:hover {
-    border-color: ${palette.accent};
-    box-shadow: ${shadow.card};
-    transform: translateY(-2px);
-  }
-`;
-
-const pickerLabelCss = css`
-  font-size: 0.72rem;
-  color: ${palette.textMuted};
-  font-weight: 500;
-`;
 
 const VariantCard = ({
   match,
@@ -143,7 +14,7 @@ const VariantCard = ({
   onSelect,
 }: {
   match: BuildMatch;
-  isSelected: () => boolean;
+  isSelected: boolean;
   onSelect: () => void;
 }) => {
   const def = BUILDINGS[match.building];
@@ -161,13 +32,46 @@ const VariantCard = ({
 
   return (
     <div
-      css={variantCardCss}
-      attr:data-selected={String(isSelected())}
+      css={`
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+        background: ${palette.cellBg};
+        border: 2px solid ${palette.border};
+        border-radius: ${radius.md};
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+          border-color: ${palette.borderHover};
+          background: ${palette.surfaceHover};
+        }
+
+        &[data-selected="true"] {
+          border-color: ${palette.highlight};
+          background: ${palette.highlightSoft};
+          box-shadow: 0 0 10px ${palette.highlightGlow};
+        }
+      `}
+      attr:data-selected={isSelected}
       on:click={onSelect}
     >
-      <div css={variantHeaderCss}>
+      <div
+        css={`
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        `}
+      >
         <span css="font-size: 1.5rem; line-height: 1;">{def.icon}</span>
-        <div css={variantInfoCss}>
+        <div
+          css={`
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+          `}
+        >
           <span css="font-size: 0.9rem; font-weight: 600;">{def.name}</span>
           <span
             css={`
@@ -180,7 +84,11 @@ const VariantCard = ({
         </div>
       </div>
       <div
-        css={variantGridCss}
+        css={`
+          display: inline-grid;
+          gap: 3px;
+          justify-self: start;
+        `}
         style:grid-template-columns={`repeat(${cols}, 26px)`}
       >
         {Array.from({ length: rows }, (__, r) =>
@@ -189,8 +97,22 @@ const VariantCard = ({
             const inMatch = match.cells.includes(gridIndex);
             return (
               <div
-                css={miniCellCss}
-                attr:data-active={String(inMatch)}
+                css={`
+                  width: 26px;
+                  height: 26px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 0.8rem;
+                  background: ${palette.surface};
+                  border-radius: 4px;
+                  border: 1px solid ${palette.border};
+
+                  &[data-active="true"] {
+                    border-color: ${palette.borderHover};
+                  }
+                `}
+                attr:data-active={inMatch}
                 style:background={
                   inMatch
                     ? RESOURCE_COLORS[
@@ -216,10 +138,42 @@ const ResourcePickerItem = ({
   resource: Resource;
   onPick: () => void;
 }) => (
-  <button css={pickerItemCss} on:click={onPick}>
+  <IconButton
+    variant="secondary"
+    css={`
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border: 2px solid ${palette.border};
+      border-radius: ${radius.md};
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: ${palette.surface};
+      font-family: inherit;
+      width: auto;
+      height: auto;
+
+      &:hover {
+        border-color: ${palette.accent};
+        box-shadow: ${shadow.card};
+        transform: translateY(-2px);
+      }
+    `}
+    on:click={onPick}
+  >
     <ResourceSwatch resource={resource} />
-    <span css={pickerLabelCss}>{RESOURCE_NAMES[resource]}</span>
-  </button>
+    <span
+      css={`
+        font-size: 0.72rem;
+        color: ${palette.textMuted};
+        font-weight: 500;
+      `}
+    >
+      {RESOURCE_NAMES[resource]}
+    </span>
+  </IconButton>
 );
 
 export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
@@ -231,9 +185,36 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
 
     if (mode.type === "onBuild") {
       return (
-        <div css={contentCss}>
-          <h3 css={titleCss}>Выберите ресурс для хранения</h3>
-          <div css={pickerListCss}>
+        <div
+          css={`
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          `}
+        >
+          <h3
+            css={`
+              margin: 0;
+              font-size: 1rem;
+              font-weight: 600;
+              color: ${palette.text};
+              text-align: center;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            `}
+          >
+            Выберите ресурс для хранения
+          </h3>
+          <div
+            css={`
+              display: flex;
+              gap: 8px;
+              justify-content: center;
+              flex-wrap: wrap;
+            `}
+          >
             {mode.validResources.map((r) => (
               <ResourcePickerItem
                 resource={r}
@@ -247,13 +228,47 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
 
     if (mode.type === "factorySwap") {
       return (
-        <div css={contentCss}>
-          <h3 css={titleCss}>
+        <div
+          css={`
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          `}
+        >
+          <h3
+            css={`
+              margin: 0;
+              font-size: 1rem;
+              font-weight: 600;
+              color: ${palette.text};
+              text-align: center;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            `}
+          >
             🏭 Заменить <ResourceSwatch resource={mode.storedResource} small />{" "}
             {RESOURCE_NAMES[mode.storedResource]}
           </h3>
-          <p css={subtitleCss}>Выберите ресурс для замены</p>
-          <div css={pickerListCss}>
+          <p
+            css={`
+              margin: 0;
+              font-size: 0.8rem;
+              color: ${palette.textMuted};
+              text-align: center;
+            `}
+          >
+            Выберите ресурс для замены
+          </p>
+          <div
+            css={`
+              display: flex;
+              gap: 8px;
+              justify-content: center;
+              flex-wrap: wrap;
+            `}
+          >
             {mode.available.map((r) => (
               <ResourcePickerItem
                 resource={r}
@@ -261,7 +276,14 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
               />
             ))}
           </div>
-          <div css={actionsCss}>
+          <div
+            css={`
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+              padding-top: 4px;
+            `}
+          >
             <Button variant="secondary" on:click={() => ui.cancelFactorySwap()}>
               Отмена
             </Button>
@@ -272,8 +294,26 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
 
     if (mode.type === "warehouseSwap") {
       return (
-        <div css={contentCss}>
-          <h3 css={titleCss}>
+        <div
+          css={`
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          `}
+        >
+          <h3
+            css={`
+              margin: 0;
+              font-size: 1rem;
+              font-weight: 600;
+              color: ${palette.text};
+              text-align: center;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+            `}
+          >
             📦 Склад ← <ResourceSwatch resource={mode.incoming} small />{" "}
             {RESOURCE_NAMES[mode.incoming]}
           </h3>
@@ -287,8 +327,24 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           )}
           {mode.stored.length > 0 && (
             <>
-              <p css={subtitleCss}>Или заменить:</p>
-              <div css={pickerListCss}>
+              <p
+                css={`
+                  margin: 0;
+                  font-size: 0.8rem;
+                  color: ${palette.textMuted};
+                  text-align: center;
+                `}
+              >
+                Или заменить:
+              </p>
+              <div
+                css={`
+                  display: flex;
+                  gap: 8px;
+                  justify-content: center;
+                  flex-wrap: wrap;
+                `}
+              >
                 {mode.stored.map((r, i) => (
                   <ResourcePickerItem
                     resource={r}
@@ -298,7 +354,14 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
               </div>
             </>
           )}
-          <div css={actionsCss}>
+          <div
+            css={`
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+              padding-top: 4px;
+            `}
+          >
             <Button
               variant="secondary"
               on:click={() => ui.cancelWarehouseSwap()}
@@ -313,18 +376,51 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
     const { builds } = mode;
 
     return (
-      <div css={contentCss}>
-        <h3 css={titleCss}>Выберите вариант</h3>
-        <div css={variantListCss}>
+      <div
+        css={`
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        `}
+      >
+        <h3
+          css={`
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: ${palette.text};
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+          `}
+        >
+          Выберите вариант
+        </h3>
+        <div
+          css={`
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+          `}
+        >
           {builds.map((match, i) => (
             <VariantCard
               match={match}
-              isSelected={() => ui.drawerSelectedVariant() === i}
+              isSelected={ui.drawerSelectedVariant() === i}
               onSelect={() => ui.selectDrawerVariant(i)}
             />
           ))}
         </div>
-        <div css={actionsCss}>
+        <div
+          css={`
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding-top: 4px;
+          `}
+        >
           <Button
             disabled={computed(() => ui.drawerSelectedVariant() === null)}
             on:click={() => ui.confirmSelectedVariant()}

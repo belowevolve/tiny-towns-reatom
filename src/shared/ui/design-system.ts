@@ -1,33 +1,31 @@
-import { css } from "@reatom/jsx";
-
 export const palette = {
-  accent: "#7c9a6e",
-  accentHover: "#6b8a5d",
-  accentSoft: "#dcecd4",
-  bg: "#faf8f5",
-  border: "#e8e4df",
-  borderActive: "#c8a87e",
-  borderHover: "#d4cfc8",
-  building: "#dcecd4",
-  buildingBorder: "#b8d4a8",
-  cellBg: "#f5f1ec",
-  cellResource: "#eee8df",
-  danger: "#c47a6e",
-  dangerHover: "#b36a5e",
-  dangerSoft: "#f5e0dc",
-  highlight: "#f0c66b",
-  highlightGlow: "rgba(240, 198, 107, 0.35)",
-  highlightSoft: "#faf0d4",
-  selected: "#6ea0c4",
-  selectedGlow: "rgba(110, 160, 196, 0.3)",
-  selectedSoft: "#dce8f0",
-  shadow: "rgba(61, 52, 41, 0.07)",
-  shadowElevated: "rgba(61, 52, 41, 0.1)",
-  surface: "#ffffff",
-  surfaceHover: "#f5f0eb",
-  text: "#3d3429",
-  textLight: "#b8ad9f",
-  textMuted: "#9b9082",
+  accent: "oklch(0.69 0.07 135)",
+  accentHover: "oklch(0.62 0.07 135)",
+  accentSoft: "oklch(0.93 0.04 135)",
+  bg: "oklch(0.98 0.01 80)",
+  border: "oklch(0.91 0.01 80)",
+  borderActive: "oklch(0.76 0.06 70)",
+  borderHover: "oklch(0.84 0.01 80)",
+  building: "oklch(0.93 0.04 135)",
+  buildingBorder: "oklch(0.84 0.05 135)",
+  cellBg: "oklch(0.96 0.01 80)",
+  cellResource: "oklch(0.94 0.01 80)",
+  danger: "oklch(0.66 0.09 30)",
+  dangerHover: "oklch(0.6 0.09 30)",
+  dangerSoft: "oklch(0.93 0.04 30)",
+  highlight: "oklch(0.85 0.11 85)",
+  highlightGlow: "oklch(0.85 0.11 85 / 0.35)",
+  highlightSoft: "oklch(0.95 0.04 85)",
+  selected: "oklch(0.71 0.06 240)",
+  selectedGlow: "oklch(0.71 0.06 240 / 0.3)",
+  selectedSoft: "oklch(0.92 0.03 240)",
+  shadow: "oklch(0.36 0.02 70 / 0.07)",
+  shadowElevated: "oklch(0.36 0.02 70 / 0.1)",
+  surface: "oklch(1 0 0)",
+  surfaceHover: "oklch(0.96 0.01 70)",
+  text: "oklch(0.34 0.02 70)",
+  textLight: "oklch(0.76 0.02 75)",
+  textMuted: "oklch(0.66 0.02 75)",
 } as const;
 
 export const radius = {
@@ -39,7 +37,7 @@ export const radius = {
 
 export const shadow = {
   card: `0 2px 8px ${palette.shadow}`,
-  cell: `0 1px 4px rgba(61, 52, 41, 0.06)`,
+  cell: `0 1px 4px oklch(0.36 0.02 70 / 0.06)`,
   elevated: `0 6px 20px ${palette.shadowElevated}`,
 } as const;
 
@@ -106,33 +104,4 @@ body {
     box-shadow: 0 0 18px ${palette.highlightGlow};
   }
 }
-`;
-
-export const pageShell = css`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
-`;
-
-export const cardScrollTrack = css`
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: ${palette.cellBg};
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: ${palette.borderHover};
-    border-radius: 2px;
-  }
-`;
-
-export const pulseAnimation = css`
-  animation: cell-pulse 1.2s ease-in-out infinite;
 `;

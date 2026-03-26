@@ -5,12 +5,9 @@ import { globalStyleText } from "./shared/ui/design-system";
 
 const GlobalStyles = () => <style>{globalStyleText}</style>;
 
-export const App = computed(
-  () => (
-    <>
-      <GlobalStyles />
-      {rootRoute.render()}
-    </>
-  ),
-  "app.root"
-);
+export const App = computed(() => (
+  <>
+    <GlobalStyles />
+    {rootRoute.render()}
+  </>
+));
