@@ -2,7 +2,9 @@ import { BUILDINGS } from "../model/buildings";
 import type { PlayerUIState } from "../model/player-ui";
 import type { BuildingType } from "../model/types";
 import { BUILDING_TYPES, RESOURCE_COLORS } from "../model/types";
-import { palette, radius, shadow } from "../shared/ui/design-system";
+import { colors, radius, shadow } from "../shared/ui/design-system";
+import { Stack } from "../shared/ui/stack";
+import { Text } from "../shared/ui/text";
 
 const RecipeCard = ({
   type,
@@ -31,8 +33,8 @@ const RecipeCard = ({
         flex-shrink: 0;
         min-width: 110px;
         padding: 8px 10px;
-        background: ${palette.surface};
-        border: 1px solid ${palette.border};
+        background: ${colors.surface};
+        border: 1px solid ${colors.border};
         border-radius: ${radius.md};
         display: flex;
         flex-direction: column;
@@ -41,19 +43,19 @@ const RecipeCard = ({
         scroll-snap-align: start;
 
         &[data-selected="true"] {
-          border-color: ${palette.selected};
-          background: ${palette.selectedSoft};
-          box-shadow: 0 0 0 2px ${palette.selectedGlow};
+          border-color: ${colors.selected};
+          background: ${colors.selectedSoft};
+          box-shadow: 0 0 0 2px ${colors.selectedGlow};
         }
 
         &[data-available="true"] {
           cursor: pointer;
-          border-color: ${palette.accent};
+          border-color: ${colors.accent};
         }
 
         &[data-available="true"]:hover {
-          background: ${palette.surfaceHover};
-          border-color: ${palette.accentHover};
+          background: ${colors.surfaceHover};
+          border-color: ${colors.accentHover};
         }
 
         &[data-unavailable="true"] {
@@ -66,18 +68,19 @@ const RecipeCard = ({
       attr:data-unavailable={bvm.isUnavailable}
       on:click={() => ui.selectBuilding(type)}
     >
-      <div
+      <Stack
+        direction="row"
+        align="center"
+        gap="4px"
         css={`
-          display: flex;
-          align-items: center;
-          gap: 4px;
           font-size: 0.75rem;
-          font-weight: 500;
         `}
       >
-        <span css="font-size: 1rem;">{def.icon}</span>
-        <span>{def.name}</span>
-      </div>
+        <Text size="sm">{def.icon}</Text>
+        <Text size="xs" w="medium">
+          {def.name}
+        </Text>
+      </Stack>
       <div
         css={`
           display: inline-grid;
@@ -100,7 +103,7 @@ const RecipeCard = ({
 
                 &[data-empty="true"] {
                   opacity: 0.15;
-                  background: ${palette.cellBg};
+                  background: ${colors.cellBg};
                   border-color: transparent;
                 }
               `}
@@ -110,46 +113,27 @@ const RecipeCard = ({
           ))
         )}
       </div>
-      <span
-        css={`
-          font-size: 0.6rem;
-          color: ${palette.textMuted};
-          line-height: 1.2;
-        `}
-      >
+      <Text size="xs" c="muted" lh="tight">
         {def.description}
-      </span>
+      </Text>
     </div>
   );
 };
 
 export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => (
-  <div
+  <Stack
+    gap="6px"
     css={`
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
       min-width: 0;
     `}
   >
-    <h3
-      css={`
-        display: block;
-        margin: 0;
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: ${palette.textMuted};
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      `}
-    >
+    <Text size="xs" c="muted" w="semibold">
       Здания
-    </h3>
-    <div
+    </Text>
+    <Stack
+      direction="row"
+      gap="8px"
       css={`
-        display: flex;
-        flex-direction: row;
-        gap: 8px;
         overflow-x: auto;
         padding-bottom: 4px;
         scroll-snap-type: x proximity;
@@ -160,12 +144,12 @@ export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => (
         }
 
         &::-webkit-scrollbar-track {
-          background: ${palette.cellBg};
+          background: ${colors.cellBg};
           border-radius: 2px;
         }
 
         &::-webkit-scrollbar-thumb {
-          background: ${palette.borderHover};
+          background: ${colors.borderHover};
           border-radius: 2px;
         }
       `}
@@ -173,6 +157,6 @@ export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => (
       {BUILDING_TYPES.map((type) => (
         <RecipeCard type={type} ui={ui} />
       ))}
-    </div>
-  </div>
+    </Stack>
+  </Stack>
 );

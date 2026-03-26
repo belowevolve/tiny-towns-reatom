@@ -5,8 +5,9 @@ import type { PlayerUIState } from "../model/player-ui";
 import type { BuildMatch, Resource } from "../model/types";
 import { GRID_SIZE, RESOURCE_COLORS, RESOURCE_NAMES } from "../model/types";
 import { Button } from "../shared/ui/button";
-import { palette, radius, shadow } from "../shared/ui/design-system";
+import { colors, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
+import { Text } from "../shared/ui/text";
 
 const VariantCard = ({
   match,
@@ -37,21 +38,21 @@ const VariantCard = ({
         flex-direction: column;
         gap: 8px;
         padding: 12px;
-        background: ${palette.cellBg};
-        border: 2px solid ${palette.border};
+        background: ${colors.cellBg};
+        border: 2px solid ${colors.border};
         border-radius: ${radius.md};
         cursor: pointer;
         transition: all 0.15s ease;
 
         &:hover {
-          border-color: ${palette.borderHover};
-          background: ${palette.surfaceHover};
+          border-color: ${colors.borderHover};
+          background: ${colors.surfaceHover};
         }
 
         &[data-selected="true"] {
-          border-color: ${palette.highlight};
-          background: ${palette.highlightSoft};
-          box-shadow: 0 0 10px ${palette.highlightGlow};
+          border-color: ${colors.highlight};
+          background: ${colors.highlightSoft};
+          box-shadow: 0 0 10px ${colors.highlightGlow};
         }
       `}
       attr:data-selected={isSelected}
@@ -64,7 +65,9 @@ const VariantCard = ({
           gap: 10px;
         `}
       >
-        <span css="font-size: 1.5rem; line-height: 1;">{def.icon}</span>
+        <Text size="xl" lh="none">
+          {def.icon}
+        </Text>
         <div
           css={`
             display: flex;
@@ -72,15 +75,20 @@ const VariantCard = ({
             gap: 1px;
           `}
         >
-          <span css="font-size: 0.9rem; font-weight: 600;">{def.name}</span>
-          <span
+          <Text size="md" w="semibold">
+            {def.name}
+          </Text>
+          <Text
+            size="xs"
+            c="muted"
             css={`
-              font-size: 0.7rem;
-              color: ${palette.textMuted};
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
             `}
           >
             {cellsLabel}
-          </span>
+          </Text>
         </div>
       </div>
       <div
@@ -104,12 +112,12 @@ const VariantCard = ({
                   align-items: center;
                   justify-content: center;
                   font-size: 0.8rem;
-                  background: ${palette.surface};
+                  background: ${colors.surface};
                   border-radius: 4px;
-                  border: 1px solid ${palette.border};
+                  border: 1px solid ${colors.border};
 
                   &[data-active="true"] {
-                    border-color: ${palette.borderHover};
+                    border-color: ${colors.borderHover};
                   }
                 `}
                 attr:data-active={inMatch}
@@ -147,13 +155,13 @@ const ResourcePickerItem = ({
       align-items: center;
       gap: 6px;
       padding: 10px 14px;
-      border: 2px solid ${palette.border};
+      border: 2px solid ${colors.border};
       border-radius: ${radius.md};
       cursor: pointer;
-      background: ${palette.surface};
+      background: ${colors.surface};
 
       &:hover {
-        border-color: ${palette.accent};
+        border-color: ${colors.accent};
         box-shadow: ${shadow.card};
         transform: translateY(-2px);
       }
@@ -161,15 +169,9 @@ const ResourcePickerItem = ({
     on:click={onPick}
   >
     <ResourceSwatch resource={resource} />
-    <span
-      css={`
-        font-size: 0.72rem;
-        color: ${palette.textMuted};
-        font-weight: 500;
-      `}
-    >
+    <Text size="xs" c="muted" w="medium">
       {RESOURCE_NAMES[resource]}
-    </span>
+    </Text>
   </Button>
 );
 
@@ -189,12 +191,11 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             gap: 16px;
           `}
         >
-          <h3
+          <Text
+            as="h3"
+            size="md"
+            w="semibold"
             css={`
-              margin: 0;
-              font-size: 1rem;
-              font-weight: 600;
-              color: ${palette.text};
               text-align: center;
               display: flex;
               align-items: center;
@@ -203,7 +204,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             `}
           >
             Выберите ресурс для хранения
-          </h3>
+          </Text>
           <div
             css={`
               display: flex;
@@ -232,12 +233,11 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             gap: 16px;
           `}
         >
-          <h3
+          <Text
+            as="h3"
+            size="md"
+            w="semibold"
             css={`
-              margin: 0;
-              font-size: 1rem;
-              font-weight: 600;
-              color: ${palette.text};
               text-align: center;
               display: flex;
               align-items: center;
@@ -245,19 +245,21 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
               gap: 6px;
             `}
           >
-            🏭 Заменить <ResourceSwatch resource={mode.storedResource} small />{" "}
+            🏭 Заменить{" "}
+            <ResourceSwatch resource={mode.storedResource} size="sm" />{" "}
             {RESOURCE_NAMES[mode.storedResource]}
-          </h3>
-          <p
+          </Text>
+          <Text
+            as="p"
+            size="sm"
+            c="muted"
             css={`
               margin: 0;
-              font-size: 0.8rem;
-              color: ${palette.textMuted};
               text-align: center;
             `}
           >
             Выберите ресурс для замены
-          </p>
+          </Text>
           <div
             css={`
               display: flex;
@@ -298,12 +300,12 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             gap: 16px;
           `}
         >
-          <h3
+          <Text
+            as="h3"
+            size="md"
+            w="semibold"
             css={`
               margin: 0;
-              font-size: 1rem;
-              font-weight: 600;
-              color: ${palette.text};
               text-align: center;
               display: flex;
               align-items: center;
@@ -311,9 +313,9 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
               gap: 6px;
             `}
           >
-            📦 Склад ← <ResourceSwatch resource={mode.incoming} small />{" "}
+            📦 Склад ← <ResourceSwatch resource={mode.incoming} size="sm" />{" "}
             {RESOURCE_NAMES[mode.incoming]}
-          </h3>
+          </Text>
           {mode.canStore && (
             <Button
               css="align-self: center;"
@@ -324,16 +326,17 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           )}
           {mode.stored.length > 0 && (
             <>
-              <p
+              <Text
+                as="p"
+                size="sm"
+                c="muted"
                 css={`
                   margin: 0;
-                  font-size: 0.8rem;
-                  color: ${palette.textMuted};
                   text-align: center;
                 `}
               >
                 Или заменить:
-              </p>
+              </Text>
               <div
                 css={`
                   display: flex;
@@ -380,12 +383,12 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           gap: 16px;
         `}
       >
-        <h3
+        <Text
+          as="h3"
+          size="md"
+          w="semibold"
           css={`
             margin: 0;
-            font-size: 1rem;
-            font-weight: 600;
-            color: ${palette.text};
             text-align: center;
             display: flex;
             align-items: center;
@@ -394,7 +397,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           `}
         >
           Выберите вариант
-        </h3>
+        </Text>
         <div
           css={`
             display: flex;

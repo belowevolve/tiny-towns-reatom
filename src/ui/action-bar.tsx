@@ -4,8 +4,23 @@ import { actionBarMode } from "../model/game-ui";
 import { announceResource, markDone } from "../model/multiplayer/actions";
 import { RESOURCES, RESOURCE_NAMES } from "../model/types";
 import { Button } from "../shared/ui/button";
-import { palette, radius, shadow } from "../shared/ui/design-system";
+import { colors, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
+import { Stack } from "../shared/ui/stack";
+import { Text } from "../shared/ui/text";
+
+const barCss = `
+  padding: 10px 16px;
+  background: ${colors.surface};
+  border-top: 1px solid ${colors.border};
+  box-shadow: 0 -2px 12px oklch(0.36 0.02 70 / 0.08);
+  max-width: 520px;
+  margin: 0 auto;
+`;
+
+const mutedHintCss = `
+  text-align: center;
+`;
 
 export const ActionBar = () => {
   const content = computed(() => {
@@ -13,61 +28,33 @@ export const ActionBar = () => {
 
     if (mode.type === "eliminated") {
       return (
-        <div
-          css={`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 10px 16px;
-            background: ${palette.surface};
-            border-top: 1px solid ${palette.border};
-            box-shadow: 0 -2px 12px oklch(0.36 0.02 70 / 0.08);
-            max-width: 520px;
-            margin: 0 auto;
-          `}
-        >
-          <div
-            css={`
-              font-size: 0.8rem;
-              color: ${palette.textMuted};
-              text-align: center;
-            `}
-          >
+        <Stack align="center" justify="center" gap="12px" css={barCss}>
+          <Text size="sm" c="muted" css={mutedHintCss}>
             Вы выбыли из игры
-          </div>
-        </div>
+          </Text>
+        </Stack>
       );
     }
 
     if (mode.type === "picker") {
       return (
-        <div
+        <Stack
+          direction="col"
+          align="center"
+          justify="center"
+          gap="6px"
           css={`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 6px;
             padding: 8px 16px 12px;
-            background: ${palette.surface};
-            border-top: 1px solid ${palette.border};
+            background: ${colors.surface};
+            border-top: 1px solid ${colors.border};
             box-shadow: 0 -2px 12px oklch(0.36 0.02 70 / 0.08);
             max-width: 520px;
             margin: 0 auto;
           `}
         >
-          <span
-            css={`
-              font-size: 0.7rem;
-              font-weight: 600;
-              color: ${palette.textMuted};
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-            `}
-          >
+          <Text size="xs" c="muted" w="semibold">
             Объявите ресурс
-          </span>
+          </Text>
           <div
             css={`
               display: flex;
@@ -80,12 +67,12 @@ export const ActionBar = () => {
                 size="icon"
                 variant="secondary"
                 css={`
-                  border: 2px solid ${palette.border};
+                  border: 2px solid ${colors.border};
                   border-radius: ${radius.sm};
                   transition: all 0.15s ease;
 
                   &:hover {
-                    border-color: ${palette.accent};
+                    border-color: ${colors.accent};
                     box-shadow: ${shadow.card};
                     transform: translateY(-2px);
                   }
@@ -99,133 +86,62 @@ export const ActionBar = () => {
                 on:click={() => announceResource(r)}
                 title={RESOURCE_NAMES[r]}
               >
-                <ResourceSwatch resource={r} small />
+                <ResourceSwatch resource={r} size="sm" />
               </Button>
             ))}
           </div>
-        </div>
+        </Stack>
       );
     }
 
     if (mode.type === "waiting") {
       return (
-        <div
-          css={`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 10px 16px;
-            background: ${palette.surface};
-            border-top: 1px solid ${palette.border};
-            box-shadow: 0 -2px 12px oklch(0.36 0.02 70 / 0.08);
-            max-width: 520px;
-            margin: 0 auto;
-          `}
-        >
-          <div
-            css={`
-              font-size: 0.8rem;
-              color: ${palette.textMuted};
-              text-align: center;
-            `}
-          >
+        <Stack align="center" justify="center" gap="12px" css={barCss}>
+          <Text size="sm" c="muted" css={mutedHintCss}>
             🔨 {mode.name} выбирает ресурс…
-          </div>
-        </div>
+          </Text>
+        </Stack>
       );
     }
 
     const badge = (
-      <div
+      <Stack
+        direction="row"
+        align="center"
+        gap="6px"
         css={`
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
           font-size: 0.85rem;
-          color: ${palette.text};
         `}
       >
-        <ResourceSwatch resource={mode.resource} small />
-        <span>{RESOURCE_NAMES[mode.resource]}</span>
-      </div>
+        <ResourceSwatch resource={mode.resource} size="sm" />
+        <Text size="sm">{RESOURCE_NAMES[mode.resource]}</Text>
+      </Stack>
     );
 
     if (mode.type === "place") {
       return (
-        <div
-          css={`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 10px 16px;
-            background: ${palette.surface};
-            border-top: 1px solid ${palette.border};
-            box-shadow: 0 -2px 12px oklch(0.36 0.02 70 / 0.08);
-            max-width: 520px;
-            margin: 0 auto;
-          `}
-        >
+        <Stack align="center" justify="center" gap="12px" css={barCss}>
           {badge}
-          <div
-            css={`
-              font-size: 0.8rem;
-              color: ${palette.textMuted};
-              text-align: center;
-            `}
-          >
+          <Text size="sm" c="muted" css={mutedHintCss}>
             Поставьте ресурс на поле
-          </div>
-        </div>
+          </Text>
+        </Stack>
       );
     }
 
     if (mode.type === "ready") {
       return (
-        <div
-          css={`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 10px 16px;
-            background: ${palette.surface};
-            border-top: 1px solid ${palette.border};
-            box-shadow: 0 -2px 12px oklch(0.36 0.02 70 / 0.08);
-            max-width: 520px;
-            margin: 0 auto;
-          `}
-        >
+        <Stack align="center" justify="center" gap="12px" css={barCss}>
           {badge}
-          <div
-            css={`
-              font-size: 0.8rem;
-              color: ${palette.textMuted};
-              text-align: center;
-            `}
-          >
+          <Text size="sm" c="muted" css={mutedHintCss}>
             Ожидание других игроков…
-          </div>
-        </div>
+          </Text>
+        </Stack>
       );
     }
 
     return (
-      <div
-        css={`
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          padding: 10px 16px;
-          background: ${palette.surface};
-          border-top: 1px solid ${palette.border};
-          box-shadow: 0 -2px 12px oklch(0.36 0.02 70 / 0.08);
-          max-width: 520px;
-          margin: 0 auto;
-        `}
-      >
+      <Stack align="center" justify="center" gap="12px" css={barCss}>
         {badge}
         <Button
           css="padding: 10px 32px; font-size: 0.95rem; font-weight: 600;"
@@ -233,7 +149,7 @@ export const ActionBar = () => {
         >
           Готово
         </Button>
-      </div>
+      </Stack>
     );
   }, "actionBar.content");
 

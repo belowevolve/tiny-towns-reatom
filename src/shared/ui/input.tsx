@@ -1,48 +1,48 @@
 import { css } from "@reatom/jsx";
 import type { JSX } from "@reatom/jsx/jsx-runtime";
 
-import { palette, radius } from "./design-system";
-import { createCssVariants } from "./style-variants";
+import { cva } from "@/shared/lib/cva";
+import type { VariantProps } from "@/shared/lib/cva";
 
-type InputProps = JSX.IntrinsicElements["input"] & {
-  code?: boolean;
-};
+import { colors, radius } from "./design-system";
 
-const getInputCss = createCssVariants({
+const inputCss = cva({
   base: css`
     padding: 10px 14px;
-    border: 2px solid ${palette.border};
+    border: 2px solid ${colors.border};
     border-radius: ${radius.md};
     font-size: 1rem;
     font-family: inherit;
-    background: ${palette.surface};
-    color: ${palette.text};
+    background: ${colors.surface};
+    color: ${colors.text.base};
     transition: border-color 0.15s ease;
     outline: none;
 
     &:focus {
-      border-color: ${palette.accent};
+      border-color: ${colors.accent};
     }
   `,
   variants: {
-    code: {
-      false: "",
-      true: css`
+    variant: {
+      code: css`
         text-align: center;
         font-size: 1.6rem;
         font-weight: 700;
         letter-spacing: 0.3em;
-        text-transform: uppercase;
       `,
     },
   },
 });
 
-export const TextInput = ({ code, css: cssProp, ...props }: InputProps) => (
+type InputProps = JSX.IntrinsicElements["input"] &
+  VariantProps<typeof inputCss>;
+
+export const Input = ({ variant, css: cssProp, ...props }: InputProps) => (
   <input
     {...props}
     css={`
-      ${getInputCss({ code: code ? "true" : "false" })}${cssProp}
+      ${inputCss({ variant })}
+      ${cssProp}
     `}
   />
 );

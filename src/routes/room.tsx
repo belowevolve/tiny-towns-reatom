@@ -1,5 +1,7 @@
 import { atom, computed } from "@reatom/core";
 
+import { Stack } from "@/shared/ui/stack";
+
 import {
   connectionStatus,
   currentRoomCode,
@@ -16,8 +18,9 @@ import { startMultiplayerGame } from "../model/multiplayer/host";
 import { MAX_PLAYERS } from "../model/types";
 import { homeRoute, roomRoute } from "../routes";
 import { Button } from "../shared/ui/button";
-import { palette, radius } from "../shared/ui/design-system";
-import { TextInput } from "../shared/ui/input";
+import { colors, radius } from "../shared/ui/design-system";
+import { Input } from "../shared/ui/input";
+import { Text } from "../shared/ui/text";
 
 const PlayerListItem = ({
   isSelf,
@@ -30,80 +33,50 @@ const PlayerListItem = ({
   peerId: string;
   ready: boolean;
 }) => (
-  <div
+  <Stack
+    direction="row"
+    align="center"
+    gap="10px"
     css={`
-      display: flex;
-      align-items: center;
-      gap: 10px;
       padding: 10px 14px;
-      background: ${palette.surface};
-      border: 1px solid ${palette.border};
+      background: ${colors.surface};
+      border: 1px solid ${colors.border};
       border-radius: ${radius.sm};
       margin-bottom: 6px;
 
       &[data-self="true"] {
-        border-color: ${palette.accent};
-        background: ${palette.accentSoft};
+        border-color: ${colors.accent};
+        background: ${colors.accentSoft};
       }
     `}
     attr:data-self={isSelf}
   >
-    <span
-      css={`
-        flex: 1;
-        font-weight: 500;
-        font-size: 0.9rem;
-      `}
-    >
+    <Text size="md" w="medium" css="flex: 1;">
       {name}
       {isSelf && (
-        <span
-          css={`
-            font-weight: 400;
-            color: ${palette.textMuted};
-            font-size: 0.75rem;
-          `}
-        >
+        <Text size="sm" c="muted" w="normal">
           {" "}
           (вы)
-        </span>
+        </Text>
       )}
-    </span>
-    <span
-      css={`
-        font-size: 0.75rem;
-        color: ${palette.textMuted};
-      `}
-    >
+    </Text>
+    <Text size="sm" c="muted">
       {ready ? "✓ Готов" : "Ожидание…"}
-    </span>
+    </Text>
     {computed(() =>
       isHost() && !isSelf ? (
-        <button
-          css={`
-            padding: 2px 6px;
-            border: 1px solid ${palette.danger};
-            background: transparent;
-            color: ${palette.danger};
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            line-height: 1;
-
-            &:hover {
-              background: ${palette.danger};
-              color: oklch(1 0 0);
-            }
-          `}
+        <Button
+          size="icon-sm"
+          variant="danger"
           on:click={() => kickPlayer(peerId)}
         >
           ✕
-        </button>
+        </Button>
       ) : (
         ""
       )
     )}
-  </div>
+  </Stack>
 );
 
 const RoomView = () => {
@@ -113,53 +86,24 @@ const RoomView = () => {
   }, "room.canStart");
 
   return (
-    <div
+    <Stack
+      align="center"
+      gap="20px"
       css={`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
         width: 100%;
         max-width: 400px;
       `}
     >
-      <div
-        css={`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        `}
-      >
-        <span
-          css={`
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: ${palette.textMuted};
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-          `}
-        >
+      <Stack align="center" gap="4px">
+        <Text size="sm" c="muted" w="semibold">
           Код комнаты
-        </span>
-        <span
-          css={`
-            font-size: 2.4rem;
-            font-weight: 800;
-            letter-spacing: 0.25em;
-            color: ${palette.accent};
-          `}
-        >
+        </Text>
+        <Text size="xl" c="accent" w="extrabold">
           {currentRoomCode}
-        </span>
-      </div>
+        </Text>
+      </Stack>
 
-      <div
-        css={`
-          font-size: 0.8rem;
-          color: ${palette.textMuted};
-        `}
-      >
+      <Text size="sm" c="muted">
         {computed(() => {
           const status = connectionStatus();
           if (status === "connecting") {
@@ -173,21 +117,12 @@ const RoomView = () => {
           }
           return "";
         })}
-      </div>
+      </Text>
 
       <div css="width: 100%;">
-        <h3
-          css={`
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: ${palette.textMuted};
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin: 0 0 10px;
-          `}
-        >
+        <Text as="h3" size="md" c="muted" w="semibold" css="margin: 0 0 10px;">
           Игроки ({computed(() => lobbyPlayers().length)}/{MAX_PLAYERS})
-        </h3>
+        </Text>
         {computed(() =>
           lobbyPlayers().map((p) => (
             <PlayerListItem
@@ -200,13 +135,7 @@ const RoomView = () => {
         )}
       </div>
 
-      <div
-        css={`
-          display: flex;
-          gap: 10px;
-          align-items: center;
-        `}
-      >
+      <Stack direction="row" align="center" gap="10px">
         {computed(() =>
           isHost() ? (
             <Button
@@ -216,14 +145,9 @@ const RoomView = () => {
               Начать игру
             </Button>
           ) : (
-            <span
-              css={`
-                font-size: 0.85rem;
-                color: ${palette.textMuted};
-              `}
-            >
+            <Text size="md" c="muted">
               Ожидание хоста…
-            </span>
+            </Text>
           )
         )}
         <Button
@@ -235,8 +159,8 @@ const RoomView = () => {
         >
           Покинуть
         </Button>
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 };
 
@@ -244,72 +168,59 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
   const nameValue = atom("", "room.namePrompt");
 
   return (
-    <div
+    <Stack
+      align="center"
+      gap="24px"
       css={`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
+        width: 100%;
       `}
     >
-      <h1
-        css={`
-          font-size: 2rem;
-          font-weight: 800;
-          color: ${palette.text};
-          margin: 0;
-          text-align: center;
-        `}
-      >
+      <Text as="h1" size="xl" w="extrabold">
         Tiny Towns
-      </h1>
-      <p
+      </Text>
+      <Text
+        as="p"
+        size="md"
+        c="muted"
         css={`
-          font-size: 0.9rem;
-          color: ${palette.textMuted};
           margin: 4px 0 24px;
           text-align: center;
         `}
       >
         Введите имя чтобы продолжить
-      </p>
-      <div
+      </Text>
+      <Stack
+        gap="12px"
         css={`
           width: 100%;
           max-width: 300px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
         `}
       >
-        <label
+        <Text
+          as="label"
+          size="sm"
+          c="muted"
+          w="semibold"
           css={`
             display: flex;
             flex-direction: column;
             gap: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: ${palette.textMuted};
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
           `}
         >
           Ваше имя
-          <TextInput
+          <Input
             type="text"
             maxlength={20}
             placeholder="Введите имя…"
             model:value={nameValue}
           />
-        </label>
-      </div>
-      <div
+        </Text>
+      </Stack>
+      <Stack
+        gap="12px"
         css={`
           width: 100%;
           max-width: 300px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
         `}
       >
         <Button
@@ -323,8 +234,8 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
         >
           Продолжить
         </Button>
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 };
 
@@ -338,16 +249,16 @@ export const RoomPage = () => {
       <div
         css={`
           padding: 10px 16px;
-          background: ${palette.dangerSoft};
-          border: 1px solid ${palette.danger};
-          color: ${palette.danger};
+          background: ${colors.dangerSoft};
+          border: 1px solid ${colors.danger};
           border-radius: ${radius.md};
-          font-size: 0.85rem;
           margin-bottom: 16px;
           text-align: center;
         `}
       >
-        {err}
+        <Text size="sm" c="danger">
+          {err}
+        </Text>
       </div>
     );
   }, "room.errorDisplay");
@@ -384,18 +295,16 @@ export const RoomPage = () => {
   }, "room.view");
 
   return (
-    <div
+    <Stack
+      align="center"
+      justify="center"
       css={`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
         min-height: 100vh;
         padding: 24px;
       `}
     >
       {errorDisplay}
       {view}
-    </div>
+    </Stack>
   );
 };

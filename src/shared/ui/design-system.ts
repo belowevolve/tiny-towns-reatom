@@ -1,4 +1,4 @@
-export const palette = {
+const palette = {
   accent: "oklch(0.69 0.07 135)",
   accentHover: "oklch(0.62 0.07 135)",
   accentSoft: "oklch(0.93 0.04 135)",
@@ -6,6 +6,10 @@ export const palette = {
   border: "oklch(0.91 0.01 80)",
   borderActive: "oklch(0.76 0.06 70)",
   borderHover: "oklch(0.84 0.01 80)",
+};
+
+export const colors = {
+  ...palette,
   building: "oklch(0.93 0.04 135)",
   buildingBorder: "oklch(0.84 0.05 135)",
   cellBg: "oklch(0.96 0.01 80)",
@@ -23,9 +27,11 @@ export const palette = {
   shadowElevated: "oklch(0.36 0.02 70 / 0.1)",
   surface: "oklch(1 0 0)",
   surfaceHover: "oklch(0.96 0.01 70)",
-  text: "oklch(0.34 0.02 70)",
-  textLight: "oklch(0.76 0.02 75)",
-  textMuted: "oklch(0.66 0.02 75)",
+  text: {
+    accent: palette.accent,
+    base: "oklch(0.34 0.02 70)",
+    muted: "oklch(0.66 0.02 75)",
+  },
 } as const;
 
 export const radius = {
@@ -36,9 +42,9 @@ export const radius = {
 } as const;
 
 export const shadow = {
-  card: `0 2px 8px ${palette.shadow}`,
+  card: `0 2px 8px ${colors.shadow}`,
   cell: `0 1px 4px oklch(0.36 0.02 70 / 0.06)`,
-  elevated: `0 6px 20px ${palette.shadowElevated}`,
+  elevated: `0 6px 20px ${colors.shadowElevated}`,
 } as const;
 
 export const globalStyleText = `
@@ -47,8 +53,8 @@ export const globalStyleText = `
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light;
-  color: ${palette.text};
-  background-color: ${palette.bg};
+  color: ${colors.text.base};
+  background-color: ${colors.bg};
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -98,10 +104,10 @@ body {
 @keyframes cell-pulse {
   0%,
   100% {
-    box-shadow: 0 0 8px ${palette.highlightGlow};
+    box-shadow: 0 0 8px ${colors.highlightGlow};
   }
   50% {
-    box-shadow: 0 0 18px ${palette.highlightGlow};
+    box-shadow: 0 0 18px ${colors.highlightGlow};
   }
 }
 `;

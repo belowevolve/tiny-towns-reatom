@@ -3,8 +3,10 @@ import { computed } from "@reatom/core";
 import { BUILDINGS } from "../model/buildings";
 import { opponents, reatomOpponentVM } from "../model/game-ui";
 import type { PlayerState } from "../model/player";
-import { palette, radius, shadow } from "../shared/ui/design-system";
+import { colors, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
+import { Stack } from "../shared/ui/stack";
+import { Text } from "../shared/ui/text";
 
 const MiniCell = ({
   player,
@@ -19,7 +21,7 @@ const MiniCell = ({
       return "";
     }
     if (c.type === "resource") {
-      return <ResourceSwatch resource={c.resource} small />;
+      return <ResourceSwatch resource={c.resource} size="sm" />;
     }
     return BUILDINGS[c.building].icon;
   }, `opp.${player.id}.cell#${index}`);
@@ -27,23 +29,23 @@ const MiniCell = ({
   const bg = computed(() => {
     const c = player.cells[index]();
     if (c?.type === "resource") {
-      return palette.cellResource;
+      return colors.cellResource;
     }
     if (c) {
-      return palette.building;
+      return colors.building;
     }
-    return palette.cellBg;
+    return colors.cellBg;
   }, `opp.${player.id}.cell#${index}.bg`);
 
   const border = computed(() => {
     const c = player.cells[index]();
     if (c?.type === "resource") {
-      return palette.borderHover;
+      return colors.borderHover;
     }
     if (c) {
-      return palette.buildingBorder;
+      return colors.buildingBorder;
     }
-    return palette.border;
+    return colors.border;
   }, `opp.${player.id}.cell#${index}.border`);
 
   return (
@@ -56,7 +58,7 @@ const MiniCell = ({
         justify-content: center;
         font-size: 0.45rem;
         border-radius: 2px;
-        border: 1px solid ${palette.border};
+        border: 1px solid ${colors.border};
 
         @media (max-width: 400px) {
           width: 14px;
@@ -76,16 +78,14 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
   const vm = reatomOpponentVM(player);
 
   return (
-    <div
+    <Stack
+      gap="3px"
       css={`
         flex-shrink: 0;
         padding: 5px 6px;
-        background: ${palette.surface};
-        border: 1px solid ${palette.border};
+        background: ${colors.surface};
+        border: 1px solid ${colors.border};
         border-radius: ${radius.sm};
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
         box-shadow: ${shadow.cell};
 
         &[data-eliminated="true"] {
@@ -93,26 +93,18 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
         }
 
         &[data-master-builder="true"] {
-          border-color: ${palette.highlight};
-          box-shadow: 0 0 6px ${palette.highlightGlow};
+          border-color: ${colors.highlight};
+          box-shadow: 0 0 6px ${colors.highlightGlow};
         }
       `}
       attr:data-eliminated={vm.isEliminated}
       attr:data-master-builder={vm.isMasterBuilder}
     >
-      <div
-        css={`
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 4px;
-        `}
-      >
-        <span
+      <Stack direction="row" align="center" justify="between" gap="4px">
+        <Text
+          size="xs"
+          w="semibold"
           css={`
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: ${palette.text};
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -125,17 +117,11 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
         >
           {computed(() => (vm.isMasterBuilder() ? "🔨 " : ""))}
           {player.name}
-        </span>
-        <span
-          css={`
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: ${palette.accent};
-          `}
-        >
+        </Text>
+        <Text size="xs" w="bold" c="accent">
           {player.score}
-        </span>
-      </div>
+        </Text>
+      </Stack>
       <div
         css={`
           display: grid;
@@ -147,10 +133,10 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
           <MiniCell player={player} index={i} />
         ))}
       </div>
-      <div
+      <Text
+        size="xs"
+        c="muted"
         css={`
-          font-size: 0.5rem;
-          color: ${palette.textMuted};
           text-align: center;
           min-height: 0.6em;
         `}
@@ -164,17 +150,17 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
           }
           return "";
         })}
-      </div>
-    </div>
+      </Text>
+    </Stack>
   );
 };
 
 export const Opponents = () => (
-  <div
+  <Stack
+    direction="row"
+    justify="end"
+    gap="6px"
     css={`
-      display: flex;
-      gap: 6px;
-      justify-content: flex-end;
       -webkit-overflow-scrolling: touch;
 
       &::-webkit-scrollbar {
@@ -182,11 +168,11 @@ export const Opponents = () => (
       }
 
       &::-webkit-scrollbar-thumb {
-        background: ${palette.borderHover};
+        background: ${colors.borderHover};
         border-radius: 2px;
       }
     `}
   >
     {computed(() => opponents().map((p) => <OpponentBadge player={p} />))}
-  </div>
+  </Stack>
 );

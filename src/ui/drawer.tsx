@@ -1,7 +1,7 @@
 import type { Atom } from "@reatom/core";
 import type { JSX } from "@reatom/jsx";
 
-import { palette, radius } from "../shared/ui/design-system";
+import { colors, radius } from "../shared/ui/design-system";
 
 export const Drawer = ({
   open,
@@ -72,7 +72,7 @@ export const Drawer = ({
           left: 0;
           right: 0;
           z-index: 101;
-          background: ${palette.surface};
+          background: ${colors.surface};
           border-radius: ${radius.xl} ${radius.xl} 0 0;
           box-shadow: 0 -4px 24px oklch(0.36 0.02 70 / 0.15);
           padding: 12px 20px 24px;
@@ -95,7 +95,7 @@ export const Drawer = ({
           css={`
             width: 40px;
             height: 4px;
-            background: ${palette.borderHover};
+            background: ${colors.borderHover};
             border-radius: 2px;
             margin: 0 auto 16px;
             flex-shrink: 0;

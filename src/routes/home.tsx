@@ -9,24 +9,23 @@ import {
 } from "../model/lobby";
 import { roomRoute } from "../routes";
 import { Button } from "../shared/ui/button";
-import { palette } from "../shared/ui/design-system";
-import { TextInput } from "../shared/ui/input";
+import { Input } from "../shared/ui/input";
+import { Stack } from "../shared/ui/stack";
+import { Text } from "../shared/ui/text";
 
 const Join = ({ disabled }: { disabled: Computed<boolean> }) => {
   const codeInput = atom("", "home.codeInput");
 
   return (
-    <div
+    <Stack
+      gap="12px"
       css={`
         width: 100%;
         max-width: 300px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
       `}
     >
-      <TextInput
-        code
+      <Input
+        variant="code"
         type="text"
         maxlength={4}
         placeholder="ABCD"
@@ -44,7 +43,7 @@ const Join = ({ disabled }: { disabled: Computed<boolean> }) => {
       >
         Войти
       </Button>
-    </div>
+    </Stack>
   );
 };
 
@@ -52,54 +51,35 @@ const MenuView = () => {
   const disabled = computed(() => !playerName(), "home.disabled");
 
   return (
-    <div
-      css={`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
-      `}
-    >
-      <h1
-        css={`
-          font-size: 2rem;
-          font-weight: 800;
-          color: ${palette.text};
-          margin: 0;
-          text-align: center;
-        `}
-      >
+    <Stack align="center" gap="24px">
+      <Text size="xl" w="extrabold">
         Tiny Towns
-      </h1>
-      <div
+      </Text>
+      <Stack
         css={`
           width: 100%;
           max-width: 300px;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
         `}
+        gap="12px"
       >
-        <label
+        <Text
+          as="label"
+          size="sm"
+          c="muted"
           css={`
             display: flex;
             flex-direction: column;
             gap: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: ${palette.textMuted};
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
           `}
         >
           Ваше имя
-          <TextInput
+          <Input
             type="text"
             maxlength={20}
             placeholder="Введите имя…"
             model:value={playerName}
           />
-        </label>
+        </Text>
         <Button
           disabled={disabled}
           on:click={() => {
@@ -112,9 +92,9 @@ const MenuView = () => {
         >
           Создать комнату
         </Button>
-      </div>
+      </Stack>
       <Join disabled={disabled} />
-    </div>
+    </Stack>
   );
 };
 

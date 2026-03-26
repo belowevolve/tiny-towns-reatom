@@ -3,8 +3,9 @@ import { computed } from "@reatom/core";
 import { BUILDINGS } from "../model/buildings";
 import type { CellVM } from "../model/player-ui";
 import { GRID_SIZE, RESOURCE_COLORS } from "../model/types";
-import { palette, radius, shadow } from "../shared/ui/design-system";
+import { colors, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
+import { Text } from "../shared/ui/text";
 
 export const Cell = ({ vm, index }: { vm: CellVM; index: number }) => {
   const hintId = `cell-hint-${index}`;
@@ -62,7 +63,7 @@ export const Cell = ({ vm, index }: { vm: CellVM; index: number }) => {
       css={`
         padding: 0;
         color: inherit;
-        border: 2px solid ${palette.border};
+        border: 2px solid ${colors.border};
         border-radius: ${radius.md};
         display: flex;
         align-items: center;
@@ -70,65 +71,65 @@ export const Cell = ({ vm, index }: { vm: CellVM; index: number }) => {
         font-size: 2rem;
         cursor: pointer;
         transition: all 0.15s ease;
-        background: ${palette.cellBg};
+        background: ${colors.cellBg};
         user-select: none;
         aspect-ratio: 1;
         position: relative;
         box-shadow: ${shadow.cell};
 
         &:hover {
-          border-color: ${palette.borderHover};
-          background: ${palette.surfaceHover};
+          border-color: ${colors.borderHover};
+          background: ${colors.surfaceHover};
         }
 
         &[data-resource="true"] {
-          background: ${palette.cellResource};
-          border-color: ${palette.borderHover};
+          background: ${colors.cellResource};
+          border-color: ${colors.borderHover};
         }
 
         &[data-building="true"] {
-          background: ${palette.building};
-          border-color: ${palette.buildingBorder};
+          background: ${colors.building};
+          border-color: ${colors.buildingBorder};
         }
 
         &[data-highlighted="true"] {
-          background: ${palette.highlightSoft};
-          border-color: ${palette.highlight};
-          box-shadow: 0 0 12px ${palette.highlightGlow};
+          background: ${colors.highlightSoft};
+          border-color: ${colors.highlight};
+          box-shadow: 0 0 12px ${colors.highlightGlow};
         }
 
         &[data-buildable="true"] {
-          background: ${palette.accentSoft};
-          border-color: ${palette.accent};
+          background: ${colors.accentSoft};
+          border-color: ${colors.accent};
           box-shadow: 0 0 10px oklch(0.69 0.07 135 / 0.3);
           animation: cell-pulse 1.2s ease-in-out infinite;
         }
 
         &[data-buildable="true"]:hover {
-          background: ${palette.accent};
-          border-color: ${palette.accentHover};
+          background: ${colors.accent};
+          border-color: ${colors.accentHover};
         }
 
         &[data-storable="true"] {
-          border-color: ${palette.highlight};
-          box-shadow: 0 0 10px ${palette.highlightGlow};
+          border-color: ${colors.highlight};
+          box-shadow: 0 0 10px ${colors.highlightGlow};
           animation: cell-pulse 1.2s ease-in-out infinite;
         }
 
         &[data-storable="true"]:hover {
-          border-color: ${palette.accent};
-          background: ${palette.accentSoft};
+          border-color: ${colors.accent};
+          background: ${colors.accentSoft};
         }
 
         &[data-substitutable="true"] {
-          border-color: ${palette.selected};
-          box-shadow: 0 0 10px ${palette.selectedGlow};
+          border-color: ${colors.selected};
+          box-shadow: 0 0 10px ${colors.selectedGlow};
           animation: cell-pulse 1.2s ease-in-out infinite;
         }
 
         &[data-substitutable="true"]:hover {
-          border-color: ${palette.accent};
-          background: ${palette.accentSoft};
+          border-color: ${colors.accent};
+          background: ${colors.accentSoft};
         }
 
         @media (max-width: 400px) {
@@ -157,48 +158,49 @@ export const Cell = ({ vm, index }: { vm: CellVM; index: number }) => {
         css={`
           margin: 0;
           padding: 8px 12px;
-          border: 1px solid ${palette.border};
+          border: 1px solid ${colors.border};
           border-radius: ${radius.sm};
-          background: ${palette.surface};
+          background: ${colors.surface};
           box-shadow: ${shadow.elevated};
-          color: ${palette.text};
+          color: ${colors.text.base};
           max-width: 220px;
           inset: unset;
           position-area: top;
           margin-bottom: 6px;
 
           &[data-positive="true"] {
-            border-color: ${palette.buildingBorder};
+            border-color: ${colors.buildingBorder};
           }
 
           &[data-negative="true"] {
-            border-color: ${palette.danger};
+            border-color: ${colors.danger};
           }
         `}
         attr:data-negative={!vm.isPositiveScore}
         attr:data-positive={vm.isPositiveScore}
       >
-        <div css="font-weight: 600; font-size: 0.8rem; line-height: 1.2;">
+        <Text size="sm" w="semibold">
           {vm.hintTitle}
-        </div>
-        <div
+        </Text>
+        <Text
+          size="xs"
+          c="muted"
           css={`
-            font-size: 0.7rem;
-            color: ${palette.textMuted};
-            line-height: 1.3;
             white-space: pre-line;
           `}
         >
           {vm.hintDesc}
-        </div>
-        <div
-          css={computed(
-            () =>
-              `font-weight: 700; font-size: 0.85rem; margin-top: 1px; color: ${vm.isPositiveScore() ? palette.accent : palette.danger};`
-          )}
+        </Text>
+        <Text
+          size="md"
+          w="bold"
+          c={vm.isPositiveScore() ? "accent" : "danger"}
+          css={`
+            margin-top: 1px;
+          `}
         >
           {vm.scoreText}
-        </div>
+        </Text>
       </div>
     </button>
   );

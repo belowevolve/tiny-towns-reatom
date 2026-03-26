@@ -1,23 +1,17 @@
 import { css } from "@reatom/jsx";
 import type { JSX } from "@reatom/jsx/jsx-runtime";
 
-import { palette, radius, shadow } from "./design-system";
-import { createCssVariants } from "./style-variants";
+import { cva } from "@/shared/lib/cva";
+import type { VariantProps } from "@/shared/lib/cva";
 
-type ButtonVariant = "action" | "secondary";
-type ButtonSize = "md" | "icon";
+import { colors, radius, shadow } from "./design-system";
 
-type ButtonProps = JSX.IntrinsicElements["button"] & {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-};
-
-const getButtonCss = createCssVariants({
+const buttonCss = cva({
   base: css`
     border-radius: ${radius.sm};
-    background: ${palette.surface};
-    border: 1px solid ${palette.border};
-    color: ${palette.text};
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    color: ${colors.text.base};
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: 500;
@@ -39,35 +33,56 @@ const getButtonCss = createCssVariants({
         align-items: center;
         justify-content: center;
       `,
+      "icon-sm": css`
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      `,
       md: css`
         padding: 8px 18px;
       `,
     },
     variant: {
       action: css`
-        background: ${palette.accent};
+        background: ${colors.accent};
         border: none;
         color: oklch(1 0 0);
         box-shadow: ${shadow.cell};
 
         &:hover {
-          background: ${palette.accentHover};
+          background: ${colors.accentHover};
           box-shadow: ${shadow.card};
         }
       `,
-      secondary: css`
-        background: ${palette.surface};
-        border: 1px solid ${palette.border};
-        color: ${palette.text};
+      danger: css`
+        background: ${colors.danger};
+        border: none;
+        color: oklch(1 0 0);
+        box-shadow: ${shadow.cell};
 
         &:hover {
-          background: ${palette.surfaceHover};
-          border-color: ${palette.borderHover};
+          background: ${colors.dangerHover};
+        }
+      `,
+      secondary: css`
+        background: ${colors.surface};
+        border: 1px solid ${colors.border};
+        color: ${colors.text.base};
+
+        &:hover {
+          background: ${colors.surfaceHover};
+          border-color: ${colors.borderHover};
         }
       `,
     },
   },
 });
+
+type ButtonProps = JSX.IntrinsicElements["button"] &
+  VariantProps<typeof buttonCss>;
 
 export const Button = ({
   css: cssProp,
@@ -77,7 +92,7 @@ export const Button = ({
 }: ButtonProps) => (
   <button
     css={`
-      ${getButtonCss({ size, variant })}${cssProp}
+      ${buttonCss({ size, variant })}${cssProp}
     `}
     {...props}
   />

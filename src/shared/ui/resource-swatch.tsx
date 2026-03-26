@@ -1,10 +1,21 @@
 import { css } from "@reatom/jsx";
 
-import type { Resource } from "../../model/types";
-import { RESOURCE_COLORS } from "../../model/types";
-import { createCssVariants } from "./style-variants";
+import { cva } from "@/shared/lib/cva";
+import type { VariantProps } from "@/shared/lib/cva";
 
-const getSwatchCss = createCssVariants({
+import type { Resource } from "../../model/types";
+import { RESOURCES, RESOURCE_COLORS } from "../../model/types";
+
+const resourceVariants = Object.fromEntries(
+  RESOURCES.map((resource) => [
+    resource,
+    css`
+      background: ${RESOURCE_COLORS[resource]};
+    `,
+  ])
+) as Record<Resource, string>;
+
+const resourceSwatchCss = cva({
   base: css`
     display: block;
     width: 32px;
@@ -13,9 +24,9 @@ const getSwatchCss = createCssVariants({
     flex-shrink: 0;
   `,
   variants: {
-    small: {
-      false: "",
-      true: css`
+    resource: resourceVariants,
+    size: {
+      sm: css`
         width: 16px;
         height: 16px;
         border-radius: 3px;
@@ -28,13 +39,7 @@ const getSwatchCss = createCssVariants({
 
 export const ResourceSwatch = ({
   resource,
-  small,
-}: {
-  resource: Resource;
-  small?: boolean;
-}) => (
-  <span
-    css={getSwatchCss({ small: small ? "true" : "false" })}
-    style:background={RESOURCE_COLORS[resource]}
-  />
+  size,
+}: VariantProps<typeof resourceSwatchCss>) => (
+  <span css={resourceSwatchCss({ resource, size })} />
 );

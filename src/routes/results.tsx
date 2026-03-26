@@ -5,108 +5,73 @@ import { sortedScores } from "../model/game-ui";
 import { localPlayerUI } from "../model/player-ui";
 import { homeRoute } from "../routes";
 import { Button } from "../shared/ui/button";
-import { palette, radius } from "../shared/ui/design-system";
+import { colors, radius } from "../shared/ui/design-system";
+import { Stack } from "../shared/ui/stack";
+import { Text } from "../shared/ui/text";
 
 export const ResultsPage = () => {
   const list = computed(
     () =>
       sortedScores().map((s, i) => (
-        <div
+        <Stack
+          direction="row"
+          align="center"
+          gap="10px"
           css={`
-            display: flex;
-            align-items: center;
-            gap: 10px;
             padding: 12px 16px;
-            background: ${palette.surface};
-            border: 1px solid ${palette.border};
+            background: ${colors.surface};
+            border: 1px solid ${colors.border};
             border-radius: ${radius.sm};
 
             &[data-winner="true"] {
-              border-color: ${palette.highlight};
-              background: ${palette.highlightSoft};
+              border-color: ${colors.highlight};
+              background: ${colors.highlightSoft};
             }
 
             &[data-self="true"] {
-              border-color: ${palette.accent};
+              border-color: ${colors.accent};
             }
           `}
           attr:data-self={s.id === peek(localPlayerId)}
           attr:data-winner={i === 0}
         >
-          <span
-            css={`
-              font-weight: 700;
-              font-size: 1rem;
-              color: ${palette.textMuted};
-              min-width: 24px;
-            `}
-          >
+          <Text w="bold" c="muted" css="min-width: 24px;">
             {i + 1}.
-          </span>
-          <span
-            css={`
-              flex: 1;
-              font-weight: 500;
-            `}
-          >
+          </Text>
+          <Text w="medium" css="flex: 1;">
             {s.name}
-          </span>
-          <span
-            css={`
-              font-weight: 700;
-              color: ${palette.accent};
-              font-size: 1.1rem;
-            `}
-          >
+          </Text>
+          <Text size="lg" c="accent" w="bold">
             {s.score} VP
-          </span>
-        </div>
+          </Text>
+        </Stack>
       )),
     "results.list"
   );
 
   return (
-    <div
+    <Stack
+      align="center"
+      justify="center"
       css={`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
         min-height: 100vh;
         padding: 24px;
       `}
     >
-      <div
-        css={`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 24px;
-        `}
-      >
-        <h2
-          css={`
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: ${palette.text};
-            margin: 0;
-          `}
-        >
+      <Stack align="center" justify="center" gap="24px">
+        <Text as="h2" size="xl" w="extrabold">
           Игра окончена!
-        </h2>
-        <div
+        </Text>
+        <Stack
+          gap="6px"
           css={`
             width: 100%;
             max-width: 360px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
           `}
         >
           {list}
-        </div>
-      </div>
+        </Stack>
+      </Stack>
       <Button
         on:click={() => {
           localPlayerUI()?.reset();
@@ -116,6 +81,6 @@ export const ResultsPage = () => {
       >
         Новая игра
       </Button>
-    </div>
+    </Stack>
   );
 };

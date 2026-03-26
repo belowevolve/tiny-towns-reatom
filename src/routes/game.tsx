@@ -3,7 +3,8 @@ import { computed } from "@reatom/core";
 import { currentPlayer } from "../model/game";
 import { masterBuilderLabel, turnLabel } from "../model/game-ui";
 import { localPlayerUI } from "../model/player-ui";
-import { palette } from "../shared/ui/design-system";
+import { Stack } from "../shared/ui/stack";
+import { Text } from "../shared/ui/text";
 import { ActionBar } from "../ui/action-bar";
 import { BuildDrawer } from "../ui/build-drawer";
 import { BuildPanel } from "../ui/build-panel";
@@ -12,61 +13,25 @@ import { Grid } from "../ui/grid";
 import { Opponents } from "../ui/opponents";
 
 const ScoreDisplay = () => (
-  <div
-    css={`
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-    `}
-  >
-    <span
-      css={`
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: ${palette.accent};
-      `}
-    >
+  <Stack direction="row" align="baseline" gap="4px">
+    <Text size="lg" c="accent" w="bold">
       {computed(() => currentPlayer()?.score() ?? 0, "score.value")}
-    </span>
-    <span
-      css={`
-        font-size: 0.65rem;
-        color: ${palette.textMuted};
-      `}
-    >
+    </Text>
+    <Text size="xs" c="muted">
       {computed(() => currentPlayer()?.scoreDetails() ?? "", "score.details")}
-    </span>
-  </div>
+    </Text>
+  </Stack>
 );
 
 const TurnInfo = () => (
-  <div
-    css={`
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `}
-  >
-    <span
-      css={`
-        font-size: 0.7rem;
-        color: ${palette.textMuted};
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      `}
-    >
+  <Stack direction="row" align="center" gap="8px">
+    <Text size="xs" c="muted" w="semibold">
       {turnLabel}
-    </span>
-    <span
-      css={`
-        font-size: 0.7rem;
-        color: ${palette.textMuted};
-      `}
-    >
+    </Text>
+    <Text size="xs" c="muted">
       {masterBuilderLabel}
-    </span>
-  </div>
+    </Text>
+  </Stack>
 );
 
 export const GamePage = computed(() => {
