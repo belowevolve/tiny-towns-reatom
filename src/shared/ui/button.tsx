@@ -82,9 +82,3 @@ export const Button = ({
     {...props}
   />
 );
-
-type IconButtonProps = Omit<ButtonProps, "size">;
-
-export const IconButton = ({ css: cssProp, ...props }: IconButtonProps) => (
-  <Button size="icon" css={cssProp} {...props} />
-);

@@ -4,7 +4,7 @@ import { BUILDINGS } from "../model/buildings";
 import type { PlayerUIState } from "../model/player-ui";
 import type { BuildMatch, Resource } from "../model/types";
 import { GRID_SIZE, RESOURCE_COLORS, RESOURCE_NAMES } from "../model/types";
-import { Button, IconButton } from "../shared/ui/button";
+import { Button } from "../shared/ui/button";
 import { palette, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
 
@@ -138,7 +138,8 @@ const ResourcePickerItem = ({
   resource: Resource;
   onPick: () => void;
 }) => (
-  <IconButton
+  <Button
+    size="icon"
     variant="secondary"
     css={`
       display: flex;
@@ -149,11 +150,7 @@ const ResourcePickerItem = ({
       border: 2px solid ${palette.border};
       border-radius: ${radius.md};
       cursor: pointer;
-      transition: all 0.15s ease;
       background: ${palette.surface};
-      font-family: inherit;
-      width: auto;
-      height: auto;
 
       &:hover {
         border-color: ${palette.accent};
@@ -173,7 +170,7 @@ const ResourcePickerItem = ({
     >
       {RESOURCE_NAMES[resource]}
     </span>
-  </IconButton>
+  </Button>
 );
 
 export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {

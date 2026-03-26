@@ -3,7 +3,7 @@ import { computed } from "@reatom/core";
 import { actionBarMode } from "../model/game-ui";
 import { announceResource, markDone } from "../model/multiplayer/actions";
 import { RESOURCES, RESOURCE_NAMES } from "../model/types";
-import { Button, IconButton } from "../shared/ui/button";
+import { Button } from "../shared/ui/button";
 import { palette, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
 
@@ -76,7 +76,8 @@ export const ActionBar = () => {
             `}
           >
             {RESOURCES.map((r) => (
-              <IconButton
+              <Button
+                size="icon"
                 variant="secondary"
                 css={`
                   border: 2px solid ${palette.border};
@@ -99,7 +100,7 @@ export const ActionBar = () => {
                 title={RESOURCE_NAMES[r]}
               >
                 <ResourceSwatch resource={r} small />
-              </IconButton>
+              </Button>
             ))}
           </div>
         </div>
