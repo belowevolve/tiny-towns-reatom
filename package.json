@@ -18,11 +18,9 @@
     "trystero": "0.23.0"
   },
   "devDependencies": {
-    "@tweakpane/core": "2.0.5",
     "husky": "9.1.7",
     "oxfmt": "0.42.0",
     "oxlint": "1.57.0",
-    "tweakpane": "4.0.5",
     "typescript": "6.0.2",
     "ultracite": "7.3.2",
     "vite": "8.0.3"

@@ -11,11 +11,9 @@
         "trystero": "0.23.0",
       },
       "devDependencies": {
-        "@tweakpane/core": "2.0.5",
         "husky": "9.1.7",
         "oxfmt": "0.42.0",
         "oxlint": "1.57.0",
-        "tweakpane": "4.0.5",
         "typescript": "6.0.2",
         "ultracite": "7.3.2",
         "vite": "8.0.3",
@@ -157,8 +155,6 @@
 
     "@trystero-p2p/nostr": ["@trystero-p2p/nostr@0.23.0", "", { "dependencies": { "@noble/secp256k1": "^3.0.0", "@trystero-p2p/core": "0.23.0" } }, "sha512-KSqUR2c1KVfv4zeErcntuegtyKzFTzNNiitIKGD0LiKA/4H3CeTF81ROk2h+X/PNvP4mv7Gp5eVxFYwfMu4Nrg=="],
 
-    "@tweakpane/core": ["@tweakpane/core@2.0.5", "", {}, "sha512-punBgD5rKCF5vcNo6BsSOXiDR/NSs9VM7SG65QSLJIxfRaGgj54ree9zQW6bO3pNFf3AogiGgaNODUVQRk9YqQ=="],
-
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
     "@types/node": ["@types/node@25.5.0", "", { "dependencies": { "undici-types": "~7.18.0" } }, "sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw=="],
@@ -254,8 +250,6 @@
     "trystero": ["trystero@0.23.0", "", { "dependencies": { "@trystero-p2p/nostr": "0.23.0" } }, "sha512-HsM0FT0w41XW9bhXmYAfxr7PT+F6KwMzOxfJK2MbfipnMk/XrAIsV8lMTgU8NwWQqwCiS/b0b1qDsOf6IGxTmg=="],
 
     "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
-
-    "tweakpane": ["tweakpane@4.0.5", "", {}, "sha512-rxEXdSI+ArlG1RyO6FghC4ZUX8JkEfz8F3v1JuteXSV0pEtHJzyo07fcDG+NsJfN5L39kSbCYbB9cBGHyuI/tQ=="],
 
     "typescript": ["typescript@6.0.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ=="],
 
