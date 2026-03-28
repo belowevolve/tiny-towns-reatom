@@ -115,12 +115,6 @@ export type CellAtom = Atom<CellContent, [newState: CellContent]>;
 export type GamePhase = "lobby" | "playing" | "finished";
 export type TurnPhase = "announce" | "place";
 
-export type ConnectionStatus =
-  | "disconnected"
-  | "connecting"
-  | "connected"
-  | "error";
-
 export interface LobbyPlayer {
   peerId: string;
   name: string;

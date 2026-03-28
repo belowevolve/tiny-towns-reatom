@@ -2,78 +2,65 @@ import { urlAtom } from "@reatom/core";
 
 import { game, localPlayerId } from "../game";
 import { localPlayerUI, reatomPlayerUI } from "../player-ui";
-import type { HostMessage } from "./protocol";
-import { onMessage, selfId } from "./transport";
-
-const handleHostMessage = (msg: HostMessage): void => {
-  switch (msg.type) {
-    case "game-start": {
-      for (const p of msg.players) {
-        game.addPlayer(p.id, p.name);
-      }
-
-      localPlayerId.set(selfId);
-      const me = game.findPlayer(selfId);
-      if (me) {
-        localPlayerUI.set(reatomPlayerUI(me));
-      }
-      game.startGame();
-      urlAtom.go("/game");
-      break;
-    }
-
-    case "resource-announced": {
-      const alreadyApplied =
-        game.currentResource() === msg.resource && game.turnPhase() === "place";
-      if (!alreadyApplied) {
-        game.announceResource(msg.resource);
-      }
-      break;
-    }
-
-    case "player-grid": {
-      if (msg.playerId === localPlayerId()) {
-        break;
-      }
-
-      const player = game.findPlayer(msg.playerId);
-      if (!player) {
-        break;
-      }
-
-      player.applyGrid(msg.grid, msg.hasPlacedResource);
-      break;
-    }
-
-    case "player-eliminated": {
-      game.eliminatePlayer(msg.playerId);
-      break;
-    }
-
-    case "all-done": {
-      game.endTurn(msg.masterBuilderIndex);
-      break;
-    }
-
-    case "game-over": {
-      game.finishGame();
-      urlAtom.go("/results");
-      break;
-    }
-
-    case "lobby-state":
-    case "kick-player": {
-      break;
-    }
-
-    default: {
-      break;
-    }
-  }
-};
+import { on, selfId } from "./transport";
 
 export const initClientListener = (): void => {
-  onMessage((msg, _peerId) => {
-    handleHostMessage(msg as HostMessage);
+  on("game-start", (msg) => {
+    for (const p of msg.players) {
+      game.addPlayer(p.id, p.name);
+    }
+
+    localPlayerId.set(selfId);
+    const me = game.findPlayer(selfId);
+    if (me) {
+      localPlayerUI.set(reatomPlayerUI(me));
+    }
+    game.startGame();
+    urlAtom.go("/game");
+  });
+
+  on("resource-announced", (msg) => {
+    if (msg.masterBuilderId === selfId) {
+      return;
+    }
+    const alreadyApplied =
+      game.currentResource() === msg.resource && game.turnPhase() === "place";
+    if (!alreadyApplied) {
+      game.announceResource(msg.resource);
+    }
+  });
+
+  on("player-grid", (msg) => {
+    if (msg.playerId === localPlayerId()) {
+      return;
+    }
+    const player = game.findPlayer(msg.playerId);
+    if (!player) {
+      return;
+    }
+    player.applyGrid(msg.grid, msg.hasPlacedResource);
+  });
+
+  on("player-eliminated", (msg) => {
+    if (msg.playerId === localPlayerId()) {
+      return;
+    }
+    game.eliminatePlayer(msg.playerId);
+  });
+
+  on("turn-done", (msg) => {
+    if (msg.playerId === localPlayerId()) {
+      return;
+    }
+    game.markPlayerDone(msg.playerId);
+  });
+
+  on("all-done", (msg) => {
+    game.endTurn(msg.masterBuilderIndex);
+  });
+
+  on("game-over", () => {
+    game.finishGame();
+    urlAtom.go("/results");
   });
 };

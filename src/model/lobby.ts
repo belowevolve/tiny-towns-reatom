@@ -1,7 +1,6 @@
 import { action, atom, withLocalStorage } from "@reatom/core";
 
 import { initClientListener } from "./multiplayer/client";
-import type { NetworkMessage } from "./multiplayer/protocol";
 import { hostPeerId, isHost } from "./multiplayer/state";
 import {
   broadcast,
@@ -11,7 +10,8 @@ import {
   currentRoomCode,
   disconnect,
   generateRoomCode,
-  onMessage,
+  on,
+  onPeerLeave,
   selfId,
   send,
 } from "./multiplayer/transport";
@@ -34,8 +34,11 @@ const broadcastLobbyState = (): void => {
   });
 };
 
-const handleLobbyMessage = (msg: NetworkMessage, peerId: string): void => {
-  if (msg.type === "player-info" && isHost()) {
+const initLobbyListeners = (): void => {
+  on("player-info", (msg, peerId) => {
+    if (!isHost()) {
+      return;
+    }
     const current = lobbyPlayers();
     if (current.length >= MAX_PLAYERS) {
       return;
@@ -46,18 +49,37 @@ const handleLobbyMessage = (msg: NetworkMessage, peerId: string): void => {
 
     lobbyPlayers.set([...current, { name: msg.name, peerId, ready: false }]);
     broadcastLobbyState();
-  }
+  });
 
-  if (msg.type === "lobby-state" && !isHost()) {
+  on("lobby-state", (msg) => {
+    if (isHost()) {
+      return;
+    }
     lobbyPlayers.set(msg.players);
     hostPeerId.set(msg.hostId);
-  }
+    connectionStatus.set("connected");
+  });
 
-  if (msg.type === "kick-player" && msg.peerId === selfId) {
+  on("kick-player", (msg) => {
+    if (msg.peerId !== selfId) {
+      return;
+    }
     disconnect();
     lobbyPlayers.set([]);
     lobbyError.set("Вас удалили из комнаты");
-  }
+  });
+
+  onPeerLeave((peerId) => {
+    if (!isHost()) {
+      return;
+    }
+    const current = lobbyPlayers();
+    if (!current.some((p) => p.peerId === peerId)) {
+      return;
+    }
+    lobbyPlayers.set(current.filter((p) => p.peerId !== peerId));
+    broadcastLobbyState();
+  });
 };
 
 export const createRoom = action(() => {
@@ -71,11 +93,12 @@ export const createRoom = action(() => {
 
   const code = generateRoomCode();
   connectToRoom(code);
+  connectionStatus.set("connected");
 
   lobbyPlayers.set([{ name, peerId: selfId, ready: true }]);
   hostPeerId.set(selfId);
 
-  onMessage(handleLobbyMessage);
+  initLobbyListeners();
 }, "lobby.createRoom");
 
 export const joinRoom = action((code: string) => {
@@ -90,7 +113,7 @@ export const joinRoom = action((code: string) => {
   connectToRoom(code);
   lobbyPlayers.set([]);
 
-  onMessage(handleLobbyMessage);
+  initLobbyListeners();
   initClientListener();
 
   const unsub = connectedPeers.subscribe((peers) => {

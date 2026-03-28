@@ -2,9 +2,7 @@ import { action } from "@reatom/core";
 
 import { game, localPlayerId } from "../game";
 import type { Resource } from "../types";
-import { hostAnnounce, scheduleAdvanceCheck } from "./host";
-import { hostPeerId, isHost } from "./state";
-import { broadcast, sendToHost } from "./transport";
+import { broadcast } from "./transport";
 
 export const announceResource = action((resource: Resource) => {
   const mb = game.currentMasterBuilder();
@@ -13,15 +11,13 @@ export const announceResource = action((resource: Resource) => {
     return;
   }
 
-  if (isHost()) {
-    hostAnnounce(resource, myId);
-  } else {
-    game.announceResource(resource);
-    const host = hostPeerId();
-    if (host) {
-      sendToHost({ resource, type: "announce-resource" }, host);
-    }
-  }
+  game.announceResource(resource);
+  broadcast({
+    masterBuilderId: myId,
+    resource,
+    turnNumber: game.turnNumber(),
+    type: "resource-announced",
+  });
 }, "mp.announceResource");
 
 export const markDone = action(() => {
@@ -35,15 +31,7 @@ export const markDone = action(() => {
   }
 
   game.markPlayerDone(myId);
-
-  if (isHost()) {
-    scheduleAdvanceCheck();
-    return;
-  }
-  const host = hostPeerId();
-  if (host) {
-    sendToHost({ type: "turn-done" }, host);
-  }
+  broadcast({ playerId: myId, type: "turn-done" });
 }, "mp.markDone");
 
 export const eliminateSelf = action(() => {
@@ -52,13 +40,6 @@ export const eliminateSelf = action(() => {
     return;
   }
 
-  if (isHost()) {
-    broadcast({ playerId: myId, type: "player-eliminated" });
-    game.eliminatePlayer(myId);
-  } else {
-    const host = hostPeerId();
-    if (host) {
-      sendToHost({ type: "player-eliminated-self" }, host);
-    }
-  }
+  game.eliminatePlayer(myId);
+  broadcast({ playerId: myId, type: "player-eliminated" });
 }, "mp.eliminateSelf");

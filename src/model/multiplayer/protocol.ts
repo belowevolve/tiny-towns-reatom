@@ -1,11 +1,6 @@
 import type { CellContent, LobbyPlayer, Resource } from "../types";
 
-// --- Host -> All messages ---
-
-export interface GameStartMsg {
-  type: "game-start";
-  players: { id: string; name: string }[];
-}
+// --- Broadcast by any player ---
 
 export interface ResourceAnnouncedMsg {
   type: "resource-announced";
@@ -21,9 +16,21 @@ export interface PlayerGridMsg {
   hasPlacedResource: boolean;
 }
 
+export interface TurnDoneMsg {
+  type: "turn-done";
+  playerId: string;
+}
+
 export interface PlayerEliminatedMsg {
   type: "player-eliminated";
   playerId: string;
+}
+
+// --- Host-only broadcasts ---
+
+export interface GameStartMsg {
+  type: "game-start";
+  players: { id: string; name: string }[];
 }
 
 export interface AllDoneMsg {
@@ -48,49 +55,21 @@ export interface KickPlayerMsg {
   peerId: string;
 }
 
-// --- Player -> Host messages ---
-
-export interface GridSyncMsg {
-  type: "grid-sync";
-  grid: CellContent[];
-  hasPlacedResource: boolean;
-}
-
-export interface TurnDoneMsg {
-  type: "turn-done";
-}
-
-export interface PlayerEliminatedSelfMsg {
-  type: "player-eliminated-self";
-}
-
-// --- Bidirectional (lobby) ---
-
-export interface AnnounceResourceMsg {
-  type: "announce-resource";
-  resource: Resource;
-}
+// --- Client -> specific peer (lobby) ---
 
 export interface PlayerInfoMsg {
   type: "player-info";
   name: string;
 }
 
-export type HostMessage =
-  | GameStartMsg
+export type NetworkMessage =
   | ResourceAnnouncedMsg
   | PlayerGridMsg
+  | TurnDoneMsg
   | PlayerEliminatedMsg
+  | GameStartMsg
   | AllDoneMsg
   | GameOverMsg
   | LobbyStateMsg
-  | KickPlayerMsg;
-
-export type ClientMessage =
-  | GridSyncMsg
-  | TurnDoneMsg
-  | PlayerEliminatedSelfMsg
-  | AnnounceResourceMsg
+  | KickPlayerMsg
   | PlayerInfoMsg;
-
-export type NetworkMessage = HostMessage | ClientMessage;

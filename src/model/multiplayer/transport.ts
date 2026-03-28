@@ -2,14 +2,13 @@ import { action, atom } from "@reatom/core";
 import type { Room } from "trystero";
 import { joinRoom, selfId } from "trystero/nostr";
 
-import type { ConnectionStatus } from "../types";
 import type { NetworkMessage } from "./protocol";
 
+export { selfId };
 const APP_ID = "tiny-towns-reatom";
 
 const ROOM_CODE_CHARS = "abcdefghjkmnpqrstuvwxyz23456789";
 export const ROOM_CODE_LENGTH = 4;
-
 export const generateRoomCode = (): string => {
   let code = "";
   for (let i = 0; i < ROOM_CODE_LENGTH; i += 1) {
@@ -18,8 +17,11 @@ export const generateRoomCode = (): string => {
   return code;
 };
 
-export { selfId };
-
+export type ConnectionStatus =
+  | "disconnected"
+  | "connecting"
+  | "connected"
+  | "error";
 export const connectionStatus = atom<ConnectionStatus>(
   "disconnected",
   "transport.status"
@@ -28,45 +30,61 @@ export const connectedPeers = atom<string[]>([], "transport.peers");
 export const currentRoom = atom<Room | null>(null, "transport.room");
 export const currentRoomCode = atom<string | null>(null, "transport.roomCode");
 
-type MessageHandler = (msg: NetworkMessage, peerId: string) => void;
-type SendHandler = (msg: NetworkMessage, targetPeerId?: string) => void;
+type Handler<T = NetworkMessage> = (data: T, peerId: string) => void;
+type PeerHandler = (peerId: string) => void;
 
-const messageHandlers: MessageHandler[] = [];
-const sendHandlers: SendHandler[] = [];
+const msgHandlers = new Map<string, Set<Handler>>();
+const peerJoinHandlers = new Set<PeerHandler>();
+const peerLeaveHandlers = new Set<PeerHandler>();
 let sendFn: ((data: NetworkMessage, target?: string) => void) | null = null;
 
-export const onMessage = (handler: MessageHandler): void => {
-  messageHandlers.push(handler);
-};
-
-export const onSend = (handler: SendHandler): void => {
-  sendHandlers.push(handler);
-};
-
-export const clearMessageHandlers = (): void => {
-  messageHandlers.length = 0;
-};
-
-export const send = (msg: NetworkMessage, targetPeerId?: string): void => {
-  if (!sendFn) {
-    return;
+export const on = <T extends NetworkMessage["type"]>(
+  type: T,
+  handler: Handler<Extract<NetworkMessage, { type: T }>>
+): (() => void) => {
+  let set = msgHandlers.get(type);
+  if (!set) {
+    set = new Set();
+    msgHandlers.set(type, set);
   }
-  for (const handler of sendHandlers) {
-    handler(msg, targetPeerId);
-  }
-  if (targetPeerId) {
-    sendFn(msg, targetPeerId);
-  } else {
-    sendFn(msg);
-  }
+  set.add(handler as Handler);
+  return () => {
+    set.delete(handler as Handler);
+  };
 };
 
-export const sendToHost = (msg: NetworkMessage, hostPeerId: string): void => {
-  send(msg, hostPeerId);
+export const onPeerJoin = (handler: PeerHandler): (() => void) => {
+  peerJoinHandlers.add(handler);
+  return () => {
+    peerJoinHandlers.delete(handler);
+  };
+};
+
+export const onPeerLeave = (handler: PeerHandler): (() => void) => {
+  peerLeaveHandlers.add(handler);
+  return () => {
+    peerLeaveHandlers.delete(handler);
+  };
+};
+
+export const send = (msg: NetworkMessage, targetPeerId: string): void => {
+  sendFn?.(msg, targetPeerId);
 };
 
 export const broadcast = (msg: NetworkMessage): void => {
-  send(msg);
+  sendFn?.(msg);
+  const handlers = msgHandlers.get(msg.type);
+  if (handlers) {
+    for (const handler of handlers) {
+      handler(msg, selfId);
+    }
+  }
+};
+
+const clearHandlers = (): void => {
+  msgHandlers.clear();
+  peerJoinHandlers.clear();
+  peerLeaveHandlers.clear();
 };
 
 export const connectToRoom = action((roomCode: string) => {
@@ -89,25 +107,30 @@ export const connectToRoom = action((roomCode: string) => {
   };
 
   getMsg((data: unknown, peerId: string) => {
-    for (const handler of messageHandlers) {
-      handler(data as NetworkMessage, peerId);
+    const msg = data as NetworkMessage;
+    const handlers = msgHandlers.get(msg.type);
+    if (handlers) {
+      for (const handler of handlers) {
+        handler(msg, peerId);
+      }
     }
   });
 
   room.onPeerJoin((peerId) => {
-    connectionStatus.set("connected");
     connectedPeers.set([...connectedPeers(), peerId]);
+    for (const handler of peerJoinHandlers) {
+      handler(peerId);
+    }
   });
 
   room.onPeerLeave((peerId) => {
     connectedPeers.set(connectedPeers().filter((id) => id !== peerId));
-    if (connectedPeers().length === 0) {
-      connectionStatus.set("connecting");
+    for (const handler of peerLeaveHandlers) {
+      handler(peerId);
     }
   });
 
   currentRoom.set(room);
-  connectionStatus.set("connected");
 }, "transport.connect");
 
 export const disconnect = action(() => {
@@ -120,5 +143,5 @@ export const disconnect = action(() => {
   connectedPeers.set([]);
   connectionStatus.set("disconnected");
   sendFn = null;
-  clearMessageHandlers();
+  clearHandlers();
 }, "transport.disconnect");
