@@ -7,4 +7,5 @@ if (import.meta.env.MODE === "development") {
 declare global {
   var LOG: typeof log;
 }
+
 globalThis.LOG = log;

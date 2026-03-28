@@ -7,8 +7,8 @@ import type { NetworkMessage } from "./protocol";
 
 const APP_ID = "tiny-towns-reatom";
 
-const ROOM_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const ROOM_CODE_LENGTH = 4;
+const ROOM_CODE_CHARS = "abcdefghjkmnpqrstuvwxyz23456789";
+export const ROOM_CODE_LENGTH = 4;
 
 export const generateRoomCode = (): string => {
   let code = "";

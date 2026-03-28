@@ -1,12 +1,13 @@
 import { computed } from "@reatom/core";
 
+import { flex } from "@/shared/ui/flex";
+
 import { BUILDINGS } from "../model/buildings";
 import { opponents, reatomOpponentVM } from "../model/game-ui";
 import type { PlayerState } from "../model/player";
 import { colors, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
-import { Stack } from "../shared/ui/stack";
-import { Text } from "../shared/ui/text";
+import { text } from "../shared/ui/text";
 
 const MiniCell = ({
   player,
@@ -78,9 +79,9 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
   const vm = reatomOpponentVM(player);
 
   return (
-    <Stack
-      gap="3px"
+    <div
       css={`
+        ${flex({ gap: 0.5 })}
         flex-shrink: 0;
         padding: 5px 6px;
         background: ${colors.surface};
@@ -100,11 +101,17 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
       attr:data-eliminated={vm.isEliminated}
       attr:data-master-builder={vm.isMasterBuilder}
     >
-      <Stack direction="row" align="center" justify="between" gap="4px">
-        <Text
-          size="xs"
-          w="semibold"
+      <div
+        css={flex({
+          align: "center",
+          direction: "row",
+          gap: 1,
+          justify: "space-between",
+        })}
+      >
+        <span
           css={`
+            ${text({ fw: "semibold", size: "xs" })}
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -117,11 +124,11 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
         >
           {computed(() => (vm.isMasterBuilder() ? "🔨 " : ""))}
           {player.name}
-        </Text>
-        <Text size="xs" w="bold" c="accent">
+        </span>
+        <span css={text({ c: "accent", fw: "bold", size: "xs" })}>
           {player.score}
-        </Text>
-      </Stack>
+        </span>
+      </div>
       <div
         css={`
           display: grid;
@@ -133,10 +140,9 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
           <MiniCell player={player} index={i} />
         ))}
       </div>
-      <Text
-        size="xs"
-        c="muted"
+      <span
         css={`
+          ${text({ c: "muted", size: "xs" })}
           text-align: center;
           min-height: 0.6em;
         `}
@@ -150,19 +156,16 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
           }
           return "";
         })}
-      </Text>
-    </Stack>
+      </span>
+    </div>
   );
 };
 
 export const Opponents = () => (
-  <Stack
-    direction="row"
-    justify="end"
-    gap="6px"
+  <div
     css={`
+      ${flex({ direction: "row", gap: 1.5, justify: "end" })}
       -webkit-overflow-scrolling: touch;
-
       &::-webkit-scrollbar {
         height: 3px;
       }
@@ -174,5 +177,5 @@ export const Opponents = () => (
     `}
   >
     {computed(() => opponents().map((p) => <OpponentBadge player={p} />))}
-  </Stack>
+  </div>
 );

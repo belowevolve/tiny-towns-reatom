@@ -1,13 +1,13 @@
-import { computed } from "@reatom/core";
+import { rootRoute } from "@/shared/lib/router";
+import { globalStyleText } from "@/shared/ui/design-system";
 
-import { rootRoute } from "./routes";
-import { globalStyleText } from "./shared/ui/design-system";
+import "./routes";
 
 const GlobalStyles = () => <style>{globalStyleText}</style>;
 
-export const App = computed(() => (
+export const App = () => (
   <>
     <GlobalStyles />
-    {rootRoute.render()}
+    {rootRoute.render}
   </>
-));
+);

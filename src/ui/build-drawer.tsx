@@ -7,7 +7,7 @@ import { GRID_SIZE, RESOURCE_COLORS, RESOURCE_NAMES } from "../model/types";
 import { Button } from "../shared/ui/button";
 import { colors, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
-import { Text } from "../shared/ui/text";
+import { text } from "../shared/ui/text";
 
 const VariantCard = ({
   match,
@@ -65,9 +65,7 @@ const VariantCard = ({
           gap: 10px;
         `}
       >
-        <Text size="xl" lh="none">
-          {def.icon}
-        </Text>
+        <span css={text({ size: "xl" })}>{def.icon}</span>
         <div
           css={`
             display: flex;
@@ -75,20 +73,17 @@ const VariantCard = ({
             gap: 1px;
           `}
         >
-          <Text size="md" w="semibold">
-            {def.name}
-          </Text>
-          <Text
-            size="xs"
-            c="muted"
+          <span css={text({ fw: "semibold", size: "md" })}>{def.name}</span>
+          <span
             css={`
+              ${text({ c: "muted", size: "xs" })}
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
             `}
           >
             {cellsLabel}
-          </Text>
+          </span>
         </div>
       </div>
       <div
@@ -169,9 +164,9 @@ const ResourcePickerItem = ({
     on:click={onPick}
   >
     <ResourceSwatch resource={resource} />
-    <Text size="xs" c="muted" w="medium">
+    <span css={text({ c: "muted", fw: "medium", size: "xs" })}>
       {RESOURCE_NAMES[resource]}
-    </Text>
+    </span>
   </Button>
 );
 
@@ -191,11 +186,9 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             gap: 16px;
           `}
         >
-          <Text
-            as="h3"
-            size="md"
-            w="semibold"
+          <h3
             css={`
+              ${text({ fw: "semibold", size: "md" })}
               text-align: center;
               display: flex;
               align-items: center;
@@ -204,7 +197,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             `}
           >
             Выберите ресурс для хранения
-          </Text>
+          </h3>
           <div
             css={`
               display: flex;
@@ -233,11 +226,9 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             gap: 16px;
           `}
         >
-          <Text
-            as="h3"
-            size="md"
-            w="semibold"
+          <h3
             css={`
+              ${text({ fw: "semibold", size: "md" })}
               text-align: center;
               display: flex;
               align-items: center;
@@ -248,18 +239,16 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             🏭 Заменить{" "}
             <ResourceSwatch resource={mode.storedResource} size="sm" />{" "}
             {RESOURCE_NAMES[mode.storedResource]}
-          </Text>
-          <Text
-            as="p"
-            size="sm"
-            c="muted"
+          </h3>
+          <p
             css={`
+              ${text({ c: "muted", size: "sm" })}
               margin: 0;
               text-align: center;
             `}
           >
             Выберите ресурс для замены
-          </Text>
+          </p>
           <div
             css={`
               display: flex;
@@ -300,11 +289,9 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
             gap: 16px;
           `}
         >
-          <Text
-            as="h3"
-            size="md"
-            w="semibold"
+          <h3
             css={`
+              ${text({ fw: "semibold", size: "md" })}
               margin: 0;
               text-align: center;
               display: flex;
@@ -315,7 +302,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           >
             📦 Склад ← <ResourceSwatch resource={mode.incoming} size="sm" />{" "}
             {RESOURCE_NAMES[mode.incoming]}
-          </Text>
+          </h3>
           {mode.canStore && (
             <Button
               css="align-self: center;"
@@ -326,17 +313,15 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           )}
           {mode.stored.length > 0 && (
             <>
-              <Text
-                as="p"
-                size="sm"
-                c="muted"
+              <p
                 css={`
+                  ${text({ c: "muted", size: "sm" })}
                   margin: 0;
                   text-align: center;
                 `}
               >
                 Или заменить:
-              </Text>
+              </p>
               <div
                 css={`
                   display: flex;
@@ -383,11 +368,9 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           gap: 16px;
         `}
       >
-        <Text
-          as="h3"
-          size="md"
-          w="semibold"
+        <h3
           css={`
+            ${text({ fw: "semibold", size: "md" })}
             margin: 0;
             text-align: center;
             display: flex;
@@ -397,7 +380,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
           `}
         >
           Выберите вариант
-        </Text>
+        </h3>
         <div
           css={`
             display: flex;

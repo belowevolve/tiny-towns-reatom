@@ -3,8 +3,8 @@ import type { PlayerUIState } from "../model/player-ui";
 import type { BuildingType } from "../model/types";
 import { BUILDING_TYPES, RESOURCE_COLORS } from "../model/types";
 import { colors, radius, shadow } from "../shared/ui/design-system";
-import { Stack } from "../shared/ui/stack";
-import { Text } from "../shared/ui/text";
+import { flex } from "../shared/ui/flex";
+import { text } from "../shared/ui/text";
 
 const RecipeCard = ({
   type,
@@ -68,19 +68,10 @@ const RecipeCard = ({
       attr:data-unavailable={bvm.isUnavailable}
       on:click={() => ui.selectBuilding(type)}
     >
-      <Stack
-        direction="row"
-        align="center"
-        gap="4px"
-        css={`
-          font-size: 0.75rem;
-        `}
-      >
-        <Text size="sm">{def.icon}</Text>
-        <Text size="xs" w="medium">
-          {def.name}
-        </Text>
-      </Stack>
+      <div css={flex({ align: "center", direction: "row", gap: 1 })}>
+        <span css={text({ size: "sm" })}>{def.icon}</span>
+        <span css={text({ fw: "medium", size: "xs" })}>{def.name}</span>
+      </div>
       <div
         css={`
           display: inline-grid;
@@ -113,27 +104,22 @@ const RecipeCard = ({
           ))
         )}
       </div>
-      <Text size="xs" c="muted" lh="tight">
-        {def.description}
-      </Text>
+      <span css={text({ c: "muted", size: "xs" })}>{def.description}</span>
     </div>
   );
 };
 
 export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => (
-  <Stack
-    gap="6px"
+  <div
     css={`
+      ${flex({ gap: 1.5 })}
       min-width: 0;
     `}
   >
-    <Text size="xs" c="muted" w="semibold">
-      Здания
-    </Text>
-    <Stack
-      direction="row"
-      gap="8px"
+    <span css={text({ c: "muted", fw: "semibold", size: "xs" })}>Здания</span>
+    <div
       css={`
+        ${flex({ direction: "row", gap: 2 })}
         overflow-x: auto;
         padding-bottom: 4px;
         scroll-snap-type: x proximity;
@@ -157,6 +143,6 @@ export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => (
       {BUILDING_TYPES.map((type) => (
         <RecipeCard type={type} ui={ui} />
       ))}
-    </Stack>
-  </Stack>
+    </div>
+  </div>
 );

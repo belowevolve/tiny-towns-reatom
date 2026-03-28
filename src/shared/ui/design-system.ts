@@ -1,8 +1,11 @@
+// oxlint-disable sort-keys
+
 const palette = {
+  bg: "oklch(0.98 0.01 80)",
   accent: "oklch(0.69 0.07 135)",
   accentHover: "oklch(0.62 0.07 135)",
   accentSoft: "oklch(0.93 0.04 135)",
-  bg: "oklch(0.98 0.01 80)",
+  danger: "oklch(0.66 0.09 30)",
   border: "oklch(0.91 0.01 80)",
   borderActive: "oklch(0.76 0.06 70)",
   borderHover: "oklch(0.84 0.01 80)",
@@ -14,11 +17,10 @@ export const colors = {
   buildingBorder: "oklch(0.84 0.05 135)",
   cellBg: "oklch(0.96 0.01 80)",
   cellResource: "oklch(0.94 0.01 80)",
-  danger: "oklch(0.66 0.09 30)",
   dangerHover: "oklch(0.6 0.09 30)",
   dangerSoft: "oklch(0.93 0.04 30)",
-  highlight: "oklch(0.85 0.11 85)",
   highlightGlow: "oklch(0.85 0.11 85 / 0.35)",
+  highlight: "oklch(0.85 0.11 85)",
   highlightSoft: "oklch(0.95 0.04 85)",
   selected: "oklch(0.71 0.06 240)",
   selectedGlow: "oklch(0.71 0.06 240 / 0.3)",
@@ -31,15 +33,28 @@ export const colors = {
     accent: palette.accent,
     base: "oklch(0.34 0.02 70)",
     muted: "oklch(0.66 0.02 75)",
+    danger: palette.danger,
   },
 } as const;
+export type TextColor = keyof typeof colors.text;
+
+export const rem = (value: number) => `${value / 4}rem`;
 
 export const radius = {
-  lg: "16px",
-  md: "12px",
-  sm: "8px",
-  xl: "20px",
+  sm: "0.5rem",
+  md: "0.75rem",
+  lg: "1rem",
+  xl: "1.25rem",
 } as const;
+
+export const textSize = {
+  lg: "font-size: 1.1rem; line-height: 1.35;",
+  md: "font-size: 1rem; line-height: 1.4;",
+  sm: "font-size: 0.8rem; line-height: 1.3;",
+  xl: "font-size: 2rem; line-height: 1.2;",
+  xs: "font-size: 0.65rem; line-height: 1.2;",
+} as const;
+export type TextSize = keyof typeof textSize;
 
 export const shadow = {
   card: `0 2px 8px ${colors.shadow}`,
@@ -69,12 +84,13 @@ export const globalStyleText = `
 
 body {
   margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 #app {
-  width: 100%;
+  width: 100%; 
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
 }
 
 [interestfor] {

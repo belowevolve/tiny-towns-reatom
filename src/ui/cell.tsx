@@ -5,7 +5,7 @@ import type { CellVM } from "../model/player-ui";
 import { GRID_SIZE, RESOURCE_COLORS } from "../model/types";
 import { colors, radius, shadow } from "../shared/ui/design-system";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
-import { Text } from "../shared/ui/text";
+import { text } from "../shared/ui/text";
 
 export const Cell = ({ vm, index }: { vm: CellVM; index: number }) => {
   const hintId = `cell-hint-${index}`;
@@ -179,28 +179,27 @@ export const Cell = ({ vm, index }: { vm: CellVM; index: number }) => {
         attr:data-negative={!vm.isPositiveScore}
         attr:data-positive={vm.isPositiveScore}
       >
-        <Text size="sm" w="semibold">
-          {vm.hintTitle}
-        </Text>
-        <Text
-          size="xs"
-          c="muted"
+        <div css={text({ fw: "semibold", size: "sm" })}>{vm.hintTitle}</div>
+        <div
           css={`
+            ${text({ c: "muted", size: "xs" })}
             white-space: pre-line;
           `}
         >
           {vm.hintDesc}
-        </Text>
-        <Text
-          size="md"
-          w="bold"
-          c={vm.isPositiveScore() ? "accent" : "danger"}
+        </div>
+        <div
           css={`
+            ${text({
+              c: vm.isPositiveScore() ? "accent" : "danger",
+              fw: "bold",
+              size: "md",
+            })}
             margin-top: 1px;
           `}
         >
           {vm.scoreText}
-        </Text>
+        </div>
       </div>
     </button>
   );

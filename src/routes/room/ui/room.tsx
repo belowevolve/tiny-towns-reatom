@@ -1,6 +1,6 @@
 import { atom, computed } from "@reatom/core";
 
-import { Stack } from "@/shared/ui/stack";
+import { flex } from "@/shared/ui/flex";
 
 import {
   connectionStatus,
@@ -13,14 +13,14 @@ import {
   lobbyPlayers,
   playerName,
   selfId,
-} from "../model/lobby";
-import { startMultiplayerGame } from "../model/multiplayer/host";
-import { MAX_PLAYERS } from "../model/types";
-import { homeRoute, roomRoute } from "../routes";
-import { Button } from "../shared/ui/button";
-import { colors, radius } from "../shared/ui/design-system";
-import { Input } from "../shared/ui/input";
-import { Text } from "../shared/ui/text";
+} from "../../../model/lobby";
+import { startMultiplayerGame } from "../../../model/multiplayer/host";
+import { MAX_PLAYERS } from "../../../model/types";
+import { homeRoute, roomRoute } from "../../../routes";
+import { Button } from "../../../shared/ui/button";
+import { colors, radius } from "../../../shared/ui/design-system";
+import { Input } from "../../../shared/ui/input";
+import { text } from "../../../shared/ui/text";
 
 const PlayerListItem = ({
   isSelf,
@@ -33,11 +33,9 @@ const PlayerListItem = ({
   peerId: string;
   ready: boolean;
 }) => (
-  <Stack
-    direction="row"
-    align="center"
-    gap="10px"
+  <div
     css={`
+      ${flex({ align: "center", direction: "row", gap: 2.5 })}
       padding: 10px 14px;
       background: ${colors.surface};
       border: 1px solid ${colors.border};
@@ -51,18 +49,17 @@ const PlayerListItem = ({
     `}
     attr:data-self={isSelf}
   >
-    <Text size="md" w="medium" css="flex: 1;">
+    <span
+      css={`
+        ${text({ fw: "medium", size: "md" })}
+        flex: 1;
+      `}
+    >
       {name}
-      {isSelf && (
-        <Text size="sm" c="muted" w="normal">
-          {" "}
-          (вы)
-        </Text>
-      )}
-    </Text>
-    <Text size="sm" c="muted">
+    </span>
+    <span css={text({ c: "muted", size: "sm" })}>
       {ready ? "✓ Готов" : "Ожидание…"}
-    </Text>
+    </span>
     {computed(() =>
       isHost() && !isSelf ? (
         <Button
@@ -76,7 +73,7 @@ const PlayerListItem = ({
         ""
       )
     )}
-  </Stack>
+  </div>
 );
 
 const RoomView = () => {
@@ -86,24 +83,23 @@ const RoomView = () => {
   }, "room.canStart");
 
   return (
-    <Stack
-      align="center"
-      gap="20px"
+    <div
       css={`
+        ${flex({ align: "center", gap: 5 })}
         width: 100%;
         max-width: 400px;
       `}
     >
-      <Stack align="center" gap="4px">
-        <Text size="sm" c="muted" w="semibold">
+      <div css={flex({ align: "center", gap: 1 })}>
+        <span css={text({ c: "muted", fw: "semibold", size: "sm" })}>
           Код комнаты
-        </Text>
-        <Text size="xl" c="accent" w="extrabold">
+        </span>
+        <span css={text({ c: "accent", fw: "bold", size: "xl" })}>
           {currentRoomCode}
-        </Text>
-      </Stack>
+        </span>
+      </div>
 
-      <Text size="sm" c="muted">
+      <span css={text({ c: "muted", size: "sm" })}>
         {computed(() => {
           const status = connectionStatus();
           if (status === "connecting") {
@@ -117,12 +113,16 @@ const RoomView = () => {
           }
           return "";
         })}
-      </Text>
+      </span>
 
       <div css="width: 100%;">
-        <Text as="h3" size="md" c="muted" w="semibold" css="margin: 0 0 10px;">
+        <h3
+          css={`
+            ${text({ c: "muted", fw: "semibold", size: "md" })}margin: 0 0 10px;
+          `}
+        >
           Игроки ({computed(() => lobbyPlayers().length)}/{MAX_PLAYERS})
-        </Text>
+        </h3>
         {computed(() =>
           lobbyPlayers().map((p) => (
             <PlayerListItem
@@ -135,7 +135,7 @@ const RoomView = () => {
         )}
       </div>
 
-      <Stack direction="row" align="center" gap="10px">
+      <div css={flex({ align: "center", direction: "row", gap: 2.5 })}>
         {computed(() =>
           isHost() ? (
             <Button
@@ -145,9 +145,7 @@ const RoomView = () => {
               Начать игру
             </Button>
           ) : (
-            <Text size="md" c="muted">
-              Ожидание хоста…
-            </Text>
+            <span css={text({ c: "muted", size: "md" })}>Ожидание хоста…</span>
           )
         )}
         <Button
@@ -159,8 +157,8 @@ const RoomView = () => {
         >
           Покинуть
         </Button>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 };
 
@@ -168,40 +166,32 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
   const nameValue = atom("", "room.namePrompt");
 
   return (
-    <Stack
-      align="center"
-      gap="24px"
+    <div
       css={`
+        ${flex({ align: "center", gap: 6 })}
         width: 100%;
       `}
     >
-      <Text as="h1" size="xl" w="extrabold">
-        Tiny Towns
-      </Text>
-      <Text
-        as="p"
-        size="md"
-        c="muted"
+      <h1 css={text({ fw: "bold", size: "xl" })}>Tiny Towns</h1>
+      <p
         css={`
+          ${text({ c: "muted", size: "md" })}
           margin: 4px 0 24px;
           text-align: center;
         `}
       >
         Введите имя чтобы продолжить
-      </Text>
-      <Stack
-        gap="12px"
+      </p>
+      <div
         css={`
+          ${flex({ gap: 3 })}
           width: 100%;
           max-width: 300px;
         `}
       >
-        <Text
-          as="label"
-          size="sm"
-          c="muted"
-          w="semibold"
+        <label
           css={`
+            ${text({ c: "muted", fw: "semibold", size: "sm" })}
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -214,11 +204,11 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
             placeholder="Введите имя…"
             model:value={nameValue}
           />
-        </Text>
-      </Stack>
-      <Stack
-        gap="12px"
+        </label>
+      </div>
+      <div
         css={`
+          ${flex({ gap: 3 })}
           width: 100%;
           max-width: 300px;
         `}
@@ -234,8 +224,8 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
         >
           Продолжить
         </Button>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 };
 
@@ -256,9 +246,7 @@ export const RoomPage = () => {
           text-align: center;
         `}
       >
-        <Text size="sm" c="danger">
-          {err}
-        </Text>
+        <span css={text({ c: "danger", size: "sm" })}>{err}</span>
       </div>
     );
   }, "room.errorDisplay");
@@ -269,10 +257,10 @@ export const RoomPage = () => {
       return null;
     }
 
-    const { code } = params;
+    const requestedCode = params.code.toUpperCase();
     const currentCode = currentRoomCode();
 
-    if (currentCode === code) {
+    if (currentCode === requestedCode) {
       return <RoomView />;
     }
 
@@ -281,30 +269,29 @@ export const RoomPage = () => {
         <NamePrompt
           onSubmit={(name) => {
             playerName.set(name);
-            joinRoom(code);
+            joinRoom(requestedCode);
           }}
         />
       );
     }
 
     if (!currentCode) {
-      joinRoom(code);
+      joinRoom(requestedCode);
     }
 
     return <RoomView />;
   }, "room.view");
 
   return (
-    <Stack
-      align="center"
-      justify="center"
+    <div
       css={`
+        ${flex({ align: "center", justify: "center" })}
         min-height: 100vh;
         padding: 24px;
       `}
     >
       {errorDisplay}
       {view}
-    </Stack>
+    </div>
   );
 };

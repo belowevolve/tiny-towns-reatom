@@ -5,9 +5,9 @@ import { announceResource, markDone } from "../model/multiplayer/actions";
 import { RESOURCES, RESOURCE_NAMES } from "../model/types";
 import { Button } from "../shared/ui/button";
 import { colors, radius, shadow } from "../shared/ui/design-system";
+import { flex } from "../shared/ui/flex";
 import { ResourceSwatch } from "../shared/ui/resource-swatch";
-import { Stack } from "../shared/ui/stack";
-import { Text } from "../shared/ui/text";
+import { text } from "../shared/ui/text";
 
 const barCss = `
   padding: 10px 16px;
@@ -28,22 +28,27 @@ export const ActionBar = () => {
 
     if (mode.type === "eliminated") {
       return (
-        <Stack align="center" justify="center" gap="12px" css={barCss}>
-          <Text size="sm" c="muted" css={mutedHintCss}>
+        <div
+          css={`
+            ${flex({ align: "center", gap: 3, justify: "center" })}${barCss}
+          `}
+        >
+          <span
+            css={`
+              ${text({ c: "muted", size: "sm" })}${mutedHintCss}
+            `}
+          >
             Вы выбыли из игры
-          </Text>
-        </Stack>
+          </span>
+        </div>
       );
     }
 
     if (mode.type === "picker") {
       return (
-        <Stack
-          direction="col"
-          align="center"
-          justify="center"
-          gap="6px"
+        <div
           css={`
+            ${flex({ align: "center", gap: 1.5, justify: "center" })}
             padding: 8px 16px 12px;
             background: ${colors.surface};
             border-top: 1px solid ${colors.border};
@@ -52,9 +57,9 @@ export const ActionBar = () => {
             margin: 0 auto;
           `}
         >
-          <Text size="xs" c="muted" w="semibold">
+          <span css={text({ c: "muted", fw: "semibold", size: "xs" })}>
             Объявите ресурс
-          </Text>
+          </span>
           <div
             css={`
               display: flex;
@@ -90,58 +95,84 @@ export const ActionBar = () => {
               </Button>
             ))}
           </div>
-        </Stack>
+        </div>
       );
     }
 
     if (mode.type === "waiting") {
       return (
-        <Stack align="center" justify="center" gap="12px" css={barCss}>
-          <Text size="sm" c="muted" css={mutedHintCss}>
+        <div
+          css={`
+            ${flex({ align: "center", gap: 3, justify: "center" })}${barCss}
+          `}
+        >
+          <span
+            css={`
+              ${text({ c: "muted", size: "sm" })}${mutedHintCss}
+            `}
+          >
             🔨 {mode.name} выбирает ресурс…
-          </Text>
-        </Stack>
+          </span>
+        </div>
       );
     }
 
     const badge = (
-      <Stack
-        direction="row"
-        align="center"
-        gap="6px"
+      <div
         css={`
+          ${flex({ align: "center", direction: "row", gap: 1.5 })}
           font-size: 0.85rem;
         `}
       >
         <ResourceSwatch resource={mode.resource} size="sm" />
-        <Text size="sm">{RESOURCE_NAMES[mode.resource]}</Text>
-      </Stack>
+        <span css={text({ size: "sm" })}>{RESOURCE_NAMES[mode.resource]}</span>
+      </div>
     );
 
     if (mode.type === "place") {
       return (
-        <Stack align="center" justify="center" gap="12px" css={barCss}>
+        <div
+          css={`
+            ${flex({ align: "center", gap: 3, justify: "center" })}${barCss}
+          `}
+        >
           {badge}
-          <Text size="sm" c="muted" css={mutedHintCss}>
+          <span
+            css={`
+              ${text({ c: "muted", size: "sm" })}${mutedHintCss}
+            `}
+          >
             Поставьте ресурс на поле
-          </Text>
-        </Stack>
+          </span>
+        </div>
       );
     }
 
     if (mode.type === "ready") {
       return (
-        <Stack align="center" justify="center" gap="12px" css={barCss}>
+        <div
+          css={`
+            ${flex({ align: "center", gap: 3, justify: "center" })}${barCss}
+          `}
+        >
           {badge}
-          <Text size="sm" c="muted" css={mutedHintCss}>
+          <span
+            css={`
+              ${text({ c: "muted", size: "sm" })}${mutedHintCss}
+            `}
+          >
             Ожидание других игроков…
-          </Text>
-        </Stack>
+          </span>
+        </div>
       );
     }
 
     return (
-      <Stack align="center" justify="center" gap="12px" css={barCss}>
+      <div
+        css={`
+          ${flex({ align: "center", gap: 3, justify: "center" })}${barCss}
+        `}
+      >
         {badge}
         <Button
           css="padding: 10px 32px; font-size: 0.95rem; font-weight: 600;"
@@ -149,7 +180,7 @@ export const ActionBar = () => {
         >
           Готово
         </Button>
-      </Stack>
+      </div>
     );
   }, "actionBar.content");
 

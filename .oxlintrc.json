@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": ["./node_modules/ultracite/config/oxlint/core/.oxlintrc.json"],
+  "extends": [
+    "./node_modules/ultracite/config/oxlint/core/.oxlintrc.json",
+    "./node_modules/ultracite/config/oxlint/vitest/.oxlintrc.json"
+  ],
   "rules": {
     "max-statements": "off",
     "import/no-relative-parent-imports": "off",

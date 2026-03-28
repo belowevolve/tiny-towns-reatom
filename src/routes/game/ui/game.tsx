@@ -1,37 +1,41 @@
 import { computed } from "@reatom/core";
 
-import { currentPlayer } from "../model/game";
-import { masterBuilderLabel, turnLabel } from "../model/game-ui";
-import { localPlayerUI } from "../model/player-ui";
-import { Stack } from "../shared/ui/stack";
-import { Text } from "../shared/ui/text";
-import { ActionBar } from "../ui/action-bar";
-import { BuildDrawer } from "../ui/build-drawer";
-import { BuildPanel } from "../ui/build-panel";
-import { Drawer } from "../ui/drawer";
-import { Grid } from "../ui/grid";
-import { Opponents } from "../ui/opponents";
+import { currentPlayer } from "@/model/game";
+import { masterBuilderLabel, turnLabel } from "@/model/game-ui";
+import { localPlayerUI } from "@/model/player-ui";
+import { flex } from "@/shared/ui/flex";
+import { text } from "@/shared/ui/text";
+import { ActionBar } from "@/ui/action-bar";
+import { BuildDrawer } from "@/ui/build-drawer";
+import { BuildPanel } from "@/ui/build-panel";
+import { Drawer } from "@/ui/drawer";
+import { Grid } from "@/ui/grid";
+import { Opponents } from "@/ui/opponents";
 
 const ScoreDisplay = () => (
-  <Stack direction="row" align="baseline" gap="4px">
-    <Text size="lg" c="accent" w="bold">
+  <div css={flex({ align: "baseline", direction: "row", gap: 1 })}>
+    <span css={text({ c: "accent", fw: "bold", size: "lg" })}>
       {computed(() => currentPlayer()?.score() ?? 0, "score.value")}
-    </Text>
-    <Text size="xs" c="muted">
+    </span>
+    <span css={text({ c: "muted", size: "xs" })}>
       {computed(() => currentPlayer()?.scoreDetails() ?? "", "score.details")}
-    </Text>
-  </Stack>
+    </span>
+  </div>
 );
 
 const TurnInfo = () => (
-  <Stack direction="row" align="center" gap="8px">
-    <Text size="xs" c="muted" w="semibold">
-      {turnLabel}
-    </Text>
-    <Text size="xs" c="muted">
-      {masterBuilderLabel}
-    </Text>
-  </Stack>
+  <div
+    css={`
+      ${flex({ align: "center", direction: "row", gap: 2 })}
+      ${text({
+        c: "muted",
+        size: "xs",
+      })}
+    `}
+  >
+    <span css={text({ fw: "semibold" })}>{turnLabel}</span>
+    <span>{masterBuilderLabel}</span>
+  </div>
 );
 
 export const GamePage = computed(() => {
