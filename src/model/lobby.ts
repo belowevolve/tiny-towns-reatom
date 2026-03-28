@@ -2,6 +2,7 @@ import { action, atom, withLocalStorage } from "@reatom/core";
 
 import { initClientListener } from "./multiplayer/client";
 import type { NetworkMessage } from "./multiplayer/protocol";
+import { hostPeerId, isHost } from "./multiplayer/state";
 import {
   broadcast,
   connectedPeers,
@@ -20,9 +21,7 @@ import { MAX_PLAYERS } from "./types";
 export const playerName = atom("", "lobby.playerName").extend(
   withLocalStorage("player-name")
 );
-export const isHost = atom(false, "lobby.isHost");
 export const lobbyPlayers = atom<LobbyPlayer[]>([], "lobby.players");
-export const hostPeerId = atom<string | null>(null, "lobby.hostPeerId");
 export const lobbyError = atom<string | null>(null, "lobby.error");
 
 export { connectionStatus, currentRoomCode, selfId };
@@ -88,7 +87,7 @@ export const joinRoom = action((code: string) => {
   lobbyError.set(null);
   isHost.set(false);
 
-  connectToRoom(code.toUpperCase());
+  connectToRoom(code);
   lobbyPlayers.set([]);
 
   onMessage(handleLobbyMessage);

@@ -1,4 +1,4 @@
-import { action, atom, computed, peek } from "@reatom/core";
+import { action, atom, computed } from "@reatom/core";
 
 import { BUILDINGS, calculateCellScore } from "./buildings";
 import { game, localPlayerId } from "./game";
@@ -88,20 +88,20 @@ export const reatomPlayerUI = (player: PlayerState) => {
   // ─── UI actions ────────────────────────────────────────────────
 
   const selectBuilding = action((type: BuildingType | null) => {
-    if (!peek(player.hasPlacedResource)) {
+    if (!player.hasPlacedResource()) {
       return;
     }
 
-    const next = type === peek(selectedBuilding) ? null : type;
+    const next = type === selectedBuilding() ? null : type;
     selectedBuilding.set(next);
     pendingBuilds.set([]);
     drawerOpen.set(false);
     pendingTargetCell.set(null);
 
     if (next) {
-      const matches = peek(player.availableBuilds).filter(
-        (m) => m.building === next
-      );
+      const matches = player
+        .availableBuilds()
+        .filter((m) => m.building === next);
       highlightedCells.set(buildableTargets(matches));
     } else {
       highlightedCells.set(new Set<number>());
@@ -127,7 +127,7 @@ export const reatomPlayerUI = (player: PlayerState) => {
   }, `${prefix}.buildAtCell`);
 
   const storeResourceOnBuilding = action((resource: Resource) => {
-    const idx = peek(pendingBuildIndex);
+    const idx = pendingBuildIndex();
     if (idx === null) {
       return;
     }
@@ -140,14 +140,14 @@ export const reatomPlayerUI = (player: PlayerState) => {
   }, `${prefix}.storeResource`);
 
   const tryBuildAt = action((cellIndex: number) => {
-    const building = peek(selectedBuilding);
+    const building = selectedBuilding();
     if (!building) {
       return;
     }
 
-    const matches = peek(player.availableBuilds).filter(
-      (m) => m.building === building
-    );
+    const matches = player
+      .availableBuilds()
+      .filter((m) => m.building === building);
     const matchesAtCell = matches.filter(
       (m) => m.cells.includes(cellIndex) && !m.wildcardCells.includes(cellIndex)
     );
@@ -173,11 +173,11 @@ export const reatomPlayerUI = (player: PlayerState) => {
       );
       highlightedCells.set(new Set<number>(nonWild));
     } else {
-      const building = peek(selectedBuilding);
+      const building = selectedBuilding();
       if (building) {
-        const matches = peek(player.availableBuilds).filter(
-          (m) => m.building === building
-        );
+        const matches = player
+          .availableBuilds()
+          .filter((m) => m.building === building);
         highlightedCells.set(buildableTargets(matches));
       } else {
         highlightedCells.set(new Set<number>());
@@ -191,11 +191,11 @@ export const reatomPlayerUI = (player: PlayerState) => {
     drawerOpen.set(false);
     drawerSelectedVariant.set(null);
 
-    const building = peek(selectedBuilding);
+    const building = selectedBuilding();
     if (building) {
-      const matches = peek(player.availableBuilds).filter(
-        (m) => m.building === building
-      );
+      const matches = player
+        .availableBuilds()
+        .filter((m) => m.building === building);
       highlightedCells.set(buildableTargets(matches));
     } else {
       highlightedCells.set(new Set<number>());
@@ -204,7 +204,7 @@ export const reatomPlayerUI = (player: PlayerState) => {
 
   const initiateWarehouseStore = action(
     (warehouseIndex: number, resource: Resource) => {
-      const content = peek(cells[warehouseIndex]);
+      const content = cells[warehouseIndex]();
       if (content?.type !== "building") {
         return;
       }
@@ -242,12 +242,12 @@ export const reatomPlayerUI = (player: PlayerState) => {
   );
 
   const confirmWarehouseSwap = action((swapIdx: number) => {
-    const swap = peek(pendingWarehouseSwap);
+    const swap = pendingWarehouseSwap();
     if (!swap) {
       return;
     }
 
-    const content = peek(cells[swap.warehouseIndex]);
+    const content = cells[swap.warehouseIndex]();
     if (content?.type !== "building") {
       return;
     }
@@ -270,7 +270,7 @@ export const reatomPlayerUI = (player: PlayerState) => {
   }, `${prefix}.cancelWarehouseSwap`);
 
   const storeOnWarehouseFromPrompt = action(() => {
-    const swap = peek(pendingWarehouseSwap);
+    const swap = pendingWarehouseSwap();
     if (!swap) {
       return;
     }
@@ -283,7 +283,7 @@ export const reatomPlayerUI = (player: PlayerState) => {
   }, `${prefix}.storeFromPrompt`);
 
   const activateFactory = action((factoryIndex: number) => {
-    const content = peek(cells[factoryIndex]);
+    const content = cells[factoryIndex]();
     if (content?.type !== "building" || content.stored.length === 0) {
       return;
     }
@@ -339,14 +339,14 @@ export const reatomPlayerUI = (player: PlayerState) => {
   }, `${prefix}.drawerMode`);
 
   const closeDrawer = action(() => {
-    if (peek(pendingBuildEffect)) {
+    if (pendingBuildEffect()) {
       return;
     }
-    if (peek(pendingFactorySwap)) {
+    if (pendingFactorySwap()) {
       cancelFactorySwap();
       return;
     }
-    if (peek(pendingWarehouseSwap)) {
+    if (pendingWarehouseSwap()) {
       cancelWarehouseSwap();
       return;
     }
@@ -355,16 +355,16 @@ export const reatomPlayerUI = (player: PlayerState) => {
 
   const selectDrawerVariant = action((index: number) => {
     drawerSelectedVariant.set(index);
-    const builds = peek(pendingBuilds);
+    const builds = pendingBuilds();
     if (builds[index]) {
       previewVariant(builds[index]);
     }
   }, `${prefix}.selectVariant`);
 
   const confirmSelectedVariant = action(() => {
-    const idx = peek(drawerSelectedVariant);
-    const target = peek(pendingTargetCell);
-    const builds = peek(pendingBuilds);
+    const idx = drawerSelectedVariant();
+    const target = pendingTargetCell();
+    const builds = pendingBuilds();
     if (idx !== null && target !== null && builds[idx]) {
       buildAtCell(builds[idx], target);
       drawerSelectedVariant.set(null);
@@ -379,12 +379,12 @@ export const reatomPlayerUI = (player: PlayerState) => {
   // ─── Cell click handler ────────────────────────────────────────
 
   const handleCellClick = action((cellIndex: number) => {
-    if (peek(selectedBuilding)) {
-      if (!peek(player.hasPlacedResource)) {
+    if (selectedBuilding()) {
+      if (!player.hasPlacedResource()) {
         selectBuilding(null);
         return;
       }
-      if (peek(highlightedCells).has(cellIndex)) {
+      if (highlightedCells().has(cellIndex)) {
         tryBuildAt(cellIndex);
       } else {
         selectBuilding(null);
@@ -392,23 +392,22 @@ export const reatomPlayerUI = (player: PlayerState) => {
       return;
     }
 
-    const resource =
-      peek(player.resourceOverride) ?? peek(game.currentResource);
-    if (!resource || peek(player.hasPlacedResource)) {
+    const resource = player.resourceOverride() ?? game.currentResource();
+    if (!resource || player.hasPlacedResource()) {
       return;
     }
 
-    const cellContent = peek(cells[cellIndex]);
+    const cellContent = cells[cellIndex]();
 
     if (
       cellContent?.type === "building" &&
-      peek(player.resourceOverride) === null
+      player.resourceOverride() === null
     ) {
-      const mb = peek(game.currentMasterBuilder);
-      if (mb?.id !== peek(localPlayerId)) {
+      const mb = game.currentMasterBuilder();
+      if (mb?.id !== localPlayerId()) {
         const def = BUILDINGS[cellContent.building];
         if (def.hooks?.modifyPlacement) {
-          const grid = cells.map((c) => peek(c));
+          const grid = cells.map((c) => c());
           const options = def.hooks.modifyPlacement(resource, {
             buildingIndex: cellIndex,
             grid,

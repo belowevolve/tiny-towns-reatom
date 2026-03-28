@@ -1,11 +1,11 @@
-import { action, peek } from "@reatom/core";
+import { action } from "@reatom/core";
 
 import { game, localPlayerId } from "../game";
-import { hostPeerId, isHost } from "../lobby";
+import { hostPeerId, isHost } from "./state";
 import { broadcast, selfId, sendToHost } from "./transport";
 
 export const sendGridSync = action(() => {
-  const myId = peek(localPlayerId);
+  const myId = localPlayerId();
   if (!myId) {
     return;
   }
@@ -17,7 +17,7 @@ export const sendGridSync = action(() => {
   const grid = player.cells.map((c) => c());
   const hasPlaced = player.hasPlacedResource();
 
-  if (peek(isHost)) {
+  if (isHost()) {
     broadcast({
       grid,
       hasPlacedResource: hasPlaced,
@@ -25,7 +25,7 @@ export const sendGridSync = action(() => {
       type: "player-grid",
     });
   } else {
-    const host = peek(hostPeerId);
+    const host = hostPeerId();
     if (host) {
       sendToHost(
         { grid, hasPlacedResource: hasPlaced, type: "grid-sync" },

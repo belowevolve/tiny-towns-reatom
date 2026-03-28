@@ -1,11 +1,11 @@
-import { action, peek } from "@reatom/core";
+import { action, urlAtom } from "@reatom/core";
 
-import { gameRoute, resultsRoute } from "../../routes";
 import { game, localPlayerId } from "../game";
-import { isHost, lobbyPlayers } from "../lobby";
+import { lobbyPlayers } from "../lobby";
 import { localPlayerUI, reatomPlayerUI } from "../player-ui";
 import type { Resource } from "../types";
 import type { ClientMessage } from "./protocol";
+import { isHost } from "./state";
 import { broadcast, onMessage, selfId } from "./transport";
 
 const advanceIfAllDone = (): void => {
@@ -13,7 +13,7 @@ const advanceIfAllDone = (): void => {
 
   if (active.length === 0) {
     game.finishGame();
-    resultsRoute.go();
+    urlAtom.go("/results");
     broadcast({
       scores: game.players().map((p) => ({
         grid: p.cells.map((c) => c()),
@@ -39,7 +39,7 @@ const advanceIfAllDone = (): void => {
 
   if (game.activePlayers().length === 0) {
     game.finishGame();
-    resultsRoute.go();
+    urlAtom.go("/results");
     broadcast({
       scores: game.players().map((p) => ({
         grid: p.cells.map((c) => c()),
@@ -128,7 +128,7 @@ const handleClientMessage = (msg: ClientMessage, peerId: string): void => {
 };
 
 export const startMultiplayerGame = action(() => {
-  if (!peek(isHost)) {
+  if (!isHost()) {
     return;
   }
 
@@ -147,7 +147,7 @@ export const startMultiplayerGame = action(() => {
     localPlayerUI.set(reatomPlayerUI(me));
   }
   game.startGame();
-  gameRoute.go();
+  urlAtom.go("/game");
 
   broadcast({
     players: players.map((p) => ({ id: p.peerId, name: p.name })),

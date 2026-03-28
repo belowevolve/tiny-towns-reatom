@@ -1,4 +1,4 @@
-import { action, atom, computed, peek, reatomNumber } from "@reatom/core";
+import { action, atom, computed, reatomNumber } from "@reatom/core";
 
 import type { PlayerState } from "./player";
 import { reatomPlayer } from "./player";
@@ -60,7 +60,7 @@ export const reatomGame = () => {
   }, "game.addPlayer");
 
   const findPlayer = (id: string): PlayerState | undefined =>
-    peek(players).find((p) => p.id === id);
+    players().find((p) => p.id === id);
 
   const startGame = action(() => {
     phase.set("playing");
@@ -80,7 +80,7 @@ export const reatomGame = () => {
     const fullBoardIds: string[] = [];
 
     for (const p of active) {
-      if (p.cells.every((c) => peek(c) !== null)) {
+      if (p.cells.every((c) => c() !== null)) {
         fullBoardIds.push(p.id);
       } else {
         readiness[p.id] = false;
@@ -101,7 +101,7 @@ export const reatomGame = () => {
     if (active.length === 0) {
       return;
     }
-    masterBuilderIndex.set((peek(masterBuilderIndex) + 1) % active.length);
+    masterBuilderIndex.set((v) => (v + 1) % active.length);
   }, "game.rotateMB");
 
   const endTurn = action((newMBIndex?: number) => {
@@ -124,7 +124,7 @@ export const reatomGame = () => {
     const active = activePlayers();
     const eliminated: string[] = [];
     for (const p of active) {
-      if (p.cells.every((c) => peek(c) !== null)) {
+      if (p.cells.every((c) => c() !== null)) {
         eliminatePlayer(p.id);
         eliminated.push(p.id);
       }

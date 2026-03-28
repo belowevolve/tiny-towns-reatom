@@ -1,4 +1,4 @@
-import { computed, peek } from "@reatom/core";
+import { computed } from "@reatom/core";
 
 import { game, localPlayerId } from "@/model/game";
 import { sortedScores } from "@/model/game-ui";
@@ -30,7 +30,7 @@ export const ResultsPage = () => {
               border-color: ${colors.accent};
             }
           `}
-          attr:data-self={s.id === peek(localPlayerId)}
+          attr:data-self={s.id === localPlayerId()}
           attr:data-winner={i === 0}
         >
           <span

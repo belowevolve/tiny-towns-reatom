@@ -1,11 +1,8 @@
 import { atom, computed } from "@reatom/core";
 
-import { flex } from "@/shared/ui/flex";
-
 import {
   connectionStatus,
   currentRoomCode,
-  isHost,
   joinRoom,
   kickPlayer,
   leaveRoom,
@@ -13,14 +10,16 @@ import {
   lobbyPlayers,
   playerName,
   selfId,
-} from "../../../model/lobby";
-import { startMultiplayerGame } from "../../../model/multiplayer/host";
-import { MAX_PLAYERS } from "../../../model/types";
-import { homeRoute, roomRoute } from "../../../routes";
-import { Button } from "../../../shared/ui/button";
-import { colors, radius } from "../../../shared/ui/design-system";
-import { Input } from "../../../shared/ui/input";
-import { text } from "../../../shared/ui/text";
+} from "@/model/lobby";
+import { startMultiplayerGame } from "@/model/multiplayer/host";
+import { isHost } from "@/model/multiplayer/state";
+import { MAX_PLAYERS } from "@/model/types";
+import { rootRoute } from "@/shared/lib/router";
+import { Button } from "@/shared/ui/button";
+import { colors, radius } from "@/shared/ui/design-system";
+import { flex } from "@/shared/ui/flex";
+import { Input } from "@/shared/ui/input";
+import { text } from "@/shared/ui/text";
 
 const PlayerListItem = ({
   isSelf,
@@ -152,7 +151,7 @@ const RoomView = () => {
           variant="secondary"
           on:click={() => {
             leaveRoom();
-            homeRoute.go();
+            rootRoute.go();
           }}
         >
           Покинуть
@@ -229,7 +228,7 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
   );
 };
 
-export const RoomPage = () => {
+export const RoomPage = ({ code }: { code: string }) => {
   const errorDisplay = computed(() => {
     const err = lobbyError();
     if (!err) {
@@ -252,12 +251,7 @@ export const RoomPage = () => {
   }, "room.errorDisplay");
 
   const view = computed(() => {
-    const params = roomRoute();
-    if (!params) {
-      return null;
-    }
-
-    const requestedCode = params.code.toUpperCase();
+    const requestedCode = code;
     const currentCode = currentRoomCode();
 
     if (currentCode === requestedCode) {

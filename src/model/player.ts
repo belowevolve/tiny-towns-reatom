@@ -77,7 +77,7 @@ export const reatomPlayer = (id: string, name: string) => {
   }, `${prefix}.restrictedResources`);
 
   const placeResource = action((index: number, resource: Resource) => {
-    const content = peek(cells[index]);
+    const content = cells[index]();
     if (content !== null) {
       return;
     }
@@ -87,7 +87,7 @@ export const reatomPlayer = (id: string, name: string) => {
   }, `${prefix}.placeResource`);
 
   const removeResource = action((index: number) => {
-    const content = peek(cells[index]);
+    const content = cells[index]();
     if (content?.type !== "resource") {
       return;
     }
@@ -96,7 +96,7 @@ export const reatomPlayer = (id: string, name: string) => {
 
   const swapWarehouseResource = action(
     (warehouseIndex: number, incoming: Resource, swapIdx: number) => {
-      const content = peek(cells[warehouseIndex]);
+      const content = cells[warehouseIndex]();
       if (content?.type !== "building") {
         return;
       }
@@ -128,7 +128,7 @@ export const reatomPlayer = (id: string, name: string) => {
       const def = BUILDINGS[match.building];
       const hook = def.hooks?.onBuild;
       if (hook) {
-        const grid = cells.map((c) => peek(c));
+        const grid = cells.map((c) => c());
         return (
           hook({
             buildingIndex: targetIndex,
@@ -144,7 +144,7 @@ export const reatomPlayer = (id: string, name: string) => {
 
   const storeResourceOnBuilding = action(
     (buildingIndex: number, resource: Resource) => {
-      const content = peek(cells[buildingIndex]);
+      const content = cells[buildingIndex]();
       if (content?.type !== "building") {
         return;
       }

@@ -3,12 +3,5 @@
   "extends": [
     "./node_modules/ultracite/config/oxlint/core/.oxlintrc.json",
     "./node_modules/ultracite/config/oxlint/vitest/.oxlintrc.json"
-  ],
-  "rules": {
-    "max-statements": "off",
-    "import/no-relative-parent-imports": "off",
-    "no-void": "off",
-    // TODO: fix this
-    "import/no-cycle": "off"
-  }
+  ]
 }

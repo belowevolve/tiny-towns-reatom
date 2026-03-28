@@ -6,8 +6,8 @@ export const roomRoute = rootRoute.reatomRoute(
   {
     exactRender: true,
     path: "room/:code",
-    render() {
-      return <RoomPage />;
+    render(self) {
+      return <RoomPage code={self().code} />;
     },
   },
   "roomRoute"

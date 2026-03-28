@@ -1,4 +1,4 @@
-import { atom, computed } from "@reatom/core";
+import { atom, computed, urlAtom } from "@reatom/core";
 import type { Computed } from "@reatom/core";
 
 import {
@@ -8,7 +8,6 @@ import {
   playerName,
 } from "@/model/lobby";
 import { ROOM_CODE_LENGTH } from "@/model/multiplayer/transport";
-import { roomRoute } from "@/routes";
 import { Button } from "@/shared/ui/button";
 import { flex } from "@/shared/ui/flex";
 import { Input } from "@/shared/ui/input";
@@ -27,7 +26,7 @@ const Join = ({ disabled }: { disabled: Computed<boolean> }) => {
         joinRoom(codeInput());
         const code = currentRoomCode();
         if (code) {
-          roomRoute.go({ code });
+          urlAtom.go(`/room/${code}`);
         }
       }}
     >
@@ -64,7 +63,7 @@ const MenuView = () => {
           createRoom();
           const code = currentRoomCode();
           if (code) {
-            roomRoute.go({ code });
+            urlAtom.go(`/room/${code}`);
           }
         }}
       >
