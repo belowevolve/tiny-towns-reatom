@@ -51,10 +51,6 @@ const advanceIfAllDone = (): void => {
   });
 };
 
-const scheduleAdvanceCheck = (): void => {
-  setTimeout(advanceIfAllDone, 0);
-};
-
 const initHostGameListeners = (): void => {
   on("turn-done", (msg, peerId) => {
     if (peerId !== selfId) {
@@ -64,14 +60,14 @@ const initHostGameListeners = (): void => {
       }
       game.markPlayerDone(msg.playerId);
     }
-    scheduleAdvanceCheck();
+    advanceIfAllDone();
   });
 
   on("player-eliminated", (msg, peerId) => {
     if (peerId !== selfId) {
       game.eliminatePlayer(msg.playerId);
     }
-    scheduleAdvanceCheck();
+    advanceIfAllDone();
   });
 
   on("player-grid", (msg, peerId) => {
@@ -93,7 +89,7 @@ const initHostGameListeners = (): void => {
       }
       game.announceResource(msg.resource);
     }
-    scheduleAdvanceCheck();
+    advanceIfAllDone();
   });
 
   onPeerLeave((peerId) => {
@@ -106,7 +102,7 @@ const initHostGameListeners = (): void => {
     }
     game.eliminatePlayer(peerId);
     broadcast({ playerId: peerId, type: "player-eliminated" });
-    scheduleAdvanceCheck();
+    advanceIfAllDone();
   });
 };
 
