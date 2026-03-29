@@ -1,3 +1,5 @@
+import { retryComputed } from "@reatom/core";
+
 import { game } from "@/model/game";
 import { rootRoute } from "@/shared/lib/router";
 
@@ -39,3 +41,11 @@ export const resultsRoute = rootRoute.reatomRoute(
   },
   "resultsRoute"
 );
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    delete rootRoute.routes[gameRoute.name];
+    delete rootRoute.routes[resultsRoute.name];
+    retryComputed(rootRoute.outlet);
+  });
+}

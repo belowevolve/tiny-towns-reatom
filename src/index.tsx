@@ -8,4 +8,11 @@ if (!("interestForElement" in HTMLButtonElement.prototype)) {
 }
 
 // oxlint-disable-next-line typescript/no-non-null-assertion
-mount(document.querySelector("#app")!, <App />);
+const root = document.querySelector("#app")!;
+export const { unmount } = mount(root, <App />);
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    unmount();
+  });
+}
