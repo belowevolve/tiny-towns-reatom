@@ -1,8 +1,9 @@
-import { action, urlAtom } from "@reatom/core";
+import { action, computed, urlAtom } from "@reatom/core";
 
 import { game, localPlayerId } from "../game";
 import { lobbyPlayers } from "../lobby";
 import { localPlayerUI, reatomPlayerUI } from "../player-ui";
+import { MAX_PLAYERS } from "../types";
 import { isHost } from "./state";
 import { broadcast, on, onPeerLeave, selfId } from "./transport";
 
@@ -106,16 +107,20 @@ const initHostGameListeners = (): void => {
   });
 };
 
-export const startMultiplayerGame = action(() => {
+export const canStartMultiplayerGame = computed(() => {
   if (!isHost()) {
+    return false;
+  }
+  const players = lobbyPlayers();
+  return players.length >= 2 && players.length <= MAX_PLAYERS;
+});
+
+export const startMultiplayerGame = action(() => {
+  if (!canStartMultiplayerGame()) {
     return;
   }
 
   const players = lobbyPlayers();
-  if (players.length < 2) {
-    return;
-  }
-
   for (const p of players) {
     game.addPlayer(p.peerId, p.name);
   }

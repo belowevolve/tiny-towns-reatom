@@ -6,12 +6,14 @@ import {
   joinRoom,
   kickPlayer,
   leaveRoom,
-  lobbyError,
   lobbyPlayers,
   playerName,
   selfId,
 } from "@/model/lobby";
-import { startMultiplayerGame } from "@/model/multiplayer/host";
+import {
+  canStartMultiplayerGame,
+  startMultiplayerGame,
+} from "@/model/multiplayer/host";
 import { isHost } from "@/model/multiplayer/state";
 import { MAX_PLAYERS } from "@/model/types";
 import { rootRoute } from "@/shared/lib/router";
@@ -20,6 +22,7 @@ import { colors, radius } from "@/shared/ui/design-system";
 import { flex } from "@/shared/ui/flex";
 import { Input } from "@/shared/ui/input";
 import { text } from "@/shared/ui/text";
+import { copyAtom } from "@/shared/utils/clipboard";
 
 const PlayerListItem = ({
   isSelf,
@@ -76,25 +79,33 @@ const PlayerListItem = ({
 );
 
 const RoomView = () => {
-  const canStart = computed(() => {
-    const players = lobbyPlayers();
-    return isHost() && players.length >= 2 && players.length <= MAX_PLAYERS;
-  }, "room.canStart");
-
+  const roomCodeCopy = copyAtom("roomCode");
   return (
     <div
       css={`
         ${flex({ align: "center", gap: 5 })}
-        width: 100%;
-        max-width: 400px;
       `}
     >
       <div css={flex({ align: "center", gap: 1 })}>
         <span css={text({ c: "muted", fw: "semibold", size: "sm" })}>
           Код комнаты
         </span>
-        <span css={text({ c: "accent", fw: "bold", size: "xl" })}>
+        <span
+          css={`
+            ${flex({ align: "center", direction: "row", gap: 2 })}
+            ${text({ c: "accent", fw: "bold", size: "xl" })}
+          `}
+        >
           {currentRoomCode}
+          <Button
+            size="icon-sm"
+            variant="secondary"
+            on:click={() => {
+              roomCodeCopy.copy(window.location.href);
+            }}
+          >
+            {() => (roomCodeCopy() ? "✅" : "📋")}
+          </Button>
         </span>
       </div>
 
@@ -135,17 +146,15 @@ const RoomView = () => {
       </div>
 
       <div css={flex({ align: "center", direction: "row", gap: 2.5 })}>
-        {computed(() =>
-          isHost() ? (
-            <Button
-              disabled={!canStart()}
-              on:click={() => startMultiplayerGame()}
-            >
-              Начать игру
-            </Button>
-          ) : (
-            <span css={text({ c: "muted", size: "md" })}>Ожидание хоста…</span>
-          )
+        {isHost() ? (
+          <Button
+            disabled={!canStartMultiplayerGame()}
+            on:click={() => startMultiplayerGame()}
+          >
+            Начать игру
+          </Button>
+        ) : (
+          <span css={text({ c: "muted", size: "md" })}>Ожидание хоста…</span>
         )}
         <Button
           variant="secondary"
@@ -162,130 +171,69 @@ const RoomView = () => {
 };
 
 const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
-  const nameValue = atom("", "room.namePrompt");
+  const nameInput = atom("", "namePrompt.nameInput");
 
   return (
-    <div
+    <form
       css={`
-        ${flex({ align: "center", gap: 6 })}
-        width: 100%;
+        ${flex({ gap: 1 })}
       `}
+      on:submit={(e) => {
+        e.preventDefault();
+        onSubmit(nameInput());
+      }}
     >
-      <h1 css={text({ fw: "bold", size: "xl" })}>Tiny Towns</h1>
-      <p
+      <label
         css={`
-          ${text({ c: "muted", size: "md" })}
-          margin: 4px 0 24px;
-          text-align: center;
+          ${flex()}
+          ${text({ c: "muted", size: "sm" })}
         `}
       >
-        Введите имя чтобы продолжить
-      </p>
-      <div
-        css={`
-          ${flex({ gap: 3 })}
-          width: 100%;
-          max-width: 300px;
-        `}
-      >
-        <label
-          css={`
-            ${text({ c: "muted", fw: "semibold", size: "sm" })}
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-          `}
-        >
-          Ваше имя
-          <Input
-            type="text"
-            maxlength={20}
-            placeholder="Введите имя…"
-            model:value={nameValue}
-          />
-        </label>
-      </div>
-      <div
-        css={`
-          ${flex({ gap: 3 })}
-          width: 100%;
-          max-width: 300px;
-        `}
-      >
-        <Button
-          css="width: 100%;"
-          on:click={() => {
-            const name = nameValue();
-            if (name.trim()) {
-              onSubmit(name);
-            }
-          }}
-        >
-          Продолжить
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-export const RoomPage = ({ code }: { code: string }) => {
-  const errorDisplay = computed(() => {
-    const err = lobbyError();
-    if (!err) {
-      return "";
-    }
-    return (
-      <div
-        css={`
-          padding: 10px 16px;
-          background: ${colors.dangerSoft};
-          border: 1px solid ${colors.danger};
-          border-radius: ${radius.md};
-          margin-bottom: 16px;
-          text-align: center;
-        `}
-      >
-        <span css={text({ c: "danger", size: "sm" })}>{err}</span>
-      </div>
-    );
-  }, "room.errorDisplay");
-
-  const view = computed(() => {
-    const requestedCode = code;
-    const currentCode = currentRoomCode();
-
-    if (currentCode === requestedCode) {
-      return <RoomView />;
-    }
-
-    if (!playerName()) {
-      return (
-        <NamePrompt
-          onSubmit={(name) => {
-            playerName.set(name);
-            joinRoom(requestedCode);
-          }}
+        Ваше имя
+        <Input
+          type="text"
+          maxlength={20}
+          placeholder="Введите имя…"
+          model:value={nameInput}
         />
-      );
-    }
-
-    if (!currentCode) {
-      joinRoom(requestedCode);
-    }
-
-    return <RoomView />;
-  }, "room.view");
-
-  return (
-    <div
-      css={`
-        ${flex({ align: "center", justify: "center" })}
-        min-height: 100vh;
-        padding: 24px;
-      `}
-    >
-      {errorDisplay}
-      {view}
-    </div>
+      </label>
+      <Button disabled={() => !nameInput()}>Присоединиться</Button>
+    </form>
   );
 };
+
+const View = ({ code }: { code: string }) => {
+  const requestedCode = code;
+  const currentCode = currentRoomCode();
+
+  if (currentCode === requestedCode) {
+    return <RoomView />;
+  }
+
+  if (!playerName()) {
+    return (
+      <NamePrompt
+        onSubmit={(name) => {
+          playerName.set(name);
+          joinRoom(requestedCode);
+        }}
+      />
+    );
+  }
+
+  if (!currentCode) {
+    joinRoom(requestedCode);
+  }
+
+  return <RoomView />;
+};
+
+export const RoomPage = ({ code }: { code: string }) => (
+  <div
+    css={`
+      ${flex({ align: "center", direction: "column", justify: "center" })}
+    `}
+  >
+    <View code={code} />
+  </div>
+);

@@ -99,15 +99,14 @@ export const connectToRoom = action((roomCode: string) => {
 
   const room = joinRoom({ appId: APP_ID }, roomCode);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- trystero JsonValue index sig mismatch
+  // oxlint-disable-next-line typescript/no-explicit-any -- TODO: recheck this
   const [sendMsg, getMsg] = room.makeAction<any>("msg");
 
-  sendFn = (data, target) => {
-    sendMsg(data, target);
+  sendFn = (msg, target) => {
+    sendMsg(msg, target);
   };
 
-  getMsg((data: unknown, peerId: string) => {
-    const msg = data as NetworkMessage;
+  getMsg((msg: NetworkMessage, peerId: string) => {
     const handlers = msgHandlers.get(msg.type);
     if (handlers) {
       for (const handler of handlers) {

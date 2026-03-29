@@ -48,12 +48,13 @@ export const radius = {
 } as const;
 
 export const textSize = {
-  lg: "font-size: 1.1rem; line-height: 1.35;",
-  md: "font-size: 1rem; line-height: 1.4;",
-  sm: "font-size: 0.8rem; line-height: 1.3;",
-  xl: "font-size: 2rem; line-height: 1.2;",
-  xs: "font-size: 0.65rem; line-height: 1.2;",
+  xs: "font-size: 0.75rem; line-height: calc(1 / 0.75);",
+  sm: "font-size: 0.875rem; line-height: calc(1.25 / 0.875);",
+  md: "font-size: 1rem; line-height: 1.5;",
+  lg: "font-size: 1.125rem; line-height: calc(1.75 / 1.125);",
+  xl: "font-size: 1.5rem; line-height: calc(2 / 1.5);",
 } as const;
+
 export type TextSize = keyof typeof textSize;
 
 export const shadow = {
