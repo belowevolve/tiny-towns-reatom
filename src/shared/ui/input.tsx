@@ -37,12 +37,14 @@ const inputCss = cva({
 type InputProps = JSX.IntrinsicElements["input"] &
   VariantProps<typeof inputCss>;
 
-export const Input = ({ variant, css: cssProp, ...props }: InputProps) => (
-  <input
-    {...props}
-    css={`
-      ${inputCss({ variant })}
-      ${cssProp}
-    `}
-  />
-);
+export const Input = ({ variant, css: cssProp, ...props }: InputProps) => {
+  return (
+    <input
+      {...props}
+      css={`
+        ${inputCss({ variant })}
+        ${cssProp}
+      `}
+    />
+  );
+};

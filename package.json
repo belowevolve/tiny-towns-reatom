@@ -18,6 +18,8 @@
     "trystero": "0.23.0"
   },
   "devDependencies": {
+    "@oxlint/plugins": "^1.57.0",
+    "eslint": "^10.1.0",
     "husky": "9.1.7",
     "oxfmt": "0.42.0",
     "oxlint": "1.57.0",

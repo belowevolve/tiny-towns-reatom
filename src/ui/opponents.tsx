@@ -161,21 +161,23 @@ const OpponentBadge = ({ player }: { player: PlayerState }) => {
   );
 };
 
-export const Opponents = () => (
-  <div
-    css={`
-      ${flex({ direction: "row", gap: 1.5, justify: "end" })}
-      -webkit-overflow-scrolling: touch;
-      &::-webkit-scrollbar {
-        height: 3px;
-      }
+export const Opponents = () => {
+  return (
+    <div
+      css={`
+        ${flex({ direction: "row", gap: 1.5, justify: "end" })}
+        -webkit-overflow-scrolling: touch;
+        &::-webkit-scrollbar {
+          height: 3px;
+        }
 
-      &::-webkit-scrollbar-thumb {
-        background: ${colors.borderHover};
-        border-radius: 2px;
-      }
-    `}
-  >
-    {computed(() => opponents().map((p) => <OpponentBadge player={p} />))}
-  </div>
-);
+        &::-webkit-scrollbar-thumb {
+          background: ${colors.borderHover};
+          border-radius: 2px;
+        }
+      `}
+    >
+      {computed(() => opponents().map((p) => <OpponentBadge player={p} />))}
+    </div>
+  );
+};

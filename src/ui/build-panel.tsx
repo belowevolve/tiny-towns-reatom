@@ -109,40 +109,42 @@ const RecipeCard = ({
   );
 };
 
-export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => (
-  <div
-    css={`
-      ${flex({ gap: 1.5 })}
-      min-width: 0;
-    `}
-  >
-    <span css={text({ c: "muted", fw: "semibold", size: "xs" })}>Здания</span>
+export const BuildPanel = ({ ui }: { ui: PlayerUIState }) => {
+  return (
     <div
       css={`
-        ${flex({ direction: "row", gap: 2 })}
-        overflow-x: auto;
-        padding-bottom: 4px;
-        scroll-snap-type: x proximity;
-        -webkit-overflow-scrolling: touch;
-
-        &::-webkit-scrollbar {
-          height: 4px;
-        }
-
-        &::-webkit-scrollbar-track {
-          background: ${colors.cellBg};
-          border-radius: 2px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background: ${colors.borderHover};
-          border-radius: 2px;
-        }
+        ${flex({ gap: 1.5 })}
+        min-width: 0;
       `}
     >
-      {BUILDING_TYPES.map((type) => (
-        <RecipeCard type={type} ui={ui} />
-      ))}
+      <span css={text({ c: "muted", fw: "semibold", size: "xs" })}>Здания</span>
+      <div
+        css={`
+          ${flex({ direction: "row", gap: 2 })}
+          overflow-x: auto;
+          padding-bottom: 4px;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+
+          &::-webkit-scrollbar {
+            height: 4px;
+          }
+
+          &::-webkit-scrollbar-track {
+            background: ${colors.cellBg};
+            border-radius: 2px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background: ${colors.borderHover};
+            border-radius: 2px;
+          }
+        `}
+      >
+        {BUILDING_TYPES.map((type) => (
+          <RecipeCard type={type} ui={ui} />
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};

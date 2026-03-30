@@ -3,11 +3,15 @@ import { globalStyleText } from "@/shared/ui/design-system";
 
 import "./routes";
 
-const GlobalStyles = () => <style>{globalStyleText}</style>;
+const GlobalStyles = () => {
+  return <style>{globalStyleText}</style>;
+};
 
-export const App = () => (
-  <>
-    <GlobalStyles />
-    {rootRoute.render}
-  </>
-);
+export const App = () => {
+  return (
+    <>
+      <GlobalStyles />
+      {rootRoute.render}
+    </>
+  );
+};

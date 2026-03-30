@@ -140,35 +140,37 @@ const ResourcePickerItem = ({
 }: {
   resource: Resource;
   onPick: () => void;
-}) => (
-  <Button
-    size="icon"
-    variant="secondary"
-    css={`
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 14px;
-      border: 2px solid ${colors.border};
-      border-radius: ${radius.md};
-      cursor: pointer;
-      background: ${colors.surface};
+}) => {
+  return (
+    <Button
+      size="icon"
+      variant="secondary"
+      css={`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 14px;
+        border: 2px solid ${colors.border};
+        border-radius: ${radius.md};
+        cursor: pointer;
+        background: ${colors.surface};
 
-      &:hover {
-        border-color: ${colors.accent};
-        box-shadow: ${shadow.card};
-        transform: translateY(-2px);
-      }
-    `}
-    on:click={onPick}
-  >
-    <ResourceSwatch resource={resource} />
-    <span css={text({ c: "muted", fw: "medium", size: "xs" })}>
-      {RESOURCE_NAMES[resource]}
-    </span>
-  </Button>
-);
+        &:hover {
+          border-color: ${colors.accent};
+          box-shadow: ${shadow.card};
+          transform: translateY(-2px);
+        }
+      `}
+      on:click={onPick}
+    >
+      <ResourceSwatch resource={resource} />
+      <span css={text({ c: "muted", fw: "medium", size: "xs" })}>
+        {RESOURCE_NAMES[resource]}
+      </span>
+    </Button>
+  );
+};
 
 export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
   const content = computed(() => {

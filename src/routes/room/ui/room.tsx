@@ -34,49 +34,51 @@ const PlayerListItem = ({
   name: string;
   peerId: string;
   ready: boolean;
-}) => (
-  <div
-    css={`
-      ${flex({ align: "center", direction: "row", gap: 2.5 })}
-      padding: 10px 14px;
-      background: ${colors.surface};
-      border: 1px solid ${colors.border};
-      border-radius: ${radius.sm};
-      margin-bottom: 6px;
-
-      &[data-self="true"] {
-        border-color: ${colors.accent};
-        background: ${colors.accentSoft};
-      }
-    `}
-    attr:data-self={isSelf}
-  >
-    <span
+}) => {
+  return (
+    <div
       css={`
-        ${text({ fw: "medium", size: "md" })}
-        flex: 1;
+        ${flex({ align: "center", direction: "row", gap: 2.5 })}
+        padding: 10px 14px;
+        background: ${colors.surface};
+        border: 1px solid ${colors.border};
+        border-radius: ${radius.sm};
+        margin-bottom: 6px;
+
+        &[data-self="true"] {
+          border-color: ${colors.accent};
+          background: ${colors.accentSoft};
+        }
       `}
+      attr:data-self={isSelf}
     >
-      {name}
-    </span>
-    <span css={text({ c: "muted", size: "sm" })}>
-      {ready ? "✓ Готов" : "Ожидание…"}
-    </span>
-    {computed(() =>
-      isHost() && !isSelf ? (
-        <Button
-          size="icon-sm"
-          variant="danger"
-          on:click={() => kickPlayer(peerId)}
-        >
-          ✕
-        </Button>
-      ) : (
-        ""
-      )
-    )}
-  </div>
-);
+      <span
+        css={`
+          ${text({ fw: "medium", size: "md" })}
+          flex: 1;
+        `}
+      >
+        {name}
+      </span>
+      <span css={text({ c: "muted", size: "sm" })}>
+        {ready ? "✓ Готов" : "Ожидание…"}
+      </span>
+      {computed(() =>
+        isHost() && !isSelf ? (
+          <Button
+            size="icon-sm"
+            variant="danger"
+            on:click={() => kickPlayer(peerId)}
+          >
+            ✕
+          </Button>
+        ) : (
+          ""
+        )
+      )}
+    </div>
+  );
+};
 
 const RoomView = () => {
   const roomCodeCopy = copyAtom("roomCode");
@@ -98,7 +100,7 @@ const RoomView = () => {
         >
           {currentRoomCode}
           <Button
-            size="icon-sm"
+            size="icon"
             variant="secondary"
             on:click={() => {
               roomCodeCopy.copy(window.location.href);
@@ -108,23 +110,6 @@ const RoomView = () => {
           </Button>
         </span>
       </div>
-
-      <span css={text({ c: "muted", size: "sm" })}>
-        {computed(() => {
-          const status = connectionStatus();
-          if (status === "connecting") {
-            return "Подключение…";
-          }
-          if (status === "connected") {
-            return "Подключено";
-          }
-          if (status === "error") {
-            return "Ошибка подключения";
-          }
-          return "";
-        })}
-      </span>
-
       <div css="width: 100%;">
         <h3
           css={`
@@ -228,12 +213,20 @@ const View = ({ code }: { code: string }) => {
   return <RoomView />;
 };
 
-export const RoomPage = ({ code }: { code: string }) => (
-  <div
-    css={`
-      ${flex({ align: "center", direction: "column", justify: "center" })}
-    `}
-  >
-    <View code={code} />
-  </div>
-);
+export const RoomPage = ({ code }: { code: string }) => {
+  return (
+    <div
+      css={`
+        ${flex({ align: "center", direction: "column", justify: "center" })}
+      `}
+    >
+      {() =>
+        connectionStatus() === "connected" ? (
+          <View code={code} />
+        ) : (
+          "Подключение…"
+        )
+      }
+    </div>
+  );
+};

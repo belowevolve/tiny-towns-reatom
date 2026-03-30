@@ -40,6 +40,6 @@ const resourceSwatchCss = cva({
 export const ResourceSwatch = ({
   resource,
   size,
-}: VariantProps<typeof resourceSwatchCss>) => (
-  <span css={resourceSwatchCss({ resource, size })} />
-);
+}: VariantProps<typeof resourceSwatchCss>) => {
+  return <span css={resourceSwatchCss({ resource, size })} />;
+};

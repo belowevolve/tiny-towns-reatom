@@ -12,31 +12,35 @@ import { Drawer } from "@/ui/drawer";
 import { Grid } from "@/ui/grid";
 import { Opponents } from "@/ui/opponents";
 
-const ScoreDisplay = () => (
-  <div css={flex({ align: "baseline", direction: "row", gap: 1 })}>
-    <span css={text({ c: "accent", fw: "bold", size: "lg" })}>
-      {computed(() => currentPlayer()?.score() ?? 0, "score.value")}
-    </span>
-    <span css={text({ c: "muted", size: "xs" })}>
-      {computed(() => currentPlayer()?.scoreDetails() ?? "", "score.details")}
-    </span>
-  </div>
-);
+const ScoreDisplay = () => {
+  return (
+    <div css={flex({ align: "baseline", direction: "row", gap: 1 })}>
+      <span css={text({ c: "accent", fw: "bold", size: "lg" })}>
+        {computed(() => currentPlayer()?.score() ?? 0, "score.value")}
+      </span>
+      <span css={text({ c: "muted", size: "xs" })}>
+        {computed(() => currentPlayer()?.scoreDetails() ?? "", "score.details")}
+      </span>
+    </div>
+  );
+};
 
-const TurnInfo = () => (
-  <div
-    css={`
-      ${flex({ align: "center", direction: "row", gap: 2 })}
-      ${text({
-        c: "muted",
-        size: "xs",
-      })}
-    `}
-  >
-    <span css={text({ fw: "semibold" })}>{turnLabel}</span>
-    <span>{masterBuilderLabel}</span>
-  </div>
-);
+const TurnInfo = () => {
+  return (
+    <div
+      css={`
+        ${flex({ align: "center", direction: "row", gap: 2 })}
+        ${text({
+          c: "muted",
+          size: "xs",
+        })}
+      `}
+    >
+      <span css={text({ fw: "semibold" })}>{turnLabel}</span>
+      <span>{masterBuilderLabel}</span>
+    </div>
+  );
+};
 
 export const GamePage = computed(() => {
   const ui = localPlayerUI();

@@ -66,26 +66,10 @@ export const shadow = {
 export const globalStyleText = `
 :root {
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light;
   color: ${colors.text.base};
   background-color: ${colors.bg};
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
 
 #app {
   width: 100%; 
@@ -93,6 +77,7 @@ body {
   display: flex;
   justify-content: center;
 }
+
 
 [interestfor] {
   interest-delay-start: 0.5s;

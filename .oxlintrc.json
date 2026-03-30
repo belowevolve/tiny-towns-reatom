@@ -4,7 +4,22 @@
     "./node_modules/ultracite/config/oxlint/core/.oxlintrc.json",
     "./node_modules/ultracite/config/oxlint/vitest/.oxlintrc.json"
   ],
+  "jsPlugins": ["./.oxlint/oxlint-plugin-component-arrow-body.ts"],
   "rules": {
     "typescript/no-dynamic-delete": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        "arrow-body-style": "off",
+        "component-arrow-body/component-aware-arrow-body-style": [
+          "error",
+          {
+            "nonComponentStyle": "as-needed"
+          }
+        ]
+      }
+    }
+  ]
 }

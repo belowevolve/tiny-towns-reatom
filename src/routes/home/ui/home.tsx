@@ -88,12 +88,14 @@ const MenuView = () => {
   );
 };
 
-export const HomePage = () => (
-  <div
-    css={`
-      ${flex({ align: "center", direction: "column", justify: "center" })}
-    `}
-  >
-    <MenuView />
-  </div>
-);
+export const HomePage = () => {
+  return (
+    <div
+      css={`
+        ${flex({ align: "center", direction: "column", justify: "center" })}
+      `}
+    >
+      <MenuView />
+    </div>
+  );
+};

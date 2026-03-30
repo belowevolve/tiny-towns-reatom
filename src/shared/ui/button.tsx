@@ -9,14 +9,12 @@ import { colors, radius, shadow } from "./design-system";
 const buttonCss = cva({
   base: css`
     border-radius: ${radius.sm};
-    background: ${colors.surface};
-    border: 1px solid ${colors.border};
     color: ${colors.text.base};
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
     transition: all 0.15s ease;
-    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
     &:disabled {
       opacity: 0.5;
@@ -26,20 +24,14 @@ const buttonCss = cva({
   variants: {
     size: {
       icon: css`
-        width: 36px;
-        height: 36px;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        font-size: 1rem;
+        width: 2rem;
+        height: 2rem;
       `,
       "icon-sm": css`
-        width: 24px;
-        height: 24px;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        font-size: 0.75rem;
+        width: 1.5rem;
+        height: 1.5rem;
       `,
       md: css`
         padding: 8px 18px;
@@ -70,7 +62,6 @@ const buttonCss = cva({
       secondary: css`
         background: ${colors.surface};
         border: 1px solid ${colors.border};
-        color: ${colors.text.base};
 
         &:hover {
           background: ${colors.surfaceHover};
@@ -89,11 +80,13 @@ export const Button = ({
   size = "md",
   variant = "action",
   ...props
-}: ButtonProps) => (
-  <button
-    css={`
-      ${buttonCss({ size, variant })}${cssProp}
-    `}
-    {...props}
-  />
-);
+}: ButtonProps) => {
+  return (
+    <button
+      css={`
+        ${buttonCss({ size, variant })}${cssProp}
+      `}
+      {...props}
+    />
+  );
+};
