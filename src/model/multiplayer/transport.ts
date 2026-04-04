@@ -10,14 +10,26 @@ const ROOM_CONFIG = {
   appId: APP_ID,
   turnConfig: [
     {
+      urls: "stun:stun.relay.metered.ca:80",
+    },
+    {
       credential: "cYhUHvyDTPSbYSxo",
-      urls: [
-        "stun:stun.relay.metered.ca:80",
-        "turn:global.relay.metered.ca:80",
-        "turn:global.relay.metered.ca:80?transport=tcp",
-        "turn:global.relay.metered.ca:443",
-        "turns:global.relay.metered.ca:443?transport=tcp",
-      ],
+      urls: "turn:global.relay.metered.ca:80",
+      username: "c08ca9be8b256a49197fc7e5",
+    },
+    {
+      credential: "cYhUHvyDTPSbYSxo",
+      urls: "turn:global.relay.metered.ca:80?transport=tcp",
+      username: "c08ca9be8b256a49197fc7e5",
+    },
+    {
+      credential: "cYhUHvyDTPSbYSxo",
+      urls: "turn:global.relay.metered.ca:443",
+      username: "c08ca9be8b256a49197fc7e5",
+    },
+    {
+      credential: "cYhUHvyDTPSbYSxo",
+      urls: "turns:global.relay.metered.ca:443?transport=tcp",
       username: "c08ca9be8b256a49197fc7e5",
     },
   ],
