@@ -8,6 +8,7 @@ import {
   playerName,
 } from "@/model/lobby";
 import { ROOM_CODE_LENGTH } from "@/model/multiplayer/transport";
+import { roomRoute } from "@/routes/room/routes";
 import { Button } from "@/shared/ui/button";
 import { flex } from "@/shared/ui/flex";
 import { Input } from "@/shared/ui/input";
@@ -26,7 +27,7 @@ const Join = ({ disabled }: { disabled: Computed<boolean> }) => {
         joinRoom(codeInput());
         const code = currentRoomCode();
         if (code) {
-          urlAtom.go(`/room/${code}`);
+          roomRoute.go({ code });
         }
       }}
     >

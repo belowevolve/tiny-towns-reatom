@@ -112,4 +112,41 @@ export const globalStyleText = `
     box-shadow: 0 0 18px ${colors.highlightGlow};
   }
 }
+
+@keyframes lobby-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-14px);
+    opacity: 1;
+  }
+}
+
+@keyframes lobby-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lobby-pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+}
 `;

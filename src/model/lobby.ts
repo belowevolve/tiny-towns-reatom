@@ -14,6 +14,7 @@ import {
   onPeerLeave,
   selfId,
   send,
+  onPeerJoin,
 } from "./multiplayer/transport";
 import type { LobbyPlayer } from "./types";
 import { MAX_PLAYERS } from "./types";
@@ -116,12 +117,12 @@ export const joinRoom = action((code: string) => {
   initLobbyListeners();
   initClientListener();
 
-  const unsub = connectedPeers.subscribe((peers) => {
-    if (peers.length > 0) {
-      send({ name, type: "player-info" }, peers[0]);
-      unsub();
-    }
+  onPeerJoin((peerId) => {
+    send({ name, type: "player-info" }, peerId);
   });
+  for (const peerId of connectedPeers()) {
+    send({ name, type: "player-info" }, peerId);
+  }
 }, "lobby.joinRoom");
 
 export const kickPlayer = action((peerId: string) => {

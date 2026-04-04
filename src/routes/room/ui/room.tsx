@@ -86,6 +86,7 @@ const RoomView = () => {
     <div
       css={`
         ${flex({ align: "center", gap: 5 })}
+        animation: lobby-fade-in 0.35s ease-out;
       `}
     >
       <div css={flex({ align: "center", gap: 1 })}>
@@ -162,6 +163,7 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
     <form
       css={`
         ${flex({ gap: 1 })}
+        animation: lobby-fade-in 0.35s ease-out;
       `}
       on:submit={(e) => {
         e.preventDefault();
@@ -187,46 +189,151 @@ const NamePrompt = ({ onSubmit }: { onSubmit: (name: string) => void }) => {
   );
 };
 
-const View = ({ code }: { code: string }) => {
-  const requestedCode = code;
-  const currentCode = currentRoomCode();
+const LoadingDot = ({ delay }: { delay: string }) => {
+  return (
+    <div
+      css={`
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: ${colors.accent};
+        animation: lobby-bounce 1.4s ease-in-out infinite;
+      `}
+      style:animation-delay={delay}
+    />
+  );
+};
 
-  if (currentCode === requestedCode) {
-    return <RoomView />;
-  }
+const ConnectingView = ({ code }: { code: string }) => {
+  const showRetry = atom(false, "connecting.showRetry");
+  let timer = setTimeout(() => showRetry.set(true), 12_000);
 
-  if (!playerName()) {
-    return (
-      <NamePrompt
-        onSubmit={(name) => {
-          playerName.set(name);
-          joinRoom(requestedCode);
-        }}
-      />
-    );
-  }
+  const retry = () => {
+    leaveRoom();
+    joinRoom(code);
+    showRetry.set(false);
+    clearTimeout(timer);
+    timer = setTimeout(() => showRetry.set(true), 12_000);
+  };
 
-  if (!currentCode) {
-    joinRoom(requestedCode);
-  }
+  return (
+    <div
+      css={`
+        ${flex({ align: "center", gap: 5 })}
+        animation: lobby-fade-in 0.4s ease-out;
+      `}
+    >
+      <div
+        css={`
+          position: relative;
+          width: 64px;
+          height: 64px;
+          ${flex({ align: "center", justify: "center" })}
+        `}
+      >
+        <div
+          css={`
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid ${colors.border};
+            animation: lobby-pulse-ring 2.4s ease-in-out infinite;
+          `}
+        />
+        <div
+          css={`
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            border: 2px solid ${colors.accentSoft};
+            animation: lobby-pulse-ring 2.4s ease-in-out 0.4s infinite;
+          `}
+        />
+        <div css={flex({ align: "center", direction: "row", gap: 1.5 })}>
+          <LoadingDot delay="0s" />
+          <LoadingDot delay="0.16s" />
+          <LoadingDot delay="0.32s" />
+        </div>
+      </div>
 
-  return <RoomView />;
+      <div css={flex({ align: "center", gap: 1 })}>
+        <span css={text({ fw: "semibold", size: "md" })}>
+          Подключение к комнате
+        </span>
+        <span css={text({ c: "accent", fw: "bold", size: "xl" })}>{code}</span>
+      </div>
+
+      <span css={text({ c: "muted", size: "sm", ta: "center" })}>
+        Ожидание других игроков…
+      </span>
+
+      {() =>
+        showRetry() ? (
+          <div
+            css={`
+              ${flex({ align: "center", gap: 2 })}
+              animation: lobby-fade-in 0.3s ease-out;
+            `}
+          >
+            <span css={text({ c: "muted", size: "sm", ta: "center" })}>
+              Не удалось найти комнату. Возможно, она ещё не создана.
+            </span>
+            <div css={flex({ direction: "row", gap: 2 })}>
+              <Button variant="secondary" on:click={retry}>
+                Попробовать снова
+              </Button>
+              <Button
+                variant="secondary"
+                on:click={() => {
+                  leaveRoom();
+                  rootRoute.go();
+                }}
+              >
+                На главную
+              </Button>
+            </div>
+          </div>
+        ) : (
+          ""
+        )
+      }
+    </div>
+  );
 };
 
 export const RoomPage = ({ code }: { code: string }) => {
+  if (playerName() && currentRoomCode() !== code) {
+    joinRoom(code);
+  }
+
   return (
     <div
       css={`
         ${flex({ align: "center", direction: "column", justify: "center" })}
+        min-width: 300px;
       `}
     >
-      {() =>
-        connectionStatus() === "connected" ? (
-          <View code={code} />
-        ) : (
-          "Подключение…"
-        )
-      }
+      {() => {
+        const status = connectionStatus();
+        const currentCode = currentRoomCode();
+
+        if (status === "connected" && currentCode === code) {
+          return <RoomView />;
+        }
+
+        if (!playerName()) {
+          return (
+            <NamePrompt
+              onSubmit={(name) => {
+                playerName.set(name);
+                joinRoom(code);
+              }}
+            />
+          );
+        }
+
+        return <ConnectingView code={code} />;
+      }}
     </div>
   );
 };
