@@ -1,6 +1,6 @@
 import { action, atom } from "@reatom/core";
 import { joinRoom, selfId } from "trystero";
-import type { Room } from "trystero";
+import type { BaseRoomConfig, Room } from "trystero";
 
 import type { NetworkMessage } from "./protocol";
 
@@ -8,34 +8,20 @@ export { selfId };
 const APP_ID = "tiny-towns-reatom";
 const ROOM_CONFIG = {
   appId: APP_ID,
-  rtcConfig: {
-    iceServers: [
-      {
-        urls: "stun:stun.relay.metered.ca:80",
-      },
-      {
-        credential: "cYhUHvyDTPSbYSxo",
-        urls: "turn:global.relay.metered.ca:80",
-        username: "c08ca9be8b256a49197fc7e5",
-      },
-      {
-        credential: "cYhUHvyDTPSbYSxo",
-        urls: "turn:global.relay.metered.ca:80?transport=tcp",
-        username: "c08ca9be8b256a49197fc7e5",
-      },
-      {
-        credential: "cYhUHvyDTPSbYSxo",
-        urls: "turn:global.relay.metered.ca:443",
-        username: "c08ca9be8b256a49197fc7e5",
-      },
-      {
-        credential: "cYhUHvyDTPSbYSxo",
-        urls: "turns:global.relay.metered.ca:443?transport=tcp",
-        username: "c08ca9be8b256a49197fc7e5",
-      },
-    ],
-  },
-};
+  turnConfig: [
+    {
+      credential: "cYhUHvyDTPSbYSxo",
+      urls: [
+        "stun:stun.relay.metered.ca:80",
+        "turn:global.relay.metered.ca:80",
+        "turn:global.relay.metered.ca:80?transport=tcp",
+        "turn:global.relay.metered.ca:443",
+        "turns:global.relay.metered.ca:443?transport=tcp",
+      ],
+      username: "c08ca9be8b256a49197fc7e5",
+    },
+  ],
+} satisfies BaseRoomConfig;
 
 const ROOM_CODE_CHARS = "abcdefghjkmnpqrstuvwxyz23456789";
 export const ROOM_CODE_LENGTH = 4;
