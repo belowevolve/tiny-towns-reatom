@@ -1,39 +1,14 @@
 import { action, atom } from "@reatom/core";
-import { joinRoom, selfId } from "trystero";
-import type { BaseRoomConfig, Room } from "trystero";
+import { joinRoom, selfId } from "@trystero-p2p/supabase";
+import type { Room, SupabaseRoomConfig } from "@trystero-p2p/supabase";
 
 import type { NetworkMessage } from "./protocol";
 
 export { selfId };
-const APP_ID = "tiny-towns-reatom";
 const ROOM_CONFIG = {
-  appId: APP_ID,
-  turnConfig: [
-    {
-      urls: "stun:stun.relay.metered.ca:80",
-    },
-    {
-      credential: "cYhUHvyDTPSbYSxo",
-      urls: "turn:global.relay.metered.ca:80",
-      username: "c08ca9be8b256a49197fc7e5",
-    },
-    {
-      credential: "cYhUHvyDTPSbYSxo",
-      urls: "turn:global.relay.metered.ca:80?transport=tcp",
-      username: "c08ca9be8b256a49197fc7e5",
-    },
-    {
-      credential: "cYhUHvyDTPSbYSxo",
-      urls: "turn:global.relay.metered.ca:443",
-      username: "c08ca9be8b256a49197fc7e5",
-    },
-    {
-      credential: "cYhUHvyDTPSbYSxo",
-      urls: "turns:global.relay.metered.ca:443?transport=tcp",
-      username: "c08ca9be8b256a49197fc7e5",
-    },
-  ],
-} satisfies BaseRoomConfig;
+  appId: import.meta.env.VITE_SUPABASE_URL,
+  supabaseKey: import.meta.env.VITE_SUPABASE_KEY,
+} satisfies SupabaseRoomConfig;
 
 const ROOM_CODE_CHARS = "abcdefghjkmnpqrstuvwxyz23456789";
 export const ROOM_CODE_LENGTH = 4;
