@@ -14,7 +14,6 @@
   "dependencies": {
     "@reatom/core": "1000.15.2",
     "@reatom/jsx": "1000.1.0",
-    "@trystero-p2p/supabase": "0.23.0",
     "interestfor": "1.0.8"
   },
   "devDependencies": {
