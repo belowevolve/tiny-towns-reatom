@@ -70,7 +70,7 @@ const RecipeCard = ({
     >
       <div css={flex({ align: "center", direction: "row", gap: 1 })}>
         <span css={text({ size: "sm" })}>{def.icon}</span>
-        <span css={text({ fw: "medium", size: "xs" })}>{def.name}</span>
+        <span css={text({ size: "xs" })}>{def.name}</span>
       </div>
       <div
         css={`

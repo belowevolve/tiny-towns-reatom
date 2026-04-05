@@ -81,9 +81,9 @@ export const globalStyleText = `
 
 [interestfor] {
   interest-delay-start: 0.5s;
-  interest-delay-end: 0.1s;
+  interest-delay-end: 0.25s;
   --interest-delay-start: 0.5s;
-  --interest-delay-end: 0.1s;
+  --interest-delay-end: 0.25s;
 }
 
 [popover] {
@@ -124,7 +124,7 @@ export const globalStyleText = `
   }
 }
 
-@keyframes lobby-fade-in {
+@keyframes fade-in {
   from {
     opacity: 0;
     transform: translateY(8px);

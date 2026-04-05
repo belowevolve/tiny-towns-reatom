@@ -1,4 +1,4 @@
-import { atom, computed } from "@reatom/core";
+import { atom, computed, urlAtom } from "@reatom/core";
 
 import {
   connectionStatus,
@@ -35,8 +35,9 @@ const PlayerListItem = ({
   peerId: string;
   ready: boolean;
 }) => {
+  const canKick = computed(() => isHost() && !isSelf, "playerListItem.canKick");
   return (
-    <div
+    <li
       css={`
         ${flex({ align: "center", direction: "row", gap: 2.5 })}
         padding: 10px 14px;
@@ -54,7 +55,6 @@ const PlayerListItem = ({
     >
       <span
         css={`
-          ${text({ fw: "medium", size: "md" })}
           flex: 1;
         `}
       >
@@ -63,20 +63,16 @@ const PlayerListItem = ({
       <span css={text({ c: "muted", size: "sm" })}>
         {ready ? "✓ Готов" : "Ожидание…"}
       </span>
-      {computed(() =>
-        isHost() && !isSelf ? (
-          <Button
-            size="icon-sm"
-            variant="danger"
-            on:click={() => kickPlayer(peerId)}
-          >
-            ✕
-          </Button>
-        ) : (
-          ""
-        )
+      {canKick() && (
+        <Button
+          size="icon-sm"
+          variant="danger"
+          on:click={() => kickPlayer(peerId)}
+        >
+          ✕
+        </Button>
       )}
-    </div>
+    </li>
   );
 };
 
@@ -114,7 +110,7 @@ const RoomView = () => {
       <div css="width: 100%;">
         <h3
           css={`
-            ${text({ c: "muted", fw: "semibold", size: "md" })}margin: 0 0 10px;
+            ${text({ c: "muted", fw: "semibold" })}margin: 0 0 10px;
           `}
         >
           Игроки ({computed(() => lobbyPlayers().length)}/{MAX_PLAYERS})
@@ -140,13 +136,13 @@ const RoomView = () => {
             Начать игру
           </Button>
         ) : (
-          <span css={text({ c: "muted", size: "md" })}>Ожидание хоста…</span>
+          <span css={text({ c: "muted" })}>Ожидание хоста…</span>
         )}
         <Button
           variant="secondary"
           on:click={() => {
             leaveRoom();
-            rootRoute.go();
+            urlAtom.go("/");
           }}
         >
           Покинуть
@@ -257,9 +253,7 @@ const ConnectingView = ({ code }: { code: string }) => {
       </div>
 
       <div css={flex({ align: "center", gap: 1 })}>
-        <span css={text({ fw: "semibold", size: "md" })}>
-          Подключение к комнате
-        </span>
+        <span css={text({ fw: "semibold" })}>Подключение к комнате</span>
         <span css={text({ c: "accent", fw: "bold", size: "xl" })}>{code}</span>
       </div>
 
@@ -310,7 +304,6 @@ export const RoomPage = ({ code }: { code: string }) => {
     <div
       css={`
         ${flex({ align: "center", direction: "column", justify: "center" })}
-        min-width: 300px;
       `}
     >
       {() => {

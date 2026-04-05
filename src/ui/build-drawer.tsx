@@ -73,7 +73,7 @@ const VariantCard = ({
             gap: 1px;
           `}
         >
-          <span css={text({ fw: "semibold", size: "md" })}>{def.name}</span>
+          <span css={text({ fw: "semibold" })}>{def.name}</span>
           <span
             css={`
               ${text({ c: "muted", size: "xs" })}
@@ -165,7 +165,7 @@ const ResourcePickerItem = ({
       on:click={onPick}
     >
       <ResourceSwatch resource={resource} />
-      <span css={text({ c: "muted", fw: "medium", size: "xs" })}>
+      <span css={text({ c: "muted", size: "xs" })}>
         {RESOURCE_NAMES[resource]}
       </span>
     </Button>
@@ -190,7 +190,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
         >
           <h3
             css={`
-              ${text({ fw: "semibold", size: "md" })}
+              ${text({ fw: "semibold" })}
               text-align: center;
               display: flex;
               align-items: center;
@@ -230,7 +230,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
         >
           <h3
             css={`
-              ${text({ fw: "semibold", size: "md" })}
+              ${text({ fw: "semibold" })}
               text-align: center;
               display: flex;
               align-items: center;
@@ -293,7 +293,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
         >
           <h3
             css={`
-              ${text({ fw: "semibold", size: "md" })}
+              ${text({ fw: "semibold" })}
               margin: 0;
               text-align: center;
               display: flex;
@@ -372,7 +372,7 @@ export const BuildDrawer = ({ ui }: { ui: PlayerUIState }) => {
       >
         <h3
           css={`
-            ${text({ fw: "semibold", size: "md" })}
+            ${text({ fw: "semibold" })}
             margin: 0;
             text-align: center;
             display: flex;

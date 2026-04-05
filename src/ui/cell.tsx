@@ -193,7 +193,6 @@ export const Cell = ({ vm, index }: { vm: CellVM; index: number }) => {
             ${text({
               c: vm.isPositiveScore() ? "accent" : "danger",
               fw: "bold",
-              size: "md",
             })}
             margin-top: 1px;
           `}

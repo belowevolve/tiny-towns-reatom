@@ -42,7 +42,7 @@ export const ResultsPage = () => {
           </span>
           <span
             css={`
-              ${text({ fw: "medium" })}flex: 1;
+              flex: 1;
             `}
           >
             {s.name}
