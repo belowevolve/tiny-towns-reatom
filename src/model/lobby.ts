@@ -1,4 +1,6 @@
-import { action, atom, withLocalStorage } from "@reatom/core";
+import { action, atom, urlAtom, withLocalStorage } from "@reatom/core";
+
+import { toast } from "@/shared/ui/toast";
 
 import { initClientListener } from "./multiplayer/client";
 import { hostPeerId, isHost } from "./multiplayer/state";
@@ -23,7 +25,6 @@ export const playerName = atom("", "lobby.playerName").extend(
   withLocalStorage("player-name")
 );
 export const lobbyPlayers = atom<LobbyPlayer[]>([], "lobby.players");
-export const lobbyError = atom<string | null>(null, "lobby.error");
 
 export { connectionStatus, currentRoomCode, selfId };
 
@@ -67,7 +68,8 @@ const initLobbyListeners = (): void => {
     }
     disconnect();
     lobbyPlayers.set([]);
-    lobbyError.set("Вас удалили из комнаты");
+    urlAtom.go("/");
+    toast("Вас удалили из комнаты", "error");
   });
 
   onPeerLeave((peerId) => {
@@ -89,7 +91,6 @@ export const createRoom = action(() => {
     return;
   }
 
-  lobbyError.set(null);
   isHost.set(true);
 
   const code = generateRoomCode();
@@ -108,7 +109,6 @@ export const joinRoom = action((code: string) => {
     return;
   }
 
-  lobbyError.set(null);
   isHost.set(false);
 
   connectToRoom(code);
@@ -139,7 +139,6 @@ export const leaveRoom = action(() => {
   lobbyPlayers.set([]);
   isHost.set(false);
   hostPeerId.set(null);
-  lobbyError.set(null);
 }, "lobby.leaveRoom");
 
 export const toggleReady = action(() => {

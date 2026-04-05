@@ -1,5 +1,6 @@
 import { rootRoute } from "@/shared/lib/router";
 import { globalStyleText } from "@/shared/ui/design-system";
+import { Toaster } from "@/shared/ui/toast";
 
 import "./routes";
 
@@ -12,6 +13,7 @@ export const App = () => {
     <>
       <GlobalStyles />
       {rootRoute.render}
+      <Toaster />
     </>
   );
 };

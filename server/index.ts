@@ -139,10 +139,6 @@ const bun = Bun.serve<WsData>({
       }
     },
 
-    open(_ws) {
-      console.log("ws opened");
-    },
-
     sendPings: true,
   },
 });
